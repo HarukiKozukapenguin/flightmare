@@ -79,6 +79,7 @@ class PPO(OnPolicyAlgorithm):
         self,
         policy: Union[str, Type[ActorCriticPolicy]],
         env: Union[GymEnv, str],
+        level_list: list() = [],
         learning_rate: Union[float, Callable] = 3e-4,
         n_steps: int = 2048,
         use_tanh_act: bool = True,
@@ -109,6 +110,7 @@ class PPO(OnPolicyAlgorithm):
         super(PPO, self).__init__(
             policy,
             env,
+            level_list=level_list,
             learning_rate=learning_rate,
             n_steps=n_steps,
             gamma=gamma,

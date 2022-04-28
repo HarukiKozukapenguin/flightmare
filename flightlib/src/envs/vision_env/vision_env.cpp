@@ -489,7 +489,7 @@ bool VisionEnv::changeLevel(){
                        std::string("/flightpy/configs/vision/") +
                        difficulty_level_ + std::string("/") +
                        std::string("environment_") + std::to_string(env_id_ % 100);
-  std::cout << obstacle_cfg_path_<< std::endl;
+  // std::cout << obstacle_cfg_path_<< std::endl;
 
   // add dynamic objects
   std::string dynamic_object_yaml =

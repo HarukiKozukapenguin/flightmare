@@ -1,5 +1,5 @@
 environment:
-  level: ["medium"]
+  level: ["easy","medium","hard"]
   env_folder: "environment_0"
   world_box: [-20, 80, -10, 10, 0.0, 10]
   goal_vel: [3.0, 0.0, 0.0]
@@ -47,7 +47,7 @@ unity:
 simulation:
   seed: 1
   sim_dt: 0.02
-  max_t: 60.0
+  max_t: 60
   num_envs: 800
   num_threads: 20
 

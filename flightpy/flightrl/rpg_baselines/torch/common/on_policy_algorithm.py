@@ -65,6 +65,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         max_grad_norm: float,
         use_sde: bool,
         sde_sample_freq: int,
+        level_list: list() = [],
         tensorboard_log: Optional[str] = None,
         create_eval_env: bool = False,
         eval_env: Union[GymEnv, str] = None,
@@ -94,7 +95,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             tensorboard_log=tensorboard_log,
             supported_action_spaces=supported_action_spaces,
         )
-
+        
+        self.level_list = level_list
         self.n_steps = n_steps
         self.gamma = gamma
         self.gae_lambda = gae_lambda
@@ -109,6 +111,26 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
         if _init_setup_model:
             self._setup_model()
+
+    def _make_env(self,cfg) ->None:
+        train_env = VisionEnv_v1(dump(cfg, Dumper=RoundTripDumper), False)
+        train_env = wrapper.FlightEnvVec(train_env)
+        configure_random_seed(args.seed, env=train_env)
+        self._set_env(train_env)
+    
+    def _set_env(self,env) -> None:
+        if env is not None:
+            if isinstance(env, str):
+                if create_eval_env:
+                    self.eval_env = maybe_make_env(env, self.verbose)
+
+            env = maybe_make_env(env, self.verbose)
+            env = self._wrap_env(env, self.verbose, monitor_wrapper)
+
+            self.observation_space = env.observation_space
+            self.action_space = env.action_space
+            self.n_envs = env.num_envs
+            self.env = env
 
     def _setup_model(self) -> None:
         self._setup_lr_schedule()
@@ -281,6 +303,9 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
         callback.on_training_start(locals(), globals())
 
+        level_whole_num = len(self.level_list)
+        level_num = 0
+
         while self.num_timesteps < total_timesteps:
 
             continue_training = self.collect_rollouts(
@@ -292,6 +317,18 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
             iteration += 1
             self._update_current_progress_remaining(self.num_timesteps, total_timesteps)
+
+            if total_timesteps/level_whole_num*(level_num+1) <self.num_timesteps:
+                cfg = YAML().load(
+                    open(
+                        os.environ["FLIGHTMARE_PATH"] + "/flightpy/configs/vision/config.yaml", "r"
+                    )
+                )
+                cfg["environment"]["level"] = [self.level_list[level_num+1]]
+                self._make_env(cfg)
+                level_num+=1
+                print("change the level to " +self.level_list[level_num+1])
+
 
             # Display training infos
             if log_interval is not None and iteration % log_interval[0] == 0:
