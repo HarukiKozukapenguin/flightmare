@@ -35,7 +35,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = 15 + kNObstacles * kNObstaclesState,
+  kNObs = 15 + 4 + 3 + kNObstacles * kNObstaclesState,
 
   // control actions
   kAct = 0,
@@ -117,11 +117,13 @@ class VisionEnv final : public EnvBase {
   std::vector<std::shared_ptr<UnityObject>> dynamic_objects_;
 
   QuadState quad_state_, quad_old_state_;
+  Vector<3> prev_pos_;
   Command cmd_;
   Logger logger_{"VisionEnv"};
 
   // Define reward for training
-  Scalar vel_coeff_, collision_coeff_, angular_vel_coeff_, survive_rew_;
+  Scalar vel_coeff_, collision_coeff_, angular_vel_coeff_, move_coeff_, survive_rew_;
+  Scalar collision_terminal_rew_, bound_terminal_rew_; 
   Vector<3> goal_linear_vel_;
   bool is_collision_;
 

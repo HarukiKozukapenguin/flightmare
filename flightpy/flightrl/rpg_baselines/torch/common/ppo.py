@@ -343,7 +343,7 @@ class PPO(OnPolicyAlgorithm):
         )
 
         # rollout trajectory and save the trajectory
-        traj_df = traj_rollout(self.eval_env, self.policy)
+        traj_df = traj_rollout(self.eval_env, self.policy, 10000)
         traj_df.to_csv(save_path + "/test_traj_{0:05d}.csv".format(iteration))
 
         # generate plots
@@ -358,6 +358,7 @@ class PPO(OnPolicyAlgorithm):
             axpos.append(fig1.add_subplot(gs1[0, i]))
             axvel.append(fig1.add_subplot(gs1[1, i]))
         episode_idx = traj_df.episode_id.unique()
+        ave_final_x = 0
         for ep_i in episode_idx:
             conditions = "episode_id == {0}".format(ep_i)
             traj_episode_i = traj_df.query(conditions)
@@ -373,7 +374,10 @@ class PPO(OnPolicyAlgorithm):
             axvel[1].plot(vel[:, 1])
             axvel[2].plot(vel[:, 2])
             plot3d_traj(ax3d=ax3d, pos=pos, vel=vel)
+            print("episode{}, final x: {}".format(ep_i+1, pos[-1,0]))
+            ave_final_x += pos[-1,0]
         #
         save_path = self.logger.get_dir() + "/TestTraj" + "/Plots"
         os.makedirs(save_path, exist_ok=True)
         fig1.savefig(save_path + "/traj_3d_{0:05d}.png".format(iteration))
+        print("ave final x: {}".format(ave_final_x/len(episode_idx)))

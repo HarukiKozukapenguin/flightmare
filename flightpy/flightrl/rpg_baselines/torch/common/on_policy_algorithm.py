@@ -278,6 +278,10 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
         callback.on_training_start(locals(), globals())
 
+        rms_stop_iteration = int(5 * 1e7 / 2 / (self.n_steps * self.env.num_envs))
+        rms_update_interval = int(250000 / (self.n_steps * self.env.num_envs))
+        print("rms_stop_iteration: {}, rms_update_interval: {}".format(rms_stop_iteration, rms_update_interval))
+
         while self.num_timesteps < total_timesteps:
 
             continue_training = self.collect_rollouts(
@@ -327,7 +331,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
             self.train()
 
-            if iteration % 10 == 0 and iteration <= 1000:
+            if iteration % rms_update_interval == 0 and iteration <= rms_stop_iteration:
                 # update running mean and standard deivation for state normalization
                 self.env.update_rms()
 

@@ -2,20 +2,27 @@ environment:
   level: "medium" # three difficulty level [easy, medium, hard]
   env_folder: "environment_0" # configurations for dynamic and static obstacles
   world_box: [-20, 80, -10, 10, 0.0, 10] # Bounding box applied during training, exiting this box terminates the episode. [xmin, xmax, ymin, ymax, zmin, zmax]
-  goal_vel: [3.0, 0.0, 0.0] # goal velicty for tracking vx, vy, vz
+  goal_vel: [5.0, 0.0, 0.0] # goal velicty for tracking vx, vy, vz
   max_detection_range: 10.0 # max obstacle detection range [m], obstacles outside this range will not be detected. The number of obstacles detected is fixed to 10, if less than 10 obstacles are within detectable range, the observation is padded with 10.0
+
+train:
+  total_timesteps: 200000000 #20 * 1e7
 
 rewards:
   vel_coeff: -0.01
   collision_coeff: -0.1
   angular_vel_coeff: -0.0001
+  move_coeff: 0.5
   survive_rew: 0.03
+  collision_terminal_rew: -10.0
+  bound_terminal_rew: -5.0
   names:
     [
       "lin_vel_reward",
       "collision_penalty",
       "ang_vel_penalty",
-      "survive_rew",
+      "survive_reward",
+      "move_reward",
       "total",
     ]
 

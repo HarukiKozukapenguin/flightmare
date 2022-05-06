@@ -41,9 +41,9 @@ columns = [
 ]
 
 
-def traj_rollout(env, policy):
+def traj_rollout(env, policy, max_ep_length = 1000):
     traj_df = pd.DataFrame(columns=columns)
-    max_ep_length = 1000
+    
     obs = env.reset(random=False)
     episode_id = np.zeros(shape=(env.num_envs, 1))
     for _ in range(max_ep_length):
@@ -97,14 +97,18 @@ def plot3d_traj(ax3d, pos, vel):
     # z_f = (zmax - zmin) / (xmax - xmin)
     # ax3d.set_box_aspect((x_f, y_f * 2, z_f * 2))
 
-def test_policy(env, model, render=False):
-    max_ep_length = env.max_episode_steps
-    num_rollouts = 5
+def test_policy(env, model, render=False, max_ep_length = 0):
+    if max_ep_length == 0:
+        max_ep_length = env.max_episode_steps
+
+    num_rollouts = 20
     frame_id = 0
+    ave_final_x = 0
     if render:
         env.connectUnity()
     for n_roll in range(num_rollouts):
         obs, done, ep_len = env.reset(), False, 0
+        final_x = 0
         while not (done or (ep_len >= max_ep_length)):
             # print(obs)
             act, _ = model.predict(obs, deterministic=True)
@@ -112,6 +116,18 @@ def test_policy(env, model, render=False):
 
             #
             env.render(ep_len)
+
+            if done:
+                if final_x == 0:
+                    # reset the test, becuase the drone collide with object in the initial state
+                    obs, done, ep_len = env.reset(), False, 0
+                    print("reset the test, becuase the drone collide with object in the initial state")
+                    continue
+                ave_final_x += final_x
+                print("final x: {}".format(final_x))
+            else:
+                final_x = env.getQuadState()[0][1]
+
 
             # ======Gray Image=========
             # gray_img = np.reshape(
@@ -141,5 +157,6 @@ def test_policy(env, model, render=False):
             frame_id += 1
 
     #
+    print("average final x: {}".format(ave_final_x/num_rollouts))
     if render:
         env.disconnectUnity()
