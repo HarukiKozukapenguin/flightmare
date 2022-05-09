@@ -337,6 +337,7 @@ class PPO(OnPolicyAlgorithm):
     def eval(self, iteration, max_ep_length = 1000) -> None:
         save_path = self.logger.get_dir() + "/TestTraj"
         os.makedirs(save_path, exist_ok=True)
+        ave_final_x = 0
 
         #
         self.policy.eval()
@@ -375,7 +376,11 @@ class PPO(OnPolicyAlgorithm):
             axvel[1].plot(vel[:, 1])
             axvel[2].plot(vel[:, 2])
             plot3d_traj(ax3d=ax3d, pos=pos, vel=vel)
-        #
+            print("episode{}, final x: {}".format(ep_i+1, pos[-1,0]))
+            ave_final_x += pos[-1,0]
+
+        #  
         save_path = self.logger.get_dir() + "/TestTraj" + "/Plots"
         os.makedirs(save_path, exist_ok=True)
         fig1.savefig(save_path + "/traj_3d_{0:05d}.png".format(iteration))
+        print("ave final x: {}".format(ave_final_x/len(episode_idx)))
