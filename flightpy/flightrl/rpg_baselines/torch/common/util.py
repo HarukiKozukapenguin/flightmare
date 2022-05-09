@@ -4,6 +4,7 @@ import pandas as pd
 import cv2
 import os
 from mpl_toolkits.mplot3d import Axes3D
+import statistics
 
 columns = [
     "episode_id",
@@ -99,9 +100,9 @@ def plot3d_traj(ax3d, pos, vel):
 
 def test_policy(env, model, render=False):
     max_ep_length = env.max_episode_steps
-    num_rollouts = 20
+    num_rollouts = 100
     frame_id = 0
-    ave_final_x = 0
+    final_x_list = []
     if render:
         env.connectUnity()
     for n_roll in range(num_rollouts):
@@ -150,7 +151,7 @@ def test_policy(env, model, render=False):
                     obs, done, ep_len = env.reset(), False, 0
                     print("reset the test, becuase the drone collide with object in the initial state")
                     continue
-                ave_final_x += final_x
+                final_x_list.append(final_x)
                 print("final x: {}".format(final_x))
             else:
                 final_x = env.getQuadState()[0][1]
@@ -161,6 +162,7 @@ def test_policy(env, model, render=False):
             frame_id += 1
 
 
-    print("average final x: {}".format(ave_final_x/num_rollouts))
+    print("average final x: {}".format(sum(final_x_list)/num_rollouts))
+    print("standard deviation x: {}".format(statistics.pstdev(final_x_list)))
     if render:
         env.disconnectUnity()
