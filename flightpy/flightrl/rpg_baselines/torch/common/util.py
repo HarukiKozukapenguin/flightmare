@@ -99,25 +99,30 @@ def plot3d_traj(ax3d, pos, vel):
 
 def test_policy(env, model, render=False):
     max_ep_length = env.max_episode_steps
-    num_rollouts = 10
+    num_rollouts = 20
     frame_id = 0
+    ave_final_x = 0
     if render:
         env.connectUnity()
     for n_roll in range(num_rollouts):
         obs, done, ep_len = env.reset(), False, 0
+        final_x = 0
         while not (done or (ep_len >= max_ep_length)):
             # print(obs)
             act, _ = model.predict(obs, deterministic=True)
             obs, rew, done, info = env.step(act)
 
+
             #
             env.render(ep_len)
+
 
             # ======Gray Image=========
             # gray_img = np.reshape(
             #     env.getImage()[0], (env.img_height, env.img_width))
             # cv2.imshow("gray_img", gray_img)
             # cv2.waitKey(100)
+
 
             # ======RGB Image=========
             # img =env.getImage(rgb=True) 
@@ -128,6 +133,7 @@ def test_policy(env, model, render=False):
             # cv2.imwrite("./images/img_{0:05d}.png".format(frame_id), rgb_img)
             # cv2.waitKey(100)
 
+
             # # ======Depth Image=========
             # depth_img = np.reshape(env.getDepthImage()[
             #                        0], (env.img_height, env.img_width))
@@ -136,10 +142,25 @@ def test_policy(env, model, render=False):
             # cv2.imshow("depth", depth_img)
             # cv2.waitKey(100)
 
+
             #
+            if done:
+                if final_x == 0:
+                    # reset the test, becuase the drone collide with object in the initial state
+                    obs, done, ep_len = env.reset(), False, 0
+                    print("reset the test, becuase the drone collide with object in the initial state")
+                    continue
+                ave_final_x += final_x
+                print("final x: {}".format(final_x))
+            else:
+                final_x = env.getQuadState()[0][1]
+
+
+
             ep_len += 1
             frame_id += 1
 
-    #
+
+    print("average final x: {}".format(ave_final_x/num_rollouts))
     if render:
         env.disconnectUnity()

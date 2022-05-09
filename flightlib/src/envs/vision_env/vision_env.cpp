@@ -376,14 +376,14 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 bool VisionEnv::isTerminalState(Scalar &reward) {
   if (is_collision_) {
     reward = fabs(quad_state_.x(QS::VELX)) * -10.0;
-    // std::cout << "terminate by collision" << std::endl;
+    std::cout << "terminate by collision" << std::endl;
     return true;
   }
 
   // simulation time out
   if (cmd_.t >= max_t_ - sim_dt_) {
     reward = -1;
-    // std::cout << "terminate by time" << std::endl;
+    std::cout << "terminate by time" << std::endl;
     return true;
   }
 
@@ -398,13 +398,13 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
                  quad_state_.x(QS::POSZ) <= world_box_[5] - safty_threshold;
   if (!x_valid || !y_valid || !z_valid) {
     reward = -5;
-    // std::cout << "terminate by box" << std::endl;
+    std::cout << "terminate by box" << std::endl;
     return true;
   }
 
   if (quad_state_.p(QS::POSX) > goal_){
     reward = 50*move_coeff_;
-    // std::cout << "terminate by reaching the goal" << std::endl;
+    std::cout << "terminate by reaching the goal" << std::endl;
     return true;
   }
   return false;
