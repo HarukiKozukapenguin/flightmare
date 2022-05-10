@@ -357,7 +357,7 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 
   // - tracking a constant linear velocity
   Scalar lin_vel_reward =
-    vel_coeff_ * (quad_state_.v - goal_linear_vel_).norm();
+    vel_coeff_ * quad_state_.v.norm();
 
   // - angular velocity penalty, to avoid oscillations
   const Scalar ang_vel_penalty = angular_vel_coeff_ * quad_state_.w.norm();
