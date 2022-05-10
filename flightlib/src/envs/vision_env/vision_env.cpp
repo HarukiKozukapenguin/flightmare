@@ -16,7 +16,8 @@ VisionEnv::VisionEnv(const std::string &cfg_path, const int env_id)
   // load configuration file
   cfg_ = YAML::LoadFile(cfg_path);
   //
-  env_id_ = env_id;
+  env_folder_ = cfg_["environment"]["env_folder"].as<int>();
+  env_id_ = env_folder_;
   init();
 }
 
@@ -24,7 +25,8 @@ VisionEnv::VisionEnv(const YAML::Node &cfg_node, const int env_id) : EnvBase() {
   cfg_ = cfg_node;
 
   //
-  env_id_ = env_id;
+  env_folder_ = cfg_["environment"]["env_folder"].as<int>();
+  env_id_ = env_folder_;
   init();
 }
 
@@ -119,7 +121,9 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
 
   // Observations
   obs << goal_linear_vel_, ori, quad_state_.p, quad_state_.v, sphericalboxel, 
-  world_box_[2], world_box_[3], world_box_[4], world_box_[5], quad_state_.w;
+  world_box_[2] - quad_state_.x(QS::POSY), world_box_[3] - quad_state_.x(QS::POSY),
+  world_box_[4] - quad_state_.x(QS::POSZ) , world_box_[5] - quad_state_.x(QS::POSZ),
+  quad_state_.w;
   return true;
 }
 
@@ -361,14 +365,20 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 
   // - angular velocity penalty, to avoid oscillations
   const Scalar ang_vel_penalty = angular_vel_coeff_ * quad_state_.w.norm();
-  
+
+  // - world box penalty
+
+  Scalar world_box_penalty =
+    world_box_coeff_[0] * std::pow(quad_state_.x(QS::POSY) - world_box_center_[0],2) +
+    world_box_coeff_[1] * std::pow(quad_state_.x(QS::POSZ) - world_box_center_[1],2);
+
   //  change progress reward as survive reward
   const Scalar total_reward =
-    move_reward + lin_vel_reward + collision_penalty + ang_vel_penalty + survive_rew_;
+    move_reward + lin_vel_reward + collision_penalty + ang_vel_penalty + survive_rew_ + world_box_penalty;
 
   // return all reward components for debug purposes
   // only the total reward is used by the RL algorithm
-  reward << move_reward, lin_vel_reward, collision_penalty, ang_vel_penalty, survive_rew_,
+  reward << move_reward, lin_vel_reward, collision_penalty, ang_vel_penalty, survive_rew_, world_box_penalty,
     total_reward;
   return true;
 }
@@ -481,8 +491,9 @@ bool VisionEnv::getImage(Ref<ImgVector<>> img, const bool rgb) {
 bool VisionEnv::loadParam(const YAML::Node &cfg) {
   if (cfg["environment"]) {
     difficulty_level_list_ = cfg["environment"]["level"].as<std::vector<std::string>>();
-    env_folder_ = cfg["environment"]["env_folder"].as<std::string>();
     world_box_ = cfg["environment"]["world_box"].as<std::vector<Scalar>>();
+    world_box_center_.push_back((world_box_[2]+world_box_[3])/2);
+    world_box_center_.push_back((world_box_[4]+world_box_[5])/2);
     std::vector<Scalar> goal_vel_vec =
       cfg["environment"]["goal_vel"].as<std::vector<Scalar>>();
     goal_linear_vel_ = Vector<3>(goal_vel_vec.data());
@@ -508,6 +519,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     dist_margin = cfg["rewards"]["dist_margin"].as<Scalar>();
     angular_vel_coeff_ = cfg["rewards"]["angular_vel_coeff"].as<Scalar>();
     survive_rew_ = cfg["rewards"]["survive_rew"].as<Scalar>();
+    world_box_coeff_ = cfg["rewards"]["world_box_coeff"].as<std::vector<Scalar>>();
 
     // std::cout << dist_margin << std::endl;
 
@@ -552,8 +564,9 @@ bool VisionEnv::changeLevel(){
   obstacle_cfg_path_ = getenv("FLIGHTMARE_PATH") +
                        std::string("/flightpy/configs/vision/") +
                        difficulty_level_ + std::string("/") +
-                       std::string("environment_") + std::to_string(env_id_ % 100);
+                       std::string("environment_") + std::to_string(env_id_ % 101);
   std::cout << obstacle_cfg_path_<< std::endl;
+  cfg_["environment"]["env_folder"] = env_id_ + 1;
 
   // add dynamic objects
   std::string dynamic_object_yaml =

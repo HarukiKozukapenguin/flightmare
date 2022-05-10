@@ -1,8 +1,8 @@
 environment:
   level: ["medium"]
-  env_folder: "environment_0"
+  env_folder: 0 # beginning of env
   world_box: [-20, 80, -10, 10, 0.0, 10]
-  goal_vel: [3.0, 0.0, 0.0]
+  goal_vel: [5.0, 0.0, 0.0]
   max_detection_range: 10.0
   goal: 70
 # three difficulty level [easy, medium, hard](list when they learn)
@@ -19,6 +19,7 @@ rewards:
   dist_margin: 2
   angular_vel_coeff: -0.0001
   survive_rew: 0.03
+  world_box_coeff: [-0.0005, -0.00025] # y,z
   names:
     [
       "move_reward",
@@ -26,6 +27,7 @@ rewards:
       "collision_penalty",
       "ang_vel_penalty",
       "survive_rew",
+      "world_box_penalty",
       "total",
     ] #this size determines the size of rewards. (cf. vision_env.cpp l460)
 
@@ -48,7 +50,7 @@ unity:
 simulation:
   seed: 1
   sim_dt: 0.02
-  max_t: 60.0
+  max_t: 20.0
   num_envs: 100
   num_threads: 20
 

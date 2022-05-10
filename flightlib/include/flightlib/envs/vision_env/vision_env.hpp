@@ -144,6 +144,7 @@ class VisionEnv final : public EnvBase {
 
   // Define reward for training
   Scalar move_coeff_, vel_coeff_, collision_coeff_,collision_exp_coeff_, angular_vel_coeff_, survive_rew_, dist_margin;
+  std::vector<Scalar> world_box_coeff_;
   Vector<3> goal_linear_vel_;
   bool is_collision_;
 
@@ -159,8 +160,9 @@ class VisionEnv final : public EnvBase {
   int num_detected_obstacles_;
   std::vector<std::string> difficulty_level_list_;
   std::string difficulty_level_;
-  std::string env_folder_;
+  int env_folder_;
   std::vector<Scalar> world_box_;
+  std::vector<Scalar> world_box_center_;
 
   // observations and actions (for RL)
   Vector<visionenv::kNObs> pi_obs_;
