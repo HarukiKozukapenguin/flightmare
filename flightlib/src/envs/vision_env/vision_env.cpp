@@ -150,9 +150,9 @@ bool VisionEnv::getObstacleState(Ref<Vector<visionenv::Cuts*visionenv::Cuts>> sp
     // compute relative distance
     Scalar obstacle_dist = delta_pos.norm();
     // limit observation range
-    if (obstacle_dist > max_detection_range_) {
-      obstacle_dist = max_detection_range_;
-    }
+    // if (obstacle_dist > max_detection_range_) {
+    //   obstacle_dist = max_detection_range_;
+    // }
     relative_pos_norm_.push_back(obstacle_dist);
 
     // store the obstacle radius
@@ -174,9 +174,9 @@ bool VisionEnv::getObstacleState(Ref<Vector<visionenv::Cuts*visionenv::Cuts>> sp
 
     // compute relative distance
     Scalar obstacle_dist = delta_pos.norm();
-    if (obstacle_dist > max_detection_range_) {
-      obstacle_dist = max_detection_range_;
-    }
+    // if (obstacle_dist > max_detection_range_) {
+    //   obstacle_dist = max_detection_range_;
+    // }
     relative_pos_norm_.push_back(obstacle_dist);
 
     // store the obstacle radius
@@ -198,21 +198,23 @@ bool VisionEnv::getObstacleState(Ref<Vector<visionenv::Cuts*visionenv::Cuts>> sp
   R.transposeInPlace();
 
   for (size_t sort_idx : sort_indexes(relative_pos_norm_)) {
-    if (idx >= visionenv::kNObstacles) {
-      obstacle_num = idx;
-      break;
-      }
+    // if (idx >= visionenv::kNObstacles) {
+    //   obstacle_num = idx;
+    //   break;
+    //   }
       // if enough obstacles in the environment
+    // std::cout << "idx is " << idx << std::endl;
       if (idx < relative_pos.size() && relative_pos_norm_[sort_idx] <= max_detection_range_) {
         pos_b_list.push_back(R*relative_pos[sort_idx]);
         pos_norm_list.push_back(relative_pos_norm_[sort_idx]);
         obs_radius_list.push_back(obstacle_radius_[sort_idx]);
       } else {
-      obstacle_num = idx;
       break;
       }
     idx += 1;
   }
+  obstacle_num = idx;
+  // relative_pos_range.push_back(pos_norm_list.back());
 
   // std::cout << "obstacle_num is " << obstacle_num << std::endl;
   
@@ -225,7 +227,7 @@ Vector<visionenv::Cuts*visionenv::Cuts> VisionEnv::getsphericalboxel(std::vector
     Vector<visionenv::Cuts*visionenv::Cuts> obstacle_obs;
     for (int t = -visionenv::Cuts/2; t < visionenv::Cuts/2; ++t) {
         for (int f = -visionenv::Cuts/2; f < visionenv::Cuts/2; ++f) {
-            Scalar tcell = (t+0.5)*(PI/visionenv::Cuts)/2;
+            Scalar tcell = (t+0.5)*(PI/visionenv::Cuts)*2/3;
             Scalar fcell = (f+0.5)*(PI/visionenv::Cuts)/2;
             obstacle_obs[(t+visionenv::Cuts/2)*visionenv::Cuts+(f+visionenv::Cuts/2)] = getClosestDistance(pos_b_list, pos_norm_list, obs_radius_list, tcell,fcell);
         }
@@ -383,17 +385,29 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   return true;
 }
 
+Scalar VisionEnv::average(std::vector<Scalar> vec){
+    Scalar sum = 0;
+  for (size_t i = 0; i < vec.size(); i++) {
+    sum += vec[i];
+  }
+  return sum/vec.size();
+}
+
 bool VisionEnv::isTerminalState(Scalar &reward) {
   if (is_collision_) {
     reward = fabs(quad_state_.x(QS::VELX)) * -10.0;
-    std::cout << "terminate by collision" << std::endl;
+    // std::cout << "terminate by collision" << std::endl;
+    // std::cout << "average ditection is " << average(relative_pos_range) << std::endl;
+    // relative_pos_range.clear();
     return true;
   }
 
   // simulation time out
   if (cmd_.t >= max_t_ - sim_dt_) {
     reward = -1;
-    std::cout << "terminate by time" << std::endl;
+    // std::cout << "terminate by time" << std::endl;
+    // std::cout << "average ditection is " << average(relative_pos_range) << std::endl;
+    // relative_pos_range.clear();
     return true;
   }
 
@@ -408,21 +422,28 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
                  quad_state_.x(QS::POSZ) <= world_box_[5] - safty_threshold;
   if (!x_valid || !y_valid || !z_valid) {
     reward = -5;
+
+    // std::cout << "average ditection is " << average(relative_pos_range) << std::endl;
+    // relative_pos_range.clear();
+
     if (!x_valid){
-      std::cout << "terminate by x boundary" << std::endl;
+      // std::cout << "terminate by x boundary" << std::endl;
     }
     if (!y_valid){
-      std::cout << "terminate by y boundary" << std::endl;
+      // std::cout << "terminate by y boundary" << std::endl;
     }
     if (!z_valid){
-      std::cout << "terminate by z boundary" << std::endl;
+      // std::cout << "terminate by z boundary" << std::endl;
     }
     return true;
   }
 
   if (quad_state_.p(QS::POSX) > goal_){
     reward = 50*move_coeff_;
-    std::cout << "terminate by reaching the goal" << std::endl;
+    // std::cout << "terminate by reaching the goal" << std::endl;
+
+    // std::cout << "average ditection is " << average(relative_pos_range) << std::endl;
+    // relative_pos_range.clear();
     return true;
   }
   return false;

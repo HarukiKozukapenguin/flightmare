@@ -85,6 +85,7 @@ class VisionEnv final : public EnvBase {
   Scalar getclosestpoint(Scalar distance, Scalar theta, Scalar size);
 
   // get quadrotor states
+  Scalar average(std::vector<Scalar> vec);
   bool getQuadAct(Ref<Vector<>> act) const;
   bool getQuadState(Ref<Vector<>> state) const;
 
@@ -155,7 +156,7 @@ class VisionEnv final : public EnvBase {
   Scalar goal_;
   std::vector<Scalar> relative_pos_norm_;
   std::vector<Scalar> obstacle_radius_;
-
+  std::vector<Scalar> relative_pos_range;
 
   int num_detected_obstacles_;
   std::vector<std::string> difficulty_level_list_;
