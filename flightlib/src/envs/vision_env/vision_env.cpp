@@ -46,7 +46,7 @@ void VisionEnv::init() {
   quad_ptr_->updateDynamics(dynamics);
 
 
-  // define input and output dimension for the environment
+  // define input and output dimensi失敗原因をon for the environment
   obs_dim_ = visionenv::kNObs;
   act_dim_ = visionenv::kNAct;
   rew_dim_ = 0;
@@ -69,6 +69,12 @@ void VisionEnv::init() {
   act_mean_ << (max_force / quad_ptr_->getMass()) / 2, 0.0, 0.0, 0.0;
   act_std_ << (max_force / quad_ptr_->getMass()) / 2, max_omega.x(),
     max_omega.y(), max_omega.z();
+
+  collide_num = 0;
+  time_num = 0;
+  bound_num = 0;
+  goal_num = 0;
+  iter = 0;
 }
 
 VisionEnv::~VisionEnv() {}
@@ -384,37 +390,59 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 }
 
 bool VisionEnv::isTerminalState(Scalar &reward) {
-  if (is_collision_) {
-    reward = fabs(quad_state_.x(QS::VELX)) * -10.0;
-    // std::cout << "terminate by collision" << std::endl;
-    return true;
-  }
+    const Scalar safty_threshold = 0.1;
+    bool x_valid = quad_state_.p(QS::POSX) >= world_box_[0] + safty_threshold &&
+                  quad_state_.p(QS::POSX) <= world_box_[1] - safty_threshold;
+    bool y_valid = quad_state_.p(QS::POSY) >= world_box_[2] + safty_threshold &&
+                  quad_state_.p(QS::POSY) <= world_box_[3] - safty_threshold;
+    bool z_valid = quad_state_.x(QS::POSZ) >= world_box_[4] + safty_threshold &&
+                  quad_state_.x(QS::POSZ) <= world_box_[5] - safty_threshold;
 
-  // simulation time out
-  if (cmd_.t >= max_t_ - sim_dt_) {
-    reward = -1;
-    // std::cout << "terminate by time" << std::endl;
-    return true;
-  }
+  if (is_collision_ || cmd_.t >= max_t_ - sim_dt_ 
+  ||!x_valid || !y_valid || !z_valid ||  quad_state_.p(QS::POSX) > goal_){
+    if (is_collision_) {
+      reward = fabs(quad_state_.x(QS::VELX)) * -10.0;
+      // std::cout << "terminate by collision" << std::endl;
+      // return true;
+      // std::cout << "t is " << cmd_.t << std::endl;
+      if (cmd_.t == sim_dt_){
+        return true;
+      }
+      collide_num +=1;
+    }
 
-  // world boundling box check
-  // - x, y, and z
-  const Scalar safty_threshold = 0.1;
-  bool x_valid = quad_state_.p(QS::POSX) >= world_box_[0] + safty_threshold &&
-                 quad_state_.p(QS::POSX) <= world_box_[1] - safty_threshold;
-  bool y_valid = quad_state_.p(QS::POSY) >= world_box_[2] + safty_threshold &&
-                 quad_state_.p(QS::POSY) <= world_box_[3] - safty_threshold;
-  bool z_valid = quad_state_.x(QS::POSZ) >= world_box_[4] + safty_threshold &&
-                 quad_state_.x(QS::POSZ) <= world_box_[5] - safty_threshold;
-  if (!x_valid || !y_valid || !z_valid) {
-    reward = -5;
-    // std::cout << "terminate by box" << std::endl;
-    return true;
-  }
+    // simulation time out
+    if (cmd_.t >= max_t_ - sim_dt_) {
+      reward = -1;
+      // std::cout << "terminate by time" << std::endl;
+      // return true;
+      time_num +=1;
+    }
 
-  if (quad_state_.p(QS::POSX) > goal_){
-    reward = 50*move_coeff_;
-    // std::cout << "terminate by reaching the goal" << std::endl;
+    // world boundling box check
+    // - x, y, and z
+    if (!x_valid || !y_valid || !z_valid) {
+      reward = -5;
+      // std::cout << "terminate by box" << std::endl;
+      // return true;
+      bound_num += 1;
+    }
+
+    if (quad_state_.p(QS::POSX) > goal_){
+      reward = 50*move_coeff_;
+      // std::cout << "terminate by reaching the goal" << std::endl;
+      // return true;
+      goal_num += 1;
+    }
+
+    iter +=1;
+    // std::cout << "iter is " << iter << std::endl;
+    if (iter == 100){
+      // std::cout << "collide_num is " << collide_num << std::endl;
+      // std::cout << "time_num is " << time_num << std::endl;
+      // std::cout << "bound_num is " << bound_num << std::endl;
+      // std::cout << "goal_num is " << goal_num << std::endl;
+    }
     return true;
   }
   return false;
