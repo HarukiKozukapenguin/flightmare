@@ -227,7 +227,7 @@ Vector<visionenv::Cuts*visionenv::Cuts> VisionEnv::getsphericalboxel(std::vector
     Vector<visionenv::Cuts*visionenv::Cuts> obstacle_obs;
     for (int t = -visionenv::Cuts/2; t < visionenv::Cuts/2; ++t) {
         for (int f = -visionenv::Cuts/2; f < visionenv::Cuts/2; ++f) {
-            Scalar tcell = (t+0.5)*(PI/visionenv::Cuts)*2/3;
+            Scalar tcell = (t+0.5)*(PI/visionenv::Cuts)/2;
             Scalar fcell = (f+0.5)*(PI/visionenv::Cuts)/2;
             obstacle_obs[(t+visionenv::Cuts/2)*visionenv::Cuts+(f+visionenv::Cuts/2)] = getClosestDistance(pos_b_list, pos_norm_list, obs_radius_list, tcell,fcell);
         }
