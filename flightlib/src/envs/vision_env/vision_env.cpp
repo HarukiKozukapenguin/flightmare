@@ -438,10 +438,10 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
     iter +=1;
     // std::cout << "iter is " << iter << std::endl;
     if (iter == 100){
-      std::cout << "collide_num is " << collide_num << std::endl;
-      std::cout << "time_num is " << time_num << std::endl;
-      std::cout << "bound_num is " << bound_num << std::endl;
-      std::cout << "goal_num is " << goal_num << std::endl;
+      // std::cout << "collide_num is " << collide_num << std::endl;
+      // std::cout << "time_num is " << time_num << std::endl;
+      // std::cout << "bound_num is " << bound_num << std::endl;
+      // std::cout << "goal_num is " << goal_num << std::endl;
     }
     return true;
   }

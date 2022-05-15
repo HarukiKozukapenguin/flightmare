@@ -138,6 +138,12 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                 self.policy.action_net, th.nn.Tanh()
             )
 
+        print("######### load #############")
+        weight = "/home/haru/icra22_competition_ws/src/agile_flight/envtest/python/saved/PPO_468/Policy/iter_02000.pth"
+        print(weight)
+        saved_variables = th.load(weight, map_location=self.device)
+        self.policy.load_state_dict(saved_variables["state_dict"], strict=False)
+
         self.policy = self.policy.to(self.device)
 
     def collect_rollouts(
