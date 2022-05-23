@@ -29,10 +29,10 @@ class EnvBase {
   virtual ~EnvBase() = 0;
 
   // (pure virtual) public methods (has to be implemented by child classes)
-  virtual bool reset(Ref<Vector<>> obs) = 0;
-  virtual bool step(const Ref<Vector<>> act, Ref<Vector<>> obs,
+  virtual bool reset(Ref<Array<>> obs) = 0;
+  virtual bool step(const Ref<Vector<>> act, Ref<Array<>> obs,
                     Ref<Vector<>> reward) = 0;
-  virtual bool getObs(Ref<Vector<>> obs) = 0;
+  virtual bool getObs(Ref<Array<>> obs) = 0;
 
   // (virtual) public methods (implementations are optional.)
   virtual bool getImage(Ref<ImgVector<>> img, const bool rgb = true);

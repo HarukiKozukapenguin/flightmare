@@ -47,16 +47,16 @@ class QuadrotorEnv final : public EnvBase {
   ~QuadrotorEnv();
 
   // - public OpenAI-gym-style functions
-  bool reset(Ref<Vector<>> obs) override;
-  bool reset(Ref<Vector<>> obs, bool random);
-  bool step(const Ref<Vector<>> act, Ref<Vector<>> obs,
+  bool reset(Ref<Array<>> obs) override;
+  bool reset(Ref<Array<>> obs, bool random);
+  bool step(const Ref<Vector<>> act, Ref<Array<>> obs,
             Ref<Vector<>> reward) override;
 
   // - public set functions
   bool loadParam(const YAML::Node &cfg);
 
   // - public get functions
-  bool getObs(Ref<Vector<>> obs) override;
+  bool getObs(Ref<Array<>> obs) override;
   bool getImage(Ref<ImgVector<>> img, const bool rgb = true) override;
   bool getDepthImage(Ref<DepthImgVector<>> img) override;
 

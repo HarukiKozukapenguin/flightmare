@@ -79,7 +79,7 @@ void VisionEnv::init() {
 
 VisionEnv::~VisionEnv() {}
 
-bool VisionEnv::reset(Ref<Vector<>> obs) {
+bool VisionEnv::reset(Ref<Array<>> obs) {
   quad_state_.setZero();
   pi_act_.setZero();
   old_pi_act_.setZero();
@@ -108,9 +108,9 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   return true;
 }
 
-bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
+bool VisionEnv::reset(Ref<Array<>> obs, bool random) { return reset(obs); }
 
-bool VisionEnv::getObs(Ref<Vector<>> obs) {
+bool VisionEnv::getObs(Ref<Array<>> obs) {
   if (obs.size() != obs_dim_) {
     logger_.error("Observation dimension mismatch. %d != %d", obs.size(),
                   obs_dim_);
@@ -120,20 +120,20 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   Vector<9> ori = Map<Vector<>>(quad_state_.R().data(), quad_state_.R().size());
 
   // get N most closest obstacles as the observation
-  Vector<visionenv::Cuts*visionenv::Cuts> sphericalboxel;
+  Array <visionenv::Cuts, visionenv::Cuts> sphericalboxel;
   getObstacleState(sphericalboxel);
 
   // std::cout << sphericalboxel << std::endl;
 
   // Observations
-  obs << goal_linear_vel_, ori, quad_state_.p, quad_state_.v, sphericalboxel, 
-  world_box_[2] - quad_state_.x(QS::POSY), world_box_[3] - quad_state_.x(QS::POSY),
-  world_box_[4] - quad_state_.x(QS::POSZ) , world_box_[5] - quad_state_.x(QS::POSZ),
-  quad_state_.w;
+  obs << sphericalboxel;
+  // world_box_[2] - quad_state_.x(QS::POSY), world_box_[3] - quad_state_.x(QS::POSY),
+  // world_box_[4] - quad_state_.x(QS::POSZ) , world_box_[5] - quad_state_.x(QS::POSZ),
+  // quad_state_.w,goal_linear_vel_, ori, quad_state_.p, quad_state_.v;
   return true;
 }
 
-bool VisionEnv::getObstacleState(Ref<Vector<visionenv::Cuts*visionenv::Cuts>> sphericalboxel) {
+bool VisionEnv::getObstacleState(Ref<Array<visionenv::Cuts,visionenv::Cuts>> sphericalboxel) {
   // Scalar safty_threshold = 0.2;
   if (dynamic_objects_.size() <= 0 || static_objects_.size() <= 0) {
     logger_.error("No dynamic or static obstacles.");
@@ -226,14 +226,14 @@ bool VisionEnv::getObstacleState(Ref<Vector<visionenv::Cuts*visionenv::Cuts>> sp
   return true;
 }
 
-Vector<visionenv::Cuts*visionenv::Cuts> VisionEnv::getsphericalboxel(std::vector<Vector<3>,
+Array<visionenv::Cuts,visionenv::Cuts> VisionEnv::getsphericalboxel(std::vector<Vector<3>,
  Eigen::aligned_allocator<Vector<3>>>& pos_b_list, std::vector<Scalar> pos_norm_list, std::vector<Scalar> obs_radius_list){
-    Vector<visionenv::Cuts*visionenv::Cuts> obstacle_obs;
+    Array<visionenv::Cuts,visionenv::Cuts> obstacle_obs;
     for (int t = -visionenv::Cuts/2; t < visionenv::Cuts/2; ++t) {
         for (int f = -visionenv::Cuts/2; f < visionenv::Cuts/2; ++f) {
             Scalar tcell = (t+0.5)*(PI/visionenv::Cuts)/2;
             Scalar fcell = (f+0.5)*(PI/visionenv::Cuts)/2;
-            obstacle_obs[(t+visionenv::Cuts/2)*visionenv::Cuts+(f+visionenv::Cuts/2)] = getClosestDistance(pos_b_list, pos_norm_list, obs_radius_list, tcell,fcell);
+            obstacle_obs(t+visionenv::Cuts/2,f+visionenv::Cuts/2) = getClosestDistance(pos_b_list, pos_norm_list, obs_radius_list, tcell,fcell);
         }
     }
     return obstacle_obs;
@@ -284,7 +284,7 @@ Scalar VisionEnv::getclosestpoint(Scalar distance, Scalar theta, Scalar size){
     return distance*std::cos(theta) - sqrt(std::pow(size,2)-std::pow(distance*std::sin(theta),2));
 }
 
-bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
+bool VisionEnv::step(const Ref<Vector<>> act, Ref<Array<>> obs,
                      Ref<Vector<>> reward) {
   if (!act.allFinite() || act.rows() != act_dim_ || rew_dim_ != reward.rows()) {
     return false;
@@ -319,6 +319,8 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
 
   // update observations
   getObs(obs);
+
+  std::cout << "vision_env: " << obs << std::endl;
 
   return computeReward(reward);
 }
@@ -776,7 +778,6 @@ bool VisionEnv::configCamera(const YAML::Node &cfg) {
   depth_img_ = cv::Mat::zeros(img_height_, img_width_, CV_32FC1);
   return true;
 }
-
 bool VisionEnv::addQuadrotorToUnity(const std::shared_ptr<UnityBridge> bridge) {
   if (!quad_ptr_) return false;
   bridge->addQuadrotor(quad_ptr_);

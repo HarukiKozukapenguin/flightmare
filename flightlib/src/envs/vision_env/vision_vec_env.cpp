@@ -98,7 +98,7 @@ bool VisionVecEnv<EnvBaseName>::step(Ref<MatrixRowMajor<>> act,
   for (int i = 0; i < this->num_envs_; i++) {
     perAgentStep(i, act, obs, reward, done, extra_info);
   }
-
+  std::cout << "vision_vec_env: "<< obs << std::endl;
   return true;
 }
 

@@ -43,7 +43,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = 3+9+3+3+4+3 + Cuts*Cuts,
+  kNObs = Cuts*Cuts, //3+9+3+3+4+3 + ,
 
   // control actions
   kAct = 0,
@@ -60,21 +60,21 @@ class VisionEnv final : public EnvBase {
   ~VisionEnv();
 
   // - public OpenAI-gym-style functions
-  bool reset(Ref<Vector<>> obs) override;
-  bool reset(Ref<Vector<>> obs, bool random);
-  bool step(const Ref<Vector<>> act, Ref<Vector<>> obs,
+  bool reset(Ref<Array<>> obs) override;
+  bool reset(Ref<Array<>> obs, bool random);
+  bool step(const Ref<Vector<>> act, Ref<Array<>> obs,
             Ref<Vector<>> reward) override;
 
   // - public set functions
   bool loadParam(const YAML::Node &cfg);
 
   // - public get functions
-  bool getObs(Ref<Vector<>> obs) override;
+  bool getObs(Ref<Array<>> obs) override;
   bool getImage(Ref<ImgVector<>> img, const bool rgb = true) override;
   bool getDepthImage(Ref<DepthImgVector<>> img) override;
 
-  bool getObstacleState(Ref<Vector<visionenv::Cuts*visionenv::Cuts>> sphericalboxel);
-  Vector<visionenv::Cuts*visionenv::Cuts> getsphericalboxel(std::vector<Vector<3>,
+  bool getObstacleState(Ref<Array<visionenv::Cuts,visionenv::Cuts>> sphericalboxel);
+  Array<visionenv::Cuts,visionenv::Cuts> getsphericalboxel(std::vector<Vector<3>,
   Eigen::aligned_allocator<Vector<3>>>& pos_b_list, std::vector<Scalar> pos_norm_list, std::vector<Scalar> obs_radius_list);
   Scalar getClosestDistance(std::vector<Vector<3>,
   Eigen::aligned_allocator<Vector<3>>>& pos_b_list, std::vector<Scalar> pos_norm_list, std::vector<Scalar> obs_radius_list, 

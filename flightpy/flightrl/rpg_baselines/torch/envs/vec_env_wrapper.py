@@ -22,20 +22,22 @@ class FlightEnvVec(VecEnv):
         self.wrapper = impl
         self.act_dim = self.wrapper.getActDim()
         self.obs_dim = self.wrapper.getObsDim()
+        self.obs_cut = int(np.sqrt(self.obs_dim))
         self.rew_dim = self.wrapper.getRewDim()
         self.img_width = self.wrapper.getImgWidth()
         self.img_height = self.wrapper.getImgHeight()
         self._observation_space = spaces.Box(
-            np.ones(self.obs_dim) * -np.Inf,
-            np.ones(self.obs_dim) * np.Inf,
-            dtype=np.float64,
+            low = 0,
+            high = 255,
+            shape = (self.obs_cut, self.obs_cut, 1),
+            dtype=np.uint8,
         )
         self._action_space = spaces.Box(
             low=np.ones(self.act_dim) * -1.0,
             high=np.ones(self.act_dim) * 1.0,
             dtype=np.float64,
         )
-        self._observation = np.zeros([self.num_envs, self.obs_dim], dtype=np.float64)
+        self._observation = np.zeros([self.num_envs, self.obs_cut, self.obs_cut], dtype=np.uint8)
         self._rgb_img_obs = np.zeros(
             [self.num_envs, self.img_width * self.img_height * 3], dtype=np.uint8
         )
@@ -66,8 +68,8 @@ class FlightEnvVec(VecEnv):
         self._flightmodes = np.zeros([self.num_envs, 1], dtype=np.float64)
 
         #  state normalization
-        self.obs_rms = RunningMeanStd(shape=[self.num_envs, self.obs_dim])
-        self.obs_rms_new = RunningMeanStd(shape=[self.num_envs, self.obs_dim])
+        self.obs_rms = RunningMeanStd(shape=[self.num_envs, self.obs_cut, self.obs_cut])
+        self.obs_rms_new = RunningMeanStd(shape=[self.num_envs, self.obs_cut, self.obs_cut])
 
         self.max_episode_steps = 1000
         # VecEnv.__init__(self, self.num_envs,

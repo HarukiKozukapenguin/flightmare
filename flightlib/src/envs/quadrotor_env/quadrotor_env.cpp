@@ -86,7 +86,7 @@ void QuadrotorEnv::init() {
 
 QuadrotorEnv::~QuadrotorEnv() {}
 
-bool QuadrotorEnv::reset(Ref<Vector<>> obs) {
+bool QuadrotorEnv::reset(Ref<Array<>> obs) {
   quad_state_.setZero();
   pi_act_.setZero();
 
@@ -127,9 +127,9 @@ bool QuadrotorEnv::reset(Ref<Vector<>> obs) {
   return true;
 }
 
-bool QuadrotorEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
+bool QuadrotorEnv::reset(Ref<Array<>> obs, bool random) { return reset(obs); }
 
-bool QuadrotorEnv::getObs(Ref<Vector<>> obs) {
+bool QuadrotorEnv::getObs(Ref<Array<>> obs) {
   if (obs.size() != obs_dim_) {
     logger_.error("Observation dimension mismatch. %d != %d", obs.size(),
                   obs_dim_);
@@ -142,8 +142,8 @@ bool QuadrotorEnv::getObs(Ref<Vector<>> obs) {
   Vector<9> ori = Map<Vector<>>(quad_state_.R().data(), quad_state_.R().size());
 
   // observation dim : 3 + 9 + 3 = 15
-  obs.segment<quadenv::kNObs>(quadenv::kObs) << quad_state_.p, ori,
-    quad_state_.v;
+  // obs.segment<quadenv::kNObs>(quadenv::kObs) << quad_state_.p, ori,
+  //   quad_state_.v;
 
   // use the following observations if use single rotor thrusts as input
   // observation dim : 3 + 9 + 3 + 3= 18
@@ -152,7 +152,7 @@ bool QuadrotorEnv::getObs(Ref<Vector<>> obs) {
   return true;
 }
 
-bool QuadrotorEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
+bool QuadrotorEnv::step(const Ref<Vector<>> act, Ref<Array<>> obs,
                         Ref<Vector<>> reward) {
   if (!act.allFinite() || act.rows() != act_dim_ || rew_dim_ != reward.rows())
     return false;
