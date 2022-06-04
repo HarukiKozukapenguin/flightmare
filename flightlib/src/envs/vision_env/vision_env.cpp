@@ -114,22 +114,24 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   Vector<9> ori = Map<Vector<>>(quad_state_.R().data(), quad_state_.R().size());
 
   // get N most closest obstacles as the observation
-  Vector<visionenv::Cuts*visionenv::Cuts> sphericalboxel;
-  Vector<> unused;
+  Vector<visionenv::Cuts * visionenv::Cuts> sphericalboxel;
+  Vector<visionenv::kNObstaclesState> unused;
   getObstacleState(sphericalboxel, unused);
 
   // std::cout << sphericalboxel << std::endl;
 
   // Observations
-  obs << goal_linear_vel_, ori, quad_state_.p, quad_state_.v, sphericalboxel, 
-  world_box_[2] - quad_state_.x(QS::POSY), world_box_[3] - quad_state_.x(QS::POSY),
-  world_box_[4] - quad_state_.x(QS::POSZ) , world_box_[5] - quad_state_.x(QS::POSZ),
-  quad_state_.w;
+  obs << goal_linear_vel_, ori, quad_state_.p, quad_state_.v, sphericalboxel,
+    world_box_[2] - quad_state_.x(QS::POSY),
+    world_box_[3] - quad_state_.x(QS::POSY),
+    world_box_[4] - quad_state_.x(QS::POSZ),
+    world_box_[5] - quad_state_.x(QS::POSZ), quad_state_.w;
   return true;
 }
 
-bool VisionEnv::getObstacleState(Ref<Vector<visionenv::Cuts*visionenv::Cuts>> sphericalboxel, 
-Ref<Vector<visionenv::kNObstaclesState*1>> obs_state) {
+bool VisionEnv::getObstacleState(
+  Ref<Vector<visionenv::Cuts * visionenv::Cuts>> sphericalboxel,
+  Ref<Vector<visionenv::kNObstaclesState * 1>> obs_state) {
   // Scalar safty_threshold = 0.2;
   if (dynamic_objects_.size() <= 0 || static_objects_.size() <= 0) {
     logger_.error("No dynamic or static obstacles.");
@@ -192,7 +194,7 @@ Ref<Vector<visionenv::kNObstaclesState*1>> obs_state) {
 
   // std::cout << relative_pos_norm_ << std::endl;
   size_t idx = 0;
-  obstacle_num = 0; // obstacle_num is declared at hpp
+  obstacle_num = 0;  // obstacle_num is declared at hpp
   std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> pos_b_list;
   std::vector<Scalar> pos_norm_list;
   std::vector<Scalar> obs_radius_list;
@@ -202,14 +204,15 @@ Ref<Vector<visionenv::kNObstaclesState*1>> obs_state) {
   for (size_t sort_idx : sort_indexes(relative_pos_norm_)) {
     if (idx >= 1) {
       break;
+    }
+    // if enough obstacles in the environment
+    if (idx < relative_pos.size() &&
+        relative_pos_norm_[sort_idx] <= max_detection_range_) {
+      for (size_t i = 0; i < 3; ++i) {
+        obs_state[i] = relative_pos[sort_idx][i];
       }
-      // if enough obstacles in the environment
-      if (idx < relative_pos.size() && relative_pos_norm_[sort_idx] <= max_detection_range_) {
-        for (size_t i = 0; i < 3; ++i){
-         obs_state[i] = relative_pos[sort_idx][i]; 
-        }
-        obs_state[3] = obstacle_radius_[sort_idx];
-      } 
+      obs_state[3] = obstacle_radius_[sort_idx];
+    }
     idx += 1;
   }
 
@@ -218,81 +221,86 @@ Ref<Vector<visionenv::kNObstaclesState*1>> obs_state) {
     if (idx >= visionenv::kNObstacles) {
       obstacle_num = idx;
       break;
-      }
-      // if enough obstacles in the environment
-      if (idx < relative_pos.size() && relative_pos_norm_[sort_idx] <= max_detection_range_) {
-        pos_b_list.push_back(R*relative_pos[sort_idx]);
-        pos_norm_list.push_back(relative_pos_norm_[sort_idx]);
-        obs_radius_list.push_back(obstacle_radius_[sort_idx]);
-      } else {
+    }
+    // if enough obstacles in the environment
+    if (idx < relative_pos.size() &&
+        relative_pos_norm_[sort_idx] <= max_detection_range_) {
+      pos_b_list.push_back(R * relative_pos[sort_idx]);
+      pos_norm_list.push_back(relative_pos_norm_[sort_idx]);
+      obs_radius_list.push_back(obstacle_radius_[sort_idx]);
+    } else {
       obstacle_num = idx;
       break;
-      }
+    }
     idx += 1;
   }
 
   // std::cout << "obstacle_num is " << obstacle_num << std::endl;
-  
-  sphericalboxel = getsphericalboxel(pos_b_list, pos_norm_list, obs_radius_list);
+
+  sphericalboxel =
+    getsphericalboxel(pos_b_list, pos_norm_list, obs_radius_list);
   return true;
 }
 
-Vector<visionenv::Cuts*visionenv::Cuts> VisionEnv::getsphericalboxel(std::vector<Vector<3>,
- Eigen::aligned_allocator<Vector<3>>>& pos_b_list, std::vector<Scalar> pos_norm_list, std::vector<Scalar> obs_radius_list){
-    Vector<visionenv::Cuts*visionenv::Cuts> obstacle_obs;
-    for (int t = -visionenv::Cuts/2; t < visionenv::Cuts/2; ++t) {
-        for (int f = -visionenv::Cuts/2; f < visionenv::Cuts/2; ++f) {
-            Scalar tcell = (t+0.5)*(PI/visionenv::Cuts)/2;
-            Scalar fcell = (f+0.5)*(PI/visionenv::Cuts)/2;
-            obstacle_obs[(t+visionenv::Cuts/2)*visionenv::Cuts+(f+visionenv::Cuts/2)] = getClosestDistance(pos_b_list, pos_norm_list, obs_radius_list, tcell,fcell);
-        }
+Vector<visionenv::Cuts * visionenv::Cuts> VisionEnv::getsphericalboxel(
+  std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
+  std::vector<Scalar> pos_norm_list, std::vector<Scalar> obs_radius_list) {
+  Vector<visionenv::Cuts * visionenv::Cuts> obstacle_obs;
+  for (int t = -visionenv::Cuts / 2; t < visionenv::Cuts / 2; ++t) {
+    for (int f = -visionenv::Cuts / 2; f < visionenv::Cuts / 2; ++f) {
+      Scalar tcell = (t + 0.5) * (PI / visionenv::Cuts) / 2;
+      Scalar fcell = (f + 0.5) * (PI / visionenv::Cuts) / 2;
+      obstacle_obs[(t + visionenv::Cuts / 2) * visionenv::Cuts +
+                   (f + visionenv::Cuts / 2)] =
+        getClosestDistance(pos_b_list, pos_norm_list, obs_radius_list, tcell,
+                           fcell);
     }
-    return obstacle_obs;
+  }
+  return obstacle_obs;
 }
 
-Scalar VisionEnv::getClosestDistance(std::vector<Vector<3>,
- Eigen::aligned_allocator<Vector<3>>>& pos_b_list, std::vector<Scalar> pos_norm_list, std::vector<Scalar> obs_radius_list, 
-Scalar tcell, Scalar fcell){
-    Vector<3> Cell = getCartesianFromAng(tcell,fcell);
-    Scalar rmin = max_detection_range_;
-    for (size_t i = 0; i < obstacle_num; ++i) {
-        Vector<3> Cartesian = pos_b_list[i]; //R*relative_pos[sort_idx]
-        Scalar cdist = pos_norm_list[i];
-        Scalar size = obs_radius_list[i]; //obstacle_radius_[sort_idx]
-        Scalar ts = std::asin(size/cdist);
-        Scalar tb = std::acos(inner_product(Cell,Cartesian)/(1*cdist));
-        if (tb < ts){
-            comp(rmin,getclosestpoint(cdist,tb,size));
-        }
+Scalar VisionEnv::getClosestDistance(
+  std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
+  std::vector<Scalar> pos_norm_list, std::vector<Scalar> obs_radius_list,
+  Scalar tcell, Scalar fcell) {
+  Vector<3> Cell = getCartesianFromAng(tcell, fcell);
+  Scalar rmin = max_detection_range_;
+  for (size_t i = 0; i < obstacle_num; ++i) {
+    Vector<3> Cartesian = pos_b_list[i];  // R*relative_pos[sort_idx]
+    Scalar cdist = pos_norm_list[i];
+    Scalar size = obs_radius_list[i];  // obstacle_radius_[sort_idx]
+    Scalar ts = std::asin(size / cdist);
+    Scalar tb = std::acos(inner_product(Cell, Cartesian) / (1 * cdist));
+    if (tb < ts) {
+      comp(rmin, getclosestpoint(cdist, tb, size));
     }
-    return rmin/max_detection_range_;
+  }
+  return rmin / max_detection_range_;
 }
 
-Vector<3> VisionEnv::getCartesianFromAng(Scalar theta, Scalar phi){
-  Vector<3> cartesian
-  = {std::cos(theta)*std::cos(phi),
-    std::sin(theta)*std::cos(phi),
-    std::sin(phi)
-  };
+Vector<3> VisionEnv::getCartesianFromAng(Scalar theta, Scalar phi) {
+  Vector<3> cartesian = {std::cos(theta) * std::cos(phi),
+                         std::sin(theta) * std::cos(phi), std::sin(phi)};
   return cartesian;
 }
 
-Scalar VisionEnv::inner_product(Vector<3> a, Vector<3> b){
-    Scalar inner_product = 0;
+Scalar VisionEnv::inner_product(Vector<3> a, Vector<3> b) {
+  Scalar inner_product = 0;
   for (int i = 0; i < 3; i++) {
     inner_product += a[i] * b[i];
   }
   return inner_product;
 }
 
-void VisionEnv::comp(Scalar& rmin, Scalar r){
-    if (r<rmin){
-        rmin=r;
-    }
+void VisionEnv::comp(Scalar &rmin, Scalar r) {
+  if (r < rmin) {
+    rmin = r;
+  }
 }
 
-Scalar VisionEnv::getclosestpoint(Scalar distance, Scalar theta, Scalar size){
-    return distance*std::cos(theta) - sqrt(std::pow(size,2)-std::pow(distance*std::sin(theta),2));
+Scalar VisionEnv::getclosestpoint(Scalar distance, Scalar theta, Scalar size) {
+  return distance * std::cos(theta) -
+         sqrt(std::pow(size, 2) - std::pow(distance * std::sin(theta), 2));
 }
 
 bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
@@ -358,9 +366,11 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     //   (relative_pos_norm_[sort_idx] > 0) &&
     //         (relative_pos_norm_[sort_idx] < max_detection_range_)
     //     ? relative_pos_norm_[sort_idx]
-    //     : max_detection_range_; // Papameretes of how far the quadrotor can detect sphere?
-    
-    // std::cout << "dist margin is " << relative_dist - obstacle_radius_[sort_idx]<< std::endl;
+    //     : max_detection_range_; // Papameretes of how far the quadrotor can
+    //     detect sphere?
+
+    // std::cout << "dist margin is " << relative_dist -
+    // obstacle_radius_[sort_idx]<< std::endl;
 
     // const Scalar dist_margin = 2;
     if (relative_pos_norm_[sort_idx] - obstacle_radius_[sort_idx] <=
@@ -373,7 +383,7 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   // std::cout << "collision_penalty is " << collision_penalty << std::endl;
   // std::cout << ' ' << std::endl;
 
-  Scalar move_reward = 
+  Scalar move_reward =
     move_coeff_ * (quad_state_.p(QS::POSX) - quad_old_state_.p(QS::POSX));
 
   // - tracking a constant linear velocity
@@ -386,17 +396,20 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   // - world box penalty
 
   Scalar world_box_penalty =
-    world_box_coeff_[0] * std::pow(quad_state_.x(QS::POSY) - world_box_center_[0],2) +
-    world_box_coeff_[1] * std::pow(quad_state_.x(QS::POSZ) - world_box_center_[1],2);
+    world_box_coeff_[0] *
+      std::pow(quad_state_.x(QS::POSY) - world_box_center_[0], 2) +
+    world_box_coeff_[1] *
+      std::pow(quad_state_.x(QS::POSZ) - world_box_center_[1], 2);
 
   //  change progress reward as survive reward
-  const Scalar total_reward =
-    move_reward + lin_vel_reward + collision_penalty + ang_vel_penalty + survive_rew_ + world_box_penalty;
+  const Scalar total_reward = move_reward + lin_vel_reward + collision_penalty +
+                              ang_vel_penalty + survive_rew_ +
+                              world_box_penalty;
 
   // return all reward components for debug purposes
   // only the total reward is used by the RL algorithm
-  reward << move_reward, lin_vel_reward, collision_penalty, ang_vel_penalty, survive_rew_, world_box_penalty,
-    total_reward;
+  reward << move_reward, lin_vel_reward, collision_penalty, ang_vel_penalty,
+    survive_rew_, world_box_penalty, total_reward;
   return true;
 }
 
@@ -425,20 +438,20 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
                  quad_state_.x(QS::POSZ) <= world_box_[5] - safty_threshold;
   if (!x_valid || !y_valid || !z_valid) {
     reward = -5;
-    if (!x_valid){
+    if (!x_valid) {
       std::cout << "terminate by x boundary" << std::endl;
     }
-    if (!y_valid){
+    if (!y_valid) {
       std::cout << "terminate by y boundary" << std::endl;
     }
-    if (!z_valid){
+    if (!z_valid) {
       std::cout << "terminate by z boundary" << std::endl;
     }
     return true;
   }
 
-  if (quad_state_.p(QS::POSX) > goal_){
-    reward = 50*move_coeff_;
+  if (quad_state_.p(QS::POSX) > goal_) {
+    reward = 50 * move_coeff_;
     std::cout << "terminate by reaching the goal" << std::endl;
     return true;
   }
@@ -515,10 +528,11 @@ bool VisionEnv::getImage(Ref<ImgVector<>> img, const bool rgb) {
 
 bool VisionEnv::loadParam(const YAML::Node &cfg) {
   if (cfg["environment"]) {
-    difficulty_level_list_ = cfg["environment"]["level"].as<std::vector<std::string>>();
+    difficulty_level_list_ =
+      cfg["environment"]["level"].as<std::vector<std::string>>();
     world_box_ = cfg["environment"]["world_box"].as<std::vector<Scalar>>();
-    world_box_center_.push_back((world_box_[2]+world_box_[3])/2);
-    world_box_center_.push_back((world_box_[4]+world_box_[5])/2);
+    world_box_center_.push_back((world_box_[2] + world_box_[3]) / 2);
+    world_box_center_.push_back((world_box_[4] + world_box_[5]) / 2);
     std::vector<Scalar> goal_vel_vec =
       cfg["environment"]["goal_vel"].as<std::vector<Scalar>>();
     goal_linear_vel_ = Vector<3>(goal_vel_vec.data());
@@ -544,7 +558,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     dist_margin = cfg["rewards"]["dist_margin"].as<Scalar>();
     angular_vel_coeff_ = cfg["rewards"]["angular_vel_coeff"].as<Scalar>();
     survive_rew_ = cfg["rewards"]["survive_rew"].as<Scalar>();
-    world_box_coeff_ = cfg["rewards"]["world_box_coeff"].as<std::vector<Scalar>>();
+    world_box_coeff_ =
+      cfg["rewards"]["world_box_coeff"].as<std::vector<Scalar>>();
 
     // std::cout << dist_margin << std::endl;
 
@@ -579,18 +594,18 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
   unity_render_offset_ = Vector<3>(render_offset.data());
   return true;
 }
-bool VisionEnv::changeLevel(){
+bool VisionEnv::changeLevel() {
   chooseLevel();
   // std::size_t size_ = difficulty_level_list_.size();
   // std::cout << size_ <<std::endl;
   // std::random_device rd;
   // std::mt19937 gen(rd());
   // int env_id = gen() % 100;
-  obstacle_cfg_path_ = getenv("FLIGHTMARE_PATH") +
-                       std::string("/flightpy/configs/vision/") +
-                       difficulty_level_ + std::string("/") +
-                       std::string("environment_") + std::to_string(env_id_ % 101);
-  std::cout << obstacle_cfg_path_<< std::endl;
+  obstacle_cfg_path_ =
+    getenv("FLIGHTMARE_PATH") + std::string("/flightpy/configs/vision/") +
+    difficulty_level_ + std::string("/") + std::string("environment_") +
+    std::to_string(env_id_ % 101);
+  std::cout << obstacle_cfg_path_ << std::endl;
   cfg_["environment"]["env_folder"] = env_id_ + 1;
 
   // add dynamic objects

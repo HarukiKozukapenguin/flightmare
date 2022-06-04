@@ -20,6 +20,14 @@ set(
 )
 
 ################################################################################
+# Debug
+################################################################################
+
+set(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb") #Turn on the -g option in debug mode
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall") #If set(CMAKE_BUILD_TYPE RELEASE) then use this configuration
+
+################################################################################
 # Finding Dependencies
 ################################################################################
 
