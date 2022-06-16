@@ -5,6 +5,7 @@ environment:
   goal_vel: [5.0, 0.0, 0.0]
   max_detection_range: 10.0
   goal: 70
+  fly_result: yes
 # three difficulty level [easy, medium, hard](list when they learn)
 # configurations for dynamic and static obstacles, environment_(0~100)
 # Bounding box applied during training, exiting this box terminates the episode. [xmin, xmax, ymin, ymax, zmin, zmax]

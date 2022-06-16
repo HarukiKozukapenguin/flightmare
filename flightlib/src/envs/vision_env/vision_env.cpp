@@ -528,7 +528,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
 
     iter += 1;
     // std::cout << "iter is " << iter << std::endl;
-    if (iter == 100) {
+    if (iter == 100 && fly_result_) {
       std::cout << "collide_num is " << collide_num << std::endl;
       std::cout << "time_num is " << time_num << std::endl;
       std::cout << "bound_num is " << bound_num << std::endl;
@@ -622,6 +622,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     max_detection_range_ =
       cfg["environment"]["max_detection_range"].as<Scalar>();
     goal_ = cfg["environment"]["goal"].as<Scalar>();
+    fly_result_ = cfg["environment"]["fly_result"].as<bool>();
   }
 
   if (cfg["simulation"]) {
