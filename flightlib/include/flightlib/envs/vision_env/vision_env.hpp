@@ -206,6 +206,7 @@ class VisionEnv final : public EnvBase {
   std::string obstacle_cfg_path_;
   int num_dynamic_objects_;
   int num_static_objects_;
+  bool control_feedthrough_;
 
   int collide_num;
   int time_num;
