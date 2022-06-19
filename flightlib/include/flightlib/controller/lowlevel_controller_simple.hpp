@@ -1,6 +1,7 @@
 #pragma once
 
 #include "flightlib/common/command.hpp"
+#include "flightlib/common/quad_state.hpp"
 #include "flightlib/common/types.hpp"
 #include "flightlib/dynamics/quadrotor_dynamics.hpp"
 
@@ -12,7 +13,7 @@ class LowLevelControllerSimple {
 
   LowLevelControllerSimple(QuadrotorDynamics quad_dynamics);
   bool setCommand(const Command& cmd);
-  Vector<4> run(const Ref<Vector<3>> omega);
+  Vector<4> run(const QuadState& state);
   bool updateQuadDynamics(const QuadrotorDynamics& quad_dynamics);
 
  private:
@@ -21,8 +22,14 @@ class LowLevelControllerSimple {
   Matrix<4, 4> B_allocation_inv_;
 
   // P gain for body rate control
-  const Matrix<3, 3> Kinv_ang_vel_tau_ =
-    Vector<3>(20.0, 20.0, 40.0).asDiagonal();
+  Matrix<3, 3> Kp_rate_;
+
+  // P gain for euler attitude control,  D gain for body rate
+  Matrix<3, 3> Kp_euler_;
+  Matrix<3, 3> Kd_rate_;
+
+  // const Matrix<3, 3> Kinv_ang_vel_tau_ =
+  //   Vector<3>(20.0, 20.0, 40.0).asDiagonal();
 
   // Quadcopter to which the controller is applied
   QuadrotorDynamics quad_dynamics_;

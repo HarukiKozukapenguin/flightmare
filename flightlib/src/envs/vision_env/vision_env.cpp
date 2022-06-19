@@ -55,7 +55,10 @@ void VisionEnv::init() {
   // load parameters
   loadParam(cfg_);
 
+  // additional paramter load
   control_feedthrough_ = cfg_["environment"]["control_feedthrough"];
+  cmd_.setCmdMode(cfg_["Control"]["cmd_mode"].as<int>());
+  cmd_.setPostionControl(cfg_["Control"]["position_control"]);
 
   // add camera
   if (!configCamera(cfg_)) {
@@ -98,32 +101,15 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * 9.0;
   quad_state_.x(QS::POSZ) = uniform_dist_(random_gen_) * 4 + 5.0;
 
-  // quad_state_.x(QS::POSX) = 0;
-  // quad_state_.x(QS::POSY) = 0;
-  // quad_state_.x(QS::POSZ) = 1;
-  // // set initial position is fixed
-
   // reset quadrotor with random states
   quad_ptr_->reset(quad_state_);
 
   // reset control command
-  cmd_.t = 0.0;
-  // use collective thrust and bodyrate control mode
-  cmd_.setCmdMode(quadcmd::LINVEL);
-  cmd_.collective_thrust = 0;
-  cmd_.omega.setZero();
-  cmd_.p.setZero();
-  cmd_.v.setZero();
-  cmd_.yaw = 0;
-
-  // std::cout << "setting cmd is finished" << std::endl;
-
+  cmd_.setZeros();
 
   // changeLevel();
   // obtain observations
   getObs(obs);
-  // std::cout <<"call reset" << std::endl;
-  // std::cout << "reset in VisionEnv is finished" << std::endl;
   return true;
 }
 

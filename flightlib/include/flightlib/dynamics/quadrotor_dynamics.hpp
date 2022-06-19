@@ -75,7 +75,9 @@ class QuadrotorDynamics : DynamicsBase {
   Vector<3> kdacc_;
   Scalar kpatt_z_;
   Scalar kpatt_xy_;
+  Vector<3> kpeuler_;
   Vector<3> kprate_;
+  Vector<3> kdrate_;
   Vector<3> p_err_max_;
   Vector<3> v_err_max_;
   Scalar filter_sampling_frequency_;
