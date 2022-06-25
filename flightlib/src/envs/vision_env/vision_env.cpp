@@ -55,8 +55,6 @@ void VisionEnv::init() {
   // load parameters
   loadParam(cfg_);
 
-  control_feedthrough_ = cfg_["environment"]["control_feedthrough"];
-
   // add camera
   if (!configCamera(cfg_)) {
     logger_.error(
@@ -376,19 +374,16 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
   // cmd_.collective_thrust = old_pi_act_(0);
   // cmd_.omega = old_pi_act_.segment<3>(1);
 
-  Vector<3> euler = quad_state_.Euler();
+  Quaternion quaternion = quad_state_.q();
+  Vector<3> euler;
+  quaternionToEuler(quaternion, euler);
 
-  if (control_feedthrough_) {
-    cmd_.p = act.segment<3>(0);
-    cmd_.v = act.segment<3>(3);
-    cmd_.yaw = act(6);
 
-  } else {
-    cmd_.p = pi_act_.segment<3>(0) + quad_state_.p;
-    cmd_.v = pi_act_.segment<3>(3) + quad_state_.v;
-    cmd_.yaw = pi_act_(6) + euler[2];
-  }
+  cmd_.p = pi_act_.segment<3>(0) + quad_state_.p;
+  cmd_.v = pi_act_.segment<3>(3) + quad_state_.v;
+  cmd_.yaw = pi_act_(6) + euler[2];
 
+  // std::cout << euler[2] << std::endl;
 
   // simulate quadrotor
   quad_ptr_->run(cmd_, sim_dt_);
