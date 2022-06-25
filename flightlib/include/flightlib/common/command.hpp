@@ -9,7 +9,7 @@ namespace quadcmd {
 enum CMDMODE : int {
   SINGLEROTOR = 0,
   THRUSTRATE = 1,
-  LINVEL = 2,
+  THRUSTATT = 2,
 };
 
 }  // namespace quadcmd
@@ -24,12 +24,13 @@ class Command {
   bool valid() const;
   bool isSingleRotorThrusts() const;
   bool isThrustRates() const;
-  bool isLinerVel() const;
+  bool isThrustAttitude() const;
+  bool needPositionControl() const;
 
   //
   void setZeros(void);
-  void setCmdVector(const Vector<4>& cmd);
   bool setCmdMode(const int cmd_mode);
+  void setPostionControl(const bool flag);
 
   /// time in [s]
   Scalar t;
@@ -39,6 +40,9 @@ class Command {
 
   /// Collective mass-normalized thrust in [m/s^2]
   Scalar collective_thrust;
+
+  /// Quaternion
+  Matrix<3, 3> R;
 
   /// Bodyrates in [rad/s]
   Vector<3> omega;
@@ -54,6 +58,7 @@ class Command {
 
   ///
   int cmd_mode;
+  bool need_position_control_;
 };
 
 }  // namespace flightlib

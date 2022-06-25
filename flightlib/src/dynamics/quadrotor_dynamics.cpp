@@ -295,6 +295,8 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   kpatt_z_ = params["Control"]["kpatt_z"].as<Scalar>();
   kpatt_xy_ = params["Control"]["kpatt_xy"].as<Scalar>();
   kprate_ = Map<Vector<3>>(params["Control"]["kprate"].as<std::vector<Scalar>>().data());
+  kdrate_ = Map<Vector<3>>(params["Control"]["kdrate"].as<std::vector<Scalar>>().data());
+  kpeuler_ = Map<Vector<3>>(params["Control"]["kpeuler"].as<std::vector<Scalar>>().data());
   p_err_max_ = Map<Vector<3>>(params["Control"]["p_err_max"].as<std::vector<Scalar>>().data());
   v_err_max_ = Map<Vector<3>>(params["Control"]["v_err_max"].as<std::vector<Scalar>>().data());
   filter_sampling_frequency_ = 

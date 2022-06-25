@@ -34,10 +34,8 @@ class Quadrotor : ObjectBase {
   bool run(const Scalar dt) override;
   bool run(Command& cmd, const Scalar dt);
 
-
-  bool getTHRUSTRATEfromLINVEL(const QuadState& state, Command& cmd);
-    Vector<3> tiltPrioritizedControl(const Quaternion& q,
-                                   const Quaternion& q_des);
+  // outer loop controller
+  bool updatePositionControl(const QuadState& state, Command& cmd);
 
   // public get functions
   bool getState(QuadState* const state) const;
@@ -100,10 +98,6 @@ class Quadrotor : ObjectBase {
   Vector<4> motor_thrusts_;
   Matrix<4, 4> B_allocation_;
   Matrix<4, 4> B_allocation_inv_;
-
-  // P gain for body-rate control
-  const Matrix<3, 3> Kinv_ang_vel_tau_ =
-    Vector<3>(16.6, 16.6, 5.0).asDiagonal();
 
   // gravity
   const Vector<3> gz_{0.0, 0.0, Gz};

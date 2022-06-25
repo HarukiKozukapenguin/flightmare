@@ -78,12 +78,16 @@ quadrotor_dynamics:
   body_drag_h: 0.00
 
 Control:
+  cmd_mode:                     2 # please check flightmare/flightlib/include/flightlib/common/command.hpp#9-13
+  position_control:             true # whether need position control
   drag_compensation:            false
   kpacc:                        [10.0,  10.0, 20.0]
   kdacc:                        [ 4.0,   4.0,  6.0]
   kpatt_z:                      2
   kpatt_xy:                     10
-  kprate:                       [0.0, 0.0, 0.0]
+  kprate:                       [20.0, 20.0, 40.0]
+  kpeuler:                      [200.0, 200.0, 100.0]
+  kdrate:                       [20.0, 20.0, 40.0]
   p_err_max:                    [0.6, 0.6, 0.3]
   v_err_max:                    [1.0, 1.0, 1.0]
   filter_sampling_frequency:     300   # filter frequency, same as control frequency (Hz)

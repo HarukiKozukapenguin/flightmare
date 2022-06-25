@@ -8,7 +8,10 @@ Command::Command()
     thrusts(0.0, 0.0, 0.0, 0.0),
     collective_thrust(0.0),
     omega(0.0, 0.0, 0.0),
-    cmd_mode(1) {}
+    p(0.0, 0.0, 0.0),
+    v(0.0, 0.0, 0.0),
+    cmd_mode(1),
+    need_position_control_(false) {}
 
 Command::~Command() {}
 
@@ -20,11 +23,16 @@ bool Command::setCmdMode(const int mode) {
   return true;
 }
 
+void Command::setPostionControl(const bool flag) {
+  need_position_control_ = flag;
+}
+
 bool Command::valid() const {
   return std::isfinite(t) &&
          (
-          (p.allFinite() && v.allFinite() && std::isfinite(yaw) && 
-           (cmd_mode == quadcmd::LINVEL)) || 
+          (p.allFinite() && v.allFinite() && std::isfinite(yaw) && need_position_control_) ||
+          (std::isfinite(collective_thrust) && R.allFinite() &&
+           (cmd_mode == quadcmd::THRUSTATT)) ||
           (std::isfinite(collective_thrust) && omega.allFinite() &&
            (cmd_mode == quadcmd::THRUSTRATE)) ||
           (thrusts.allFinite() && (cmd_mode == quadcmd::SINGLEROTOR)));
@@ -39,36 +47,27 @@ bool Command::isThrustRates() const {
          (std::isfinite(collective_thrust) && omega.allFinite());
 }
 
-bool Command::isLinerVel() const {
-  return (cmd_mode == quadcmd::LINVEL);
+bool Command::isThrustAttitude() const {
+  return (cmd_mode == quadcmd::THRUSTATT) &&
+         (std::isfinite(collective_thrust) && R.allFinite());
+}
+
+bool Command::needPositionControl() const {
+  return need_position_control_;
 }
 
 
 void Command::setZeros() {
   t = 0.0;
-  if (cmd_mode == quadcmd::SINGLEROTOR) {
-    thrusts = Vector<4>::Zero();
-  } else if (cmd_mode == quadcmd::THRUSTRATE) {
-    collective_thrust = 0;
-    omega = Vector<3>::Zero();
-  } else if (cmd_mode == quadcmd::LINVEL){
-    p = Vector<3>::Zero();
-    v = Vector<3>::Zero();
-    yaw = 0;    
-  }
-}
+  collective_thrust = 0;
+  yaw = 0;
 
-void Command::setCmdVector(const Vector<4>& cmd) {
-  if (cmd_mode == quadcmd::SINGLEROTOR) {
-    thrusts = cmd;
-  } else if (cmd_mode == quadcmd::THRUSTRATE) {
-    collective_thrust = cmd(0);
-    omega = cmd.segment<3>(1);
-  } else if (cmd_mode == quadcmd::LINVEL) {
-    p = cmd.segment<3>(0);
-    v = cmd.segment<3>(3);
-    yaw = cmd(6);
-  }
+  R = Matrix<3, 3>::Zero();
+  p = Vector<3>::Zero();
+  v = Vector<3>::Zero();
+  thrusts = Vector<4>::Zero();
+  omega = Vector<3>::Zero();
+
 }
 
 }  // namespace flightlib
