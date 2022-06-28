@@ -5,7 +5,8 @@ environment:
   goal_vel: [5.0, 0.0, 0.0]
   max_detection_range: 10.0
   goal: 70
-  fly_result: yes
+  fly_result: no
+  control_feedthrough: false
 # three difficulty level [easy, medium, hard](list when they learn)
 # configurations for dynamic and static obstacles, environment_(0~100)
 # Bounding box applied during training, exiting this box terminates the episode. [xmin, xmax, ymin, ymax, zmin, zmax]
@@ -80,7 +81,7 @@ quadrotor_dynamics:
 Control:
   cmd_mode:                     2 # please check flightmare/flightlib/include/flightlib/common/command.hpp#9-13
   position_control:             true # whether need position control
-  drag_compensation:            false
+  drag_compensation:            true
   kpacc:                        [10.0,  10.0, 20.0]
   kdacc:                        [ 4.0,   4.0,  6.0]
   kpatt_z:                      2

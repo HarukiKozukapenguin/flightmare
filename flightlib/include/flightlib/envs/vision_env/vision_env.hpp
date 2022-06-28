@@ -160,6 +160,7 @@ class VisionEnv final : public EnvBase {
   Scalar max_detection_range_;
   Scalar goal_;
   bool fly_result_;
+  bool control_feedthrough_;
   std::vector<Scalar> relative_pos_norm_;
   std::vector<Scalar> obstacle_radius_;
 

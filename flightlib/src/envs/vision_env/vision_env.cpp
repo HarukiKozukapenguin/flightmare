@@ -15,7 +15,7 @@ VisionEnv::VisionEnv(const std::string &cfg_path, const int env_id)
   }
   // load configuration file
   cfg_ = YAML::LoadFile(cfg_path);
-  //
+
   env_folder_ = cfg_["environment"]["env_folder"].as<int>();
   env_id_ = env_folder_;
   init();
@@ -23,7 +23,6 @@ VisionEnv::VisionEnv(const std::string &cfg_path, const int env_id)
 
 VisionEnv::VisionEnv(const YAML::Node &cfg_node, const int env_id) : EnvBase() {
   cfg_ = cfg_node;
-
   //
   env_folder_ = cfg_["environment"]["env_folder"].as<int>();
   env_id_ = env_folder_;
@@ -56,7 +55,6 @@ void VisionEnv::init() {
   loadParam(cfg_);
 
   // additional paramter load
-  control_feedthrough_ = cfg_["environment"]["control_feedthrough"];
   cmd_.setCmdMode(cfg_["Control"]["cmd_mode"].as<int>());
   cmd_.setPostionControl(cfg_["Control"]["position_control"]);
 
@@ -367,9 +365,16 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
   quaternionToEuler(quaternion, euler);
 
 
-  cmd_.p = pi_act_.segment<3>(0) + quad_state_.p;
-  cmd_.v = pi_act_.segment<3>(3) + quad_state_.v;
-  cmd_.yaw = pi_act_(6) + euler[2];
+  if (control_feedthrough_) {
+    cmd_.p = act.segment<3>(0);
+    cmd_.v = act.segment<3>(3);
+    cmd_.yaw = act(6);
+
+  } else {
+    cmd_.p = pi_act_.segment<3>(0) + quad_state_.p;
+    cmd_.v = pi_act_.segment<3>(3) + quad_state_.v;
+    cmd_.yaw = pi_act_(6) + euler[2];
+  }
 
   // std::cout << euler[2] << std::endl;
 
@@ -619,6 +624,9 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
       cfg["environment"]["max_detection_range"].as<Scalar>();
     goal_ = cfg["environment"]["goal"].as<Scalar>();
     fly_result_ = cfg["environment"]["fly_result"].as<bool>();
+    // std::cout << "fly_result_ is " << std::boolalpha << fly_result_
+    //           << std::endl;
+    control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
   }
 
   if (cfg["simulation"]) {
