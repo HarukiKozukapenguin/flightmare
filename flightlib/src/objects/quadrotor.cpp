@@ -35,7 +35,6 @@ Quadrotor::Quadrotor(const QuadrotorDynamics &dynamics)
 Quadrotor::~Quadrotor() {}
 
 bool Quadrotor::run(Command &cmd, const Scalar ctl_dt) {
-
   if (cmd.needPositionControl()) {
     updatePositionControl(state_, cmd);
   }
@@ -64,6 +63,9 @@ bool Quadrotor::run(const Scalar ctl_dt) {
   const Scalar max_dt = integrator_ptr_->dtMax();
   Scalar remain_ctl_dt = ctl_dt;
 
+  // std::cout << "cmd_.v:" << std::endl;
+  // std::cout << cmd_.v << std::endl;
+
   ctrl_.setCommand(cmd_);
 
   // simulation loop
@@ -71,7 +73,12 @@ bool Quadrotor::run(const Scalar ctl_dt) {
     const Scalar sim_dt = std::min(remain_ctl_dt, max_dt);
 
     const Vector<4> motor_thrusts_des = ctrl_.run(state_);
+    // std::cout << "motor_thrusts_des" << std::endl;
+    // std::cout << motor_thrusts_des << std::endl;
     runMotors(sim_dt, motor_thrusts_des);
+
+    // std::cout << "motor_thrusts_" << std::endl;
+    // std::cout << motor_thrusts_ << std::endl;
 
     Vector<4> force_torques = B_allocation_ * motor_thrusts_;
 
@@ -108,25 +115,30 @@ bool Quadrotor::run(const Scalar ctl_dt) {
 }
 
 bool Quadrotor::updatePositionControl(const QuadState &state, Command &cmd) {
-
   if (!state.valid()) {
     std::cout << "State is invalid" << std::endl;
     return false;
   }
 
   // acc command
-  Vector<3> pos_error = clip(cmd.p - state.p, dynamics_.p_err_max_);  // set clipping for stable flight
+  Vector<3> pos_error = clip(
+    cmd.p - state.p, dynamics_.p_err_max_);  // set clipping for stable flight
   Vector<3> vel_error = clip(cmd.v - state.v, dynamics_.v_err_max_);
   Vector<3> acc_setpoint = {0, 0, 0};  // set 0
   Vector<3> acc_cmd = dynamics_.kpacc_.cwiseProduct(pos_error) +
-    dynamics_.kdacc_.cwiseProduct(vel_error) + acc_setpoint - GVEC;
+                      dynamics_.kdacc_.cwiseProduct(vel_error) + acc_setpoint -
+                      GVEC;
+  // std::cout << "GVEC is " << GVEC << std::endl;
+  // std::cout << "acc_cmd is " << acc_cmd << std::endl;
   if (acc_cmd[2] < 1) acc_cmd[2] = 1;  // if 0, then unstable in z_B
   Scalar thrust_cmd = acc_cmd.norm() * dynamics_.getMass();
 
   // attitude command
-  Quaternion q_c(Quaternion(Eigen::AngleAxis<Scalar>(cmd.yaw, Vector<3>::UnitZ())));
+  Quaternion q_c(
+    Quaternion(Eigen::AngleAxis<Scalar>(cmd.yaw, Vector<3>::UnitZ())));
   Vector<3> y_c = q_c * Vector<3>::UnitY();
-  Vector<3> z_B = acc_cmd.normalized();  // normalized desired z direction vector
+  Vector<3> z_B =
+    acc_cmd.normalized();  // normalized desired z direction vector
   Vector<3> x_B = (y_c.cross(z_B)).normalized();  // normalized vector
   Vector<3> y_B = (z_B.cross(x_B)).normalized();
   Matrix<3, 3> R_W_B((Matrix<3, 3>() << x_B, y_B, z_B).finished());
@@ -140,13 +152,15 @@ bool Quadrotor::updatePositionControl(const QuadState &state, Command &cmd) {
     // angular acceleration command
     // Attitude control method from Fohn 2020.
     const Quaternion q_e = state.q().inverse() * q_des;
-    Matrix<3, 3> T_att = (Matrix<3, 3>() << dynamics_.kpatt_xy_, 0.0, 0.0, 0.0,
-                          dynamics_.kpatt_xy_, 0.0, 0.0, 0.0, dynamics_.kpatt_z_)
-      .finished();
+    Matrix<3, 3> T_att =
+      (Matrix<3, 3>() << dynamics_.kpatt_xy_, 0.0, 0.0, 0.0,
+       dynamics_.kpatt_xy_, 0.0, 0.0, 0.0, dynamics_.kpatt_z_)
+        .finished();
     Vector<3> tmp = Vector<3>(q_e.w() * q_e.x() - q_e.y() * q_e.z(),
                               q_e.w() * q_e.y() + q_e.x() * q_e.z(), q_e.z());
     if (q_e.w() <= 0) tmp(2) *= -1.0;
-    Vector<3> omega_cmd = 2.0 / std::sqrt(q_e.w() * q_e.w() + q_e.z() * q_e.z()) * T_att * tmp;
+    Vector<3> omega_cmd =
+      2.0 / std::sqrt(q_e.w() * q_e.w() + q_e.z() * q_e.z()) * T_att * tmp;
 
     // Command command;
     cmd.omega = omega_cmd;
@@ -154,7 +168,10 @@ bool Quadrotor::updatePositionControl(const QuadState &state, Command &cmd) {
 
   if (cmd.isThrustAttitude()) {
     cmd.R = q_des.toRotationMatrix();
-    // std::cout << "cmd.q: " << q_des.x() << "," << q_des.y() << ", " << q_des.z() << ", " << q_des.w() << "; cmd_euler: " << cmd.R.eulerAngles(2, 1, 0).transpose()  << "; euler: " << state_.Euler().transpose() << std::endl;
+    // std::cout << "cmd.q: " << q_des.x() << "," << q_des.y() << ", " <<
+    // q_des.z() << ", " << q_des.w() << "; cmd_euler: " << cmd.R.eulerAngles(2,
+    // 1, 0).transpose()  << "; euler: " << state_.Euler().transpose() <<
+    // std::endl;
   }
 
   return true;

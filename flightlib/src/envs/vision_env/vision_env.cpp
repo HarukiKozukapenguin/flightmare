@@ -102,6 +102,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   // reset quadrotor with random states
   quad_ptr_->reset(quad_state_);
 
+  // std::cout << "z_vel is " << quad_state_.x(QS::VELZ) << std::endl;
   // reset control command
   cmd_.setZeros();
 
@@ -373,6 +374,8 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
   } else {
     cmd_.p = pi_act_.segment<3>(0) + quad_state_.p;
     cmd_.v = pi_act_.segment<3>(3) + quad_state_.v;
+    // std::cout << "cmd_.v" << std::endl;
+    // std::cout << cmd_.v << std::endl;
     cmd_.yaw = pi_act_(6) + euler[2];
   }
 
