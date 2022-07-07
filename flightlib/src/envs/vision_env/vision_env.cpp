@@ -922,6 +922,7 @@ bool VisionEnv::setUnity(bool render) {
 
 bool VisionEnv::connectUnity(void) {
   if (unity_bridge_ptr_ == nullptr) return false;
+  std::cout << "connectUnity" << std::endl;
   unity_ready_ = unity_bridge_ptr_->connectUnity(scene_id_);
   return unity_ready_;
 }
@@ -929,6 +930,7 @@ bool VisionEnv::connectUnity(void) {
 
 FrameID VisionEnv::updateUnity(const FrameID frame_id) {
   if (unity_render_ && unity_ready_) {
+    std::cout << "updageUnity" << std::endl;
     unity_bridge_ptr_->getRender(frame_id);
     return unity_bridge_ptr_->handleOutput(frame_id);
   } else {

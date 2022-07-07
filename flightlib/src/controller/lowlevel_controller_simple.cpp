@@ -49,8 +49,8 @@ Vector<4> LowLevelControllerSimple::run(const QuadState& state) {
       omega.cross(quad_dynamics_.getJ() * omega);
     const Vector<4> thrust_torque(force, body_torque_des.x(),
                                   body_torque_des.y(), body_torque_des.z());
-    std::cout << "thrust_torque is " << std::endl;
-    std::cout << thrust_torque << std::endl;
+    // std::cout << "thrust_torque is " << std::endl;
+    // std::cout << thrust_torque << std::endl;
 
     motor_thrusts = B_allocation_inv_ * thrust_torque;
 

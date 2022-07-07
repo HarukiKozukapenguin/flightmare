@@ -13,7 +13,8 @@ UnityBridge::UnityBridge()
     last_downloaded_utime_(0),
     last_download_debug_utime_(0),
     u_packet_latency_(0),
-    unity_ready_(false) {
+    unity_ready_(false),
+    show_msg_(false) {
   // initialize connections upon creating unity bridge
   initializeConnections();
 }
@@ -85,6 +86,12 @@ bool UnityBridge::sendInitialSettings(void) {
   // create JSON object for initial settings
   json json_mesg = settings_;
   msg << json_mesg.dump();
+  if (show_msg_) {
+    std::string check = json_mesg.dump();
+    std::cout << "show msg in sendInitialSettings" << std::endl;
+    std::cout << check << std::endl;
+    show_msg_ = false;
+  }
   // send message without blocking
   pub_.send(msg, true);
   return true;
@@ -132,7 +139,11 @@ bool UnityBridge::getRender(const FrameID frame_id) {
   // create JSON object for pose update and append
   json json_msg = pub_msg_;
   msg << json_msg.dump();
-  // send message without blocking
+  // std::string check = json_msg.dump();
+  // // send message without blocking
+
+  // std::cout << "show msg in getRender" << std::endl;
+  // std::cout << check << std::endl;
   return pub_.send(msg, true);
 }
 
@@ -336,6 +347,11 @@ bool UnityBridge::getPointCloud(PointCloudMessage_t& pointcloud_msg,
   // create JSON object for initial settings
   json json_msg = pointcloud_msg;
   msg << json_msg.dump();
+  // std::string check = json_msg.dump();
+  // send message without blocking
+
+  // std::cout << "show msg in getPointCloud" << std::endl;
+  // std::cout << check << std::endl;
   // send message without blocking
   pub_.send(msg, true);
 
