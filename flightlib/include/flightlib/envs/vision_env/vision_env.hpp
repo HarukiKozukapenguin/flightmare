@@ -61,6 +61,9 @@ class VisionEnv final : public EnvBase {
   // - public OpenAI-gym-style functions
   bool reset(Ref<Vector<>> obs) override;
   bool reset(Ref<Vector<>> obs, bool random);
+
+  void init_isCollision(void);
+
   bool step(const Ref<Vector<>> act, Ref<Vector<>> obs,
             Ref<Vector<>> reward) override;
 

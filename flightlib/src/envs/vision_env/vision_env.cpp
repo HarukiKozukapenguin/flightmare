@@ -95,12 +95,25 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
 
   // randomly reset the quadrotor state
   // reset position
-  quad_state_.x(QS::POSX) = uniform_dist_(random_gen_);
-  quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * 9.0;
-  quad_state_.x(QS::POSZ) = uniform_dist_(random_gen_) * 4 + 5.0;
+  while (true) {
+    quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 20 + 30;
+    quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * 9.0;
+    quad_state_.x(QS::POSZ) = uniform_dist_(random_gen_) * 4 + 5.0;
 
-  // reset quadrotor with random states
-  quad_ptr_->reset(quad_state_);
+    // quad_state_.x(QS::POSX) = 52.9;
+    // quad_state_.x(QS::POSY) = 7.4;
+    // quad_state_.x(QS::POSZ) = 7.6;
+    // reset quadrotor with random states
+    quad_ptr_->reset(quad_state_);
+
+    init_isCollision();  // change is_collision depending on initial position
+
+    if (!is_collision_) {
+      std::cout << "not initial collision" << std::endl;
+      break;
+    }
+    std::cout << "initial collision" << std::endl;
+  }
 
   // std::cout << "z_vel is " << quad_state_.x(QS::VELZ) << std::endl;
   // reset control command
@@ -113,6 +126,13 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
 }
 
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
+
+void VisionEnv::init_isCollision(void) {
+  Vector<visionenv::Cuts * visionenv::Cuts> unused1;
+  Vector<visionenv::kNObstaclesState> unused2;
+  getObstacleState(
+    unused1, unused2);  // change "is_collision_" depending on current state
+}
 
 bool VisionEnv::getObs(Ref<Vector<>> obs) {
   if (obs.size() != obs_dim_) {
