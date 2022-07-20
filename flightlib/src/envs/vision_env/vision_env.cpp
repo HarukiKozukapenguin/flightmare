@@ -104,6 +104,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     // quad_state_.x(QS::POSY) = 7.4;
     // quad_state_.x(QS::POSZ) = 7.6;
     // reset quadrotor with random states
+    is_collision_ = false;
     quad_ptr_->reset(quad_state_);
 
     init_isCollision();  // change is_collision depending on initial position
@@ -113,6 +114,9 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
       break;
     }
     std::cout << "initial collision" << std::endl;
+    std::cout << "initial x" << quad_state_.x(QS::POSX) << std::endl;
+    std::cout << "initial y" << quad_state_.x(QS::POSY) << std::endl;
+    std::cout << "initial z" << quad_state_.x(QS::POSZ) << std::endl;
   }
 
   // std::cout << "z_vel is " << quad_state_.x(QS::VELZ) << std::endl;
@@ -942,7 +946,7 @@ bool VisionEnv::setUnity(bool render) {
 
 bool VisionEnv::connectUnity(void) {
   if (unity_bridge_ptr_ == nullptr) return false;
-  std::cout << "connectUnity" << std::endl;
+  // std::cout << "connectUnity" << std::endl;
   unity_ready_ = unity_bridge_ptr_->connectUnity(scene_id_);
   return unity_ready_;
 }
@@ -950,7 +954,7 @@ bool VisionEnv::connectUnity(void) {
 
 FrameID VisionEnv::updateUnity(const FrameID frame_id) {
   if (unity_render_ && unity_ready_) {
-    std::cout << "updageUnity" << std::endl;
+    // std::cout << "updageUnity" << std::endl;
     unity_bridge_ptr_->getRender(frame_id);
     return unity_bridge_ptr_->handleOutput(frame_id);
   } else {
