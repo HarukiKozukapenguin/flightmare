@@ -128,12 +128,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   getObs(obs);
   return true;
 }
-1
-
-  bool
-  VisionEnv::reset(Ref<Vector<>> obs, bool random) {
-  return reset(obs);
-}
+bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
 
 void VisionEnv::init_isCollision(void) {
   Vector<visionenv::Cuts * visionenv::Cuts> unused1;
@@ -402,7 +397,15 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.v = act.segment<3>(3);
     cmd_.yaw = act(6);
 
-  } else {
+  } else if (momentum_bool_) {
+    cmd_.p = (1 - momentum_) * (pi_act_.segment<3>(0) + quad_state_.p) +
+             momentum_ * cmd_.p;
+    cmd_.v = (1 - momentum_) * (pi_act_.segment<3>(3) + quad_state_.v) +
+             momentum_ * cmd_.v;
+    cmd_.yaw = (1 - momentum_) * (pi_act_(6) + euler[2]) + momentum_ * cmd_.yaw;
+  }
+
+  else {
     cmd_.p = pi_act_.segment<3>(0) + quad_state_.p;
     cmd_.v = pi_act_.segment<3>(3) + quad_state_.v;
     // std::cout << "cmd_.v" << std::endl;
@@ -661,7 +664,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     // std::cout << "fly_result_ is " << std::boolalpha << fly_result_
     //           << std::endl;
     control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
-    control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
+    momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
+    momentum_ = cfg["environment"]["momentum"].as<Scalar>();
   }
 
   if (cfg["simulation"]) {

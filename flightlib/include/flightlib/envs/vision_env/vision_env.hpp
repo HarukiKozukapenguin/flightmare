@@ -164,7 +164,8 @@ class VisionEnv final : public EnvBase {
   Scalar goal_;
   bool fly_result_;
   bool control_feedthrough_;
-  bool momentum_;
+  bool momentum_bool_;
+  Scalar momentum_;
   std::vector<Scalar> relative_pos_norm_;
   std::vector<Scalar> obstacle_radius_;
 
