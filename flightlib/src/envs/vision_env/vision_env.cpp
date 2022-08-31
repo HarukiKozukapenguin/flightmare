@@ -96,7 +96,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   // randomly reset the quadrotor state
   // reset position
   while (true) {
-    quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 20 + 30;
+    quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 0.1;
     quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * 9.0;
     quad_state_.x(QS::POSZ) = uniform_dist_(random_gen_) * 4 + 5.0;
 
@@ -110,13 +110,13 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     init_isCollision();  // change is_collision depending on initial position
 
     if (!is_collision_) {
-      std::cout << "not initial collision" << std::endl;
+      // std::cout << "not initial collision" << std::endl;
       break;
     }
-    std::cout << "initial collision" << std::endl;
-    std::cout << "initial x" << quad_state_.x(QS::POSX) << std::endl;
-    std::cout << "initial y" << quad_state_.x(QS::POSY) << std::endl;
-    std::cout << "initial z" << quad_state_.x(QS::POSZ) << std::endl;
+    // std::cout << "initial collision" << std::endl;
+    // std::cout << "initial x" << quad_state_.x(QS::POSX) << std::endl;
+    // std::cout << "initial y" << quad_state_.x(QS::POSY) << std::endl;
+    // std::cout << "initial z" << quad_state_.x(QS::POSZ) << std::endl;
   }
 
   // std::cout << "z_vel is " << quad_state_.x(QS::VELZ) << std::endl;
@@ -128,8 +128,12 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   getObs(obs);
   return true;
 }
+1
 
-bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
+  bool
+  VisionEnv::reset(Ref<Vector<>> obs, bool random) {
+  return reset(obs);
+}
 
 void VisionEnv::init_isCollision(void) {
   Vector<visionenv::Cuts * visionenv::Cuts> unused1;
@@ -203,10 +207,12 @@ bool VisionEnv::getObstacleState(
 
     // store the obstacle radius
     Scalar obs_radius = dynamic_objects_[i]->getScale()[0] / 2;
+    // due to think quadsize, change obs_radius to more smaller to move forword
+    obs_radius = obs_radius / 2;
     obstacle_radius_.push_back(obs_radius);
 
     //
-    if (obstacle_dist < obs_radius) {
+    if (obstacle_dist < obs_radius + quad_size_) {
       is_collision_ = true;
     }
   }
@@ -229,9 +235,10 @@ bool VisionEnv::getObstacleState(
 
     // store the obstacle radius
     Scalar obs_radius = static_objects_[i]->getScale()[0] / 2;
-    obstacle_radius_.push_back(obs_radius);
+    obs_radius = obs_radius / 2;
 
-    if (obstacle_dist < obs_radius) {
+    obstacle_radius_.push_back(obs_radius);
+    if (obstacle_dist < obs_radius + quad_size_) {
       is_collision_ = true;
     }
   }
@@ -654,6 +661,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     // std::cout << "fly_result_ is " << std::boolalpha << fly_result_
     //           << std::endl;
     control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
+    control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
   }
 
   if (cfg["simulation"]) {
@@ -693,6 +701,10 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
   if (cfg["unity"]) {
     unity_render_ = cfg["unity"]["render"].as<bool>();
     scene_id_ = cfg["unity"]["scene_id"].as<SceneID>();
+  }
+
+  if (cfg["quadrotor_dynamics"]) {
+    quad_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
   }
 
   //

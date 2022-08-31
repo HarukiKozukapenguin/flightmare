@@ -16,8 +16,8 @@ bool LowLevelControllerSimple::updateQuadDynamics(
   Kd_rate_ = quad.kdrate_.asDiagonal();
   Kp_euler_ = quad.kpeuler_.asDiagonal();
 
-  std::cout << "Kp_euler_: \n" << Kp_euler_ << std::endl;
-  std::cout << "Kd_rate_: \n" << Kd_rate_ << std::endl;
+  // std::cout << "Kp_euler_: \n" << Kp_euler_ << std::endl;
+  // std::cout << "Kd_rate_: \n" << Kd_rate_ << std::endl;
 
   return true;
 }

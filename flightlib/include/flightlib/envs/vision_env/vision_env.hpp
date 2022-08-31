@@ -164,6 +164,7 @@ class VisionEnv final : public EnvBase {
   Scalar goal_;
   bool fly_result_;
   bool control_feedthrough_;
+  bool momentum_;
   std::vector<Scalar> relative_pos_norm_;
   std::vector<Scalar> obstacle_radius_;
 
@@ -174,6 +175,9 @@ class VisionEnv final : public EnvBase {
   int env_folder_;
   std::vector<Scalar> world_box_;
   std::vector<Scalar> world_box_center_;
+
+  // quad_size (meter)
+  Scalar quad_size_;
 
   // observations and actions (for RL)
   Vector<visionenv::kNObs> pi_obs_;

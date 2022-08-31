@@ -7,6 +7,7 @@ environment:
   goal: 70
   fly_result: no
   control_feedthrough: false
+  momentum: true
 # three difficulty level [easy, medium, hard](list when they learn)
 # configurations for dynamic and static obstacles, environment_(0~100)
 # Bounding box applied during training, exiting this box terminates the episode. [xmin, xmax, ymin, ymax, zmin, zmax]
@@ -77,6 +78,7 @@ quadrotor_dynamics:
   body_drag_1: [0.00, 0.00, 0.00]
   body_drag_3: [0.00, 0.00, 0.00]
   body_drag_h: 0.00
+  quad_size: 0.25 # [m]
 
 Control:
   cmd_mode:                     2 # please check flightmare/flightlib/include/flightlib/common/command.hpp#9-13
