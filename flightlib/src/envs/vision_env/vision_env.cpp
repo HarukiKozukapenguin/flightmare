@@ -96,7 +96,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   // randomly reset the quadrotor state
   // reset position
   while (true) {
-    quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 0.1;
+    quad_state_.x(QS::POSX) = uniform_dist_(random_gen_);
     quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * 9.0;
     quad_state_.x(QS::POSZ) = uniform_dist_(random_gen_) * 4 + 5.0;
 

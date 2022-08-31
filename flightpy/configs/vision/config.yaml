@@ -1,11 +1,11 @@
 environment:
   level: ["medium"]
   env_folder: 0 # beginning of env
-  world_box: [-20, 80, -1.5, 1.5, 0.0, 10]
+  world_box: [-20, 80, -10, 10, 0.0, 10]
   goal_vel: [5.0, 0.0, 0.0]
   max_detection_range: 10.0
   goal: 70
-  fly_result: no
+  fly_result: true
   control_feedthrough: false
   momentum_bool: true
   momentum: 0.9
