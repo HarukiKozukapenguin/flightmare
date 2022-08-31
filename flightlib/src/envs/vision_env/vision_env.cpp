@@ -403,7 +403,7 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.v = (1 - momentum_) * (pi_act_.segment<3>(3) + quad_state_.v) +
              momentum_ * cmd_.v;
     cmd_.yaw = (1 - momentum_) * (pi_act_(6) + euler[2]) + momentum_ * cmd_.yaw;
-    std::cout << "momentum now" << std::endl;
+    // std::cout << "momentum now" << std::endl;
   }
 
   else {
