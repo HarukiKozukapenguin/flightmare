@@ -5,7 +5,7 @@ environment:
   goal_vel: [5.0, 0.0, 0.0]
   max_detection_range: 10.0
   goal: 70
-  fly_result: true
+  fly_result: false
   control_feedthrough: false
   momentum_bool: true
   momentum: 0.9
