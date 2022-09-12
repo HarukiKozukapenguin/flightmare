@@ -121,6 +121,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
 
   // std::cout << "z_vel is " << quad_state_.x(QS::VELZ) << std::endl;
   // reset control command
+  act_.setZero();
   cmd_.setZeros();
 
   // changeLevel();
@@ -159,8 +160,8 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // std::cout << sphericalboxel << std::endl;
 
   // Observations
-  obs << goal_linear_vel_, ori, quad_state_.p, quad_state_.v, sphericalboxel,
-    world_box_[2] - quad_state_.x(QS::POSY),
+  obs << act_, goal_linear_vel_, ori, quad_state_.p, quad_state_.v,
+    sphericalboxel, world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY),
     world_box_[4] - quad_state_.x(QS::POSZ),
     world_box_[5] - quad_state_.x(QS::POSZ), quad_state_.w;
@@ -374,6 +375,7 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
   }
 
   //
+  act_ = act;
   old_pi_act_ = pi_act_;
 
   // compute actual control actions
