@@ -667,6 +667,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
     momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
+    tree_size_ = cfg["environment"]["tree_size"].as<Scalar>();
   }
 
   if (cfg["simulation"]) {
@@ -711,7 +712,6 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
   if (cfg["quadrotor_dynamics"]) {
     quad_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
   }
-
   //
   std::string scene_file =
     getenv("FLIGHTMARE_PATH") + std::string("/flightpy/configs/scene.yaml");
@@ -803,7 +803,7 @@ bool VisionEnv::configDynamicObjects(const std::string &yaml_file) {
     // actual size in meters
     obj->setSize(Vector<3>(1.0, 1.0, 1.0));
     // scale of the original size
-    obj->setScale(Vector<3>(scalevec.data()));
+    obj->setScale(Vector<3>(scalevec.data()) * tree_size_);
 
     std::string csv_name = cfg_node[object_id]["csvtraj"].as<std::string>();
     std::string csv_file = obstacle_cfg_path_ + std::string("/csvtrajs/") +
@@ -862,7 +862,7 @@ bool VisionEnv::configStaticObjects(const std::string &csv_file) {
     // actual size in meters
     obj->setSize(Vector<3>(1.0, 1.0, 1.0));
     // scale of the original size
-    obj->setScale(scale);
+    obj->setScale(scale * tree_size_);
     static_objects_.push_back(obj);
   }
   num_static_objects_ = static_objects_.size();

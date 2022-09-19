@@ -168,6 +168,7 @@ class VisionEnv final : public EnvBase {
   Scalar momentum_;
   std::vector<Scalar> relative_pos_norm_;
   std::vector<Scalar> obstacle_radius_;
+  Scalar tree_size_;
 
 
   int num_detected_obstacles_;

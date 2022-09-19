@@ -9,6 +9,7 @@ environment:
   control_feedthrough: false
   momentum_bool: true
   momentum: 0.9
+  tree_size: 0.5
 # three difficulty level [easy, medium, hard](list when they learn)
 # configurations for dynamic and static obstacles, environment_(0~100)
 # Bounding box applied during training, exiting this box terminates the episode. [xmin, xmax, ymin, ymax, zmin, zmax]
