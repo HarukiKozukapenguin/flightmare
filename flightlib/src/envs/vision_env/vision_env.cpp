@@ -194,6 +194,8 @@ bool VisionEnv::getObstacleState(
 
     // compute relative distance
     Scalar obstacle_dist = delta_pos.norm();
+    Scalar obstacle_2d_dist =
+      std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));
     // limit observation range
     if (obstacle_dist > max_detection_range_) {
       obstacle_dist = max_detection_range_;
@@ -202,12 +204,13 @@ bool VisionEnv::getObstacleState(
 
     // store the obstacle radius
     Scalar obs_radius = dynamic_objects_[i]->getScale()[0] / 2;
-    // due to think quadsize, change obs_radius to more smaller to move forword
+    // due to think quadsize, change obs_radius to more smaller to
+    // move forword
     obs_radius = obs_radius / 2;
     obstacle_radius_.push_back(obs_radius);
 
     //
-    if (obstacle_dist < obs_radius + quad_size_) {
+    if (obstacle_2d_dist < obs_radius + quad_size_) {
       is_collision_ = true;
     }
   }
@@ -220,9 +223,10 @@ bool VisionEnv::getObstacleState(
     Vector<3> delta_pos = static_objects_[i]->getPos() - quad_state_.p;
     relative_pos.push_back(delta_pos);
 
-
     // compute relative distance
     Scalar obstacle_dist = delta_pos.norm();
+    Scalar obstacle_2d_dist =
+      std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));
     if (obstacle_dist > max_detection_range_) {
       obstacle_dist = max_detection_range_;
     }
@@ -233,7 +237,7 @@ bool VisionEnv::getObstacleState(
     obs_radius = obs_radius / 2;
 
     obstacle_radius_.push_back(obs_radius);
-    if (obstacle_dist < obs_radius + quad_size_) {
+    if (obstacle_2d_dist < obs_radius + quad_size_) {
       is_collision_ = true;
     }
   }
