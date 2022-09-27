@@ -78,17 +78,21 @@ class VisionEnv final : public EnvBase {
   bool getObstacleState(
     Ref<Vector<visionenv::Cuts * visionenv::Cuts>> sphericalboxel,
     Ref<Vector<visionenv::kNObstaclesState * 1>> obs_state);
+
   Vector<visionenv::Cuts * visionenv::Cuts> getsphericalboxel(
-    std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
-    std::vector<Scalar> pos_norm_list, std::vector<Scalar> obs_radius_list);
+    const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
+      &pos_b_list,
+    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v);
+
   Scalar getClosestDistance(
-    std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
-    std::vector<Scalar> pos_norm_list, std::vector<Scalar> obs_radius_list,
-    Scalar tcell, Scalar fcell);
-  Vector<3> getCartesianFromAng(Scalar t, Scalar f);
-  Scalar inner_product(Vector<3> a, Vector<3> b);
-  void comp(Scalar &rmin, Scalar r);
-  Scalar getclosestpoint(Scalar distance, Scalar theta, Scalar size);
+    const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
+      &pos_b_list,
+    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+    const Scalar &tcell, const Scalar &fcell);
+  Vector<3> getCartesianFromAng(const Scalar &theta, const Scalar &phi);
+  Scalar inner_product(const Vector<3> &a, const Vector<3> &b);
+  Vector<3> cross_product(const Vector<3> &a, const Vector<3> &b);
+  // void comp(Scalar &rmin, Scalar r);
 
   // get quadrotor states
   bool getQuadAct(Ref<Vector<>> act) const;
@@ -167,6 +171,7 @@ class VisionEnv final : public EnvBase {
   bool momentum_bool_;
   Scalar momentum_;
   std::vector<Scalar> relative_pos_norm_;
+  std::vector<Scalar> relative_2d_pos_norm_;
   std::vector<Scalar> obstacle_radius_;
   Scalar tree_size_;
 
