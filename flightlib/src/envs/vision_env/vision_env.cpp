@@ -157,13 +157,19 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // std::cout << "getObstacleState is called" << std::endl;
 
   // std::cout << sphericalboxel << std::endl;
-
+  Vector<3> normalized_p;  //[0,1]
+  for (size_t i = 0; i < 3; i++) {
+    normalized_p[i] = (quad_state_.p[i] - world_box_[i * 2]) /
+                      (world_box_[i * 2 + 1] - world_box_[i * 2]);
+  }
   // Observations
-  obs << goal_linear_vel_, ori, quad_state_.p, quad_state_.v, sphericalboxel,
-    world_box_[2] - quad_state_.x(QS::POSY),
-    world_box_[3] - quad_state_.x(QS::POSY),
-    world_box_[4] - quad_state_.x(QS::POSZ),
-    world_box_[5] - quad_state_.x(QS::POSZ), quad_state_.w;
+
+  obs << goal_linear_vel_, ori, normalized_p, quad_state_.v, sphericalboxel,
+    quad_state_.w;
+  // world_box_[2] - quad_state_.x(QS::POSY),
+  // world_box_[3] - quad_state_.x(QS::POSY),
+  // world_box_[4] - quad_state_.x(QS::POSZ),
+  // world_box_[5] - quad_state_.x(QS::POSZ),
   // std::cout << "obs is called" << std::endl;
   return true;
 }

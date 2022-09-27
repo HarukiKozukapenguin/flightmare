@@ -42,7 +42,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = 3 + 9 + 3 + 3 + 4 + 3 + Cuts * Cuts,
+  kNObs = 3 + 9 + 3 + 3 + 3 + Cuts * Cuts,
 
   // control actions
   kAct = 0,
