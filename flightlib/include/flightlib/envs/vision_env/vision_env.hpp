@@ -42,7 +42,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = 3 + 9 + 3 + 3 + 3 + Cuts * Cuts,
+  kNObs = 3 + 9 + 3 + 3 + 3 + 3 + 4 + Cuts * Cuts,
 
   // control actions
   kAct = 0,
@@ -182,7 +182,9 @@ class VisionEnv final : public EnvBase {
   int env_folder_;
   std::vector<Scalar> world_box_;
   std::vector<Scalar> world_box_center_;
-
+  std::vector<Scalar> y_lim_;
+  std::vector<Scalar> z_lim_;
+  std::vector<Scalar> tree_size_range_;
   // quad_size (meter)
   Scalar quad_size_;
 

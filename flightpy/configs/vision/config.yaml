@@ -1,15 +1,18 @@
 environment:
   level: ["medium"]
   env_folder: 0 # beginning of env
-  world_box: [-20, 80, -10, 10, 0.0, 10]
+  world_box: [-10, 70, -10, 10, 0.0, 10]
+  tree_size: 0.5
+  y_lim: [1,10]
+  z_lim: [2,10]
+  tree_size_range: [0.25, 0.5]
   goal_vel: [5.0, 0.0, 0.0]
   max_detection_range: 10.0
-  goal: 70
+  goal: 60
   fly_result: false
   control_feedthrough: false
   momentum_bool: true
   momentum: 0.9
-  tree_size: 0.5
 # three difficulty level [easy, medium, hard](list when they learn)
 # configurations for dynamic and static obstacles, environment_(0~100)
 # Bounding box applied during training, exiting this box terminates the episode. [xmin, xmax, ymin, ymax, zmin, zmax]

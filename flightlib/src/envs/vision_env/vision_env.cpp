@@ -10,6 +10,7 @@ VisionEnv::VisionEnv()
 VisionEnv::VisionEnv(const std::string &cfg_path, const int env_id)
   : EnvBase() {
   // check if configuration file exist
+  std::cout << "cfg_path: " << cfg_path << std::endl;
   if (!(file_exists(cfg_path))) {
     logger_.error("Configuration file %s does not exists.", cfg_path);
   }
@@ -93,12 +94,25 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   old_pi_act_.setZero();
   is_collision_ = false;
 
+
+  std::uniform_real_distribution<Scalar> y_range_dist{y_lim_[0], y_lim_[1]};
+  std::uniform_real_distribution<Scalar> z_range_dist{z_lim_[0], z_lim_[1]};
+  Scalar y_lim = y_range_dist(random_gen_);
+  Scalar z_lim = z_range_dist(random_gen_);
+  world_box_[2] = -y_lim;
+  world_box_[3] = y_lim;
+  world_box_[5] = z_lim;
   // randomly reset the quadrotor state
   // reset position
+  std::uniform_real_distribution<Scalar> tree_range_dist{tree_size_range_[0],
+                                                         tree_size_range_[1]};
+  tree_size_ = tree_range_dist(random_gen_);
+  changeLevel();
   while (true) {
     quad_state_.x(QS::POSX) = uniform_dist_(random_gen_);
-    quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * 9.0;
-    quad_state_.x(QS::POSZ) = uniform_dist_(random_gen_) * 4 + 5.0;
+    quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * y_lim * 0.9;
+    quad_state_.x(QS::POSZ) =
+      uniform_dist_(random_gen_) * z_lim * 0.4 + z_lim / 2;
 
     // quad_state_.x(QS::POSX) = 52.9;
     // quad_state_.x(QS::POSY) = 7.4;
@@ -123,7 +137,6 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   // reset control command
   cmd_.setZeros();
 
-  // changeLevel();
   // obtain observations
   getObs(obs);
   return true;
@@ -164,12 +177,11 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   }
   // Observations
 
-  obs << goal_linear_vel_, ori, normalized_p, quad_state_.v, sphericalboxel,
-    quad_state_.w;
-  // world_box_[2] - quad_state_.x(QS::POSY),
-  // world_box_[3] - quad_state_.x(QS::POSY),
-  // world_box_[4] - quad_state_.x(QS::POSZ),
-  // world_box_[5] - quad_state_.x(QS::POSZ),
+  obs << goal_linear_vel_, ori, quad_state_.p, normalized_p, quad_state_.v,
+    sphericalboxel, quad_state_.w, world_box_[2] - quad_state_.x(QS::POSY),
+    world_box_[3] - quad_state_.x(QS::POSY),
+    world_box_[4] - quad_state_.x(QS::POSZ),
+    world_box_[5] - quad_state_.x(QS::POSZ);
   // std::cout << "obs is called" << std::endl;
   return true;
 }
@@ -690,6 +702,11 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     world_box_ = cfg["environment"]["world_box"].as<std::vector<Scalar>>();
     world_box_center_.push_back((world_box_[2] + world_box_[3]) / 2);
     world_box_center_.push_back((world_box_[4] + world_box_[5]) / 2);
+    y_lim_ = cfg["environment"]["y_lim"].as<std::vector<Scalar>>();
+    z_lim_ = cfg["environment"]["z_lim"].as<std::vector<Scalar>>();
+    tree_size_ = cfg["environment"]["tree_size"].as<Scalar>();
+    tree_size_range_ =
+      cfg["environment"]["tree_size_range"].as<std::vector<Scalar>>();
     std::vector<Scalar> goal_vel_vec =
       cfg["environment"]["goal_vel"].as<std::vector<Scalar>>();
     goal_linear_vel_ = Vector<3>(goal_vel_vec.data());
@@ -702,7 +719,6 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
     momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
-    tree_size_ = cfg["environment"]["tree_size"].as<Scalar>();
   }
 
   if (cfg["simulation"]) {
@@ -765,7 +781,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
   return true;
 }
 bool VisionEnv::changeLevel() {
-  chooseLevel();
+  difficulty_level_ = difficulty_level_list_[0];
   // std::size_t size_ = difficulty_level_list_.size();
   // std::cout << size_ <<std::endl;
   // std::random_device rd;
@@ -775,13 +791,14 @@ bool VisionEnv::changeLevel() {
     getenv("FLIGHTMARE_PATH") + std::string("/flightpy/configs/vision/") +
     difficulty_level_ + std::string("/") + std::string("environment_") +
     std::to_string(env_id_ % 101);
-  std::cout << obstacle_cfg_path_ << std::endl;
-  cfg_["environment"]["env_folder"] = env_id_ + 1;
+  // std::cout << obstacle_cfg_path_ << std::endl;
+  cfg_["environment"]["env_folder"] = (env_id_ + 1) % 101;
 
   // add dynamic objects
   std::string dynamic_object_yaml =
     obstacle_cfg_path_ + std::string("/dynamic_obstacles.yaml");
   if (!configDynamicObjects(dynamic_object_yaml)) {
+    // std::cout << dynamic_object_yaml << std::endl;
     logger_.error(
       "Cannot config Dynamic Object Yaml. Something wrong with the config "
       "file");
