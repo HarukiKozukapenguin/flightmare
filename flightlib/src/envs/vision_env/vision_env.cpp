@@ -73,7 +73,6 @@ void VisionEnv::init() {
   // act_mean_ << (max_force / quad_ptr_->getMass()) / 2, 0.0, 0.0, 0.0;
   // act_std_ << (max_force / quad_ptr_->getMass()) / 2, max_omega.x(),
   //   max_omega.y(), max_omega.z();
-
   act_mean_ << 0, 0, 0, 0, 0, 0, 0;
   act_std_ << 0.6, 0.6, 0.3, 1.0, 1.0, 1.0,
     0.1;  // set by my experience (cmd difference)
@@ -104,10 +103,10 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   world_box_[5] = z_lim;
   // randomly reset the quadrotor state
   // reset position
-  std::uniform_real_distribution<Scalar> tree_range_dist{tree_size_range_[0],
-                                                         tree_size_range_[1]};
-  tree_size_ = tree_range_dist(random_gen_);
-  changeLevel();
+  // std::uniform_real_distribution<Scalar> tree_range_dist{tree_size_range_[0],
+  //                                                        tree_size_range_[1]};
+  // tree_size_ = tree_range_dist(random_gen_);
+  // changeLevel();
   while (true) {
     quad_state_.x(QS::POSX) = uniform_dist_(random_gen_);
     quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * y_lim * 0.9;
@@ -474,7 +473,7 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
   // std::cout << "z is " << quad_state_.p(quad_state_.IDX::POSZ) << std::endl;
 
   // simulate dynamic obstacles
-  simDynamicObstacles(sim_dt_);
+  // simDynamicObstacles(sim_dt_);
 
   // update observations
   getObs(obs);
@@ -705,8 +704,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     y_lim_ = cfg["environment"]["y_lim"].as<std::vector<Scalar>>();
     z_lim_ = cfg["environment"]["z_lim"].as<std::vector<Scalar>>();
     tree_size_ = cfg["environment"]["tree_size"].as<Scalar>();
-    tree_size_range_ =
-      cfg["environment"]["tree_size_range"].as<std::vector<Scalar>>();
+    // tree_size_range_ =
+    //   cfg["environment"]["tree_size_range"].as<std::vector<Scalar>>();
     std::vector<Scalar> goal_vel_vec =
       cfg["environment"]["goal_vel"].as<std::vector<Scalar>>();
     goal_linear_vel_ = Vector<3>(goal_vel_vec.data());

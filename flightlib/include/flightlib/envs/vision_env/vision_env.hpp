@@ -184,7 +184,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> world_box_center_;
   std::vector<Scalar> y_lim_;
   std::vector<Scalar> z_lim_;
-  std::vector<Scalar> tree_size_range_;
+  // std::vector<Scalar> tree_size_range_;
   // quad_size (meter)
   Scalar quad_size_;
 
