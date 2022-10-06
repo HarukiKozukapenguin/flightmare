@@ -94,13 +94,13 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   is_collision_ = false;
 
 
-  std::uniform_real_distribution<Scalar> y_range_dist{y_lim_[0], y_lim_[1]};
-  std::uniform_real_distribution<Scalar> z_range_dist{z_lim_[0], z_lim_[1]};
-  Scalar y_lim = y_range_dist(random_gen_);
-  Scalar z_lim = z_range_dist(random_gen_);
-  world_box_[2] = -y_lim;
-  world_box_[3] = y_lim;
-  world_box_[5] = z_lim;
+  // std::uniform_real_distribution<Scalar> y_range_dist{y_lim_[0], y_lim_[1]};
+  // std::uniform_real_distribution<Scalar> z_range_dist{z_lim_[0], z_lim_[1]};
+  // Scalar y_lim = y_range_dist(random_gen_);
+  // Scalar z_lim = z_range_dist(random_gen_);
+  // world_box_[2] = -y_lim;
+  // world_box_[3] = y_lim;
+  // world_box_[5] = z_lim;
   // randomly reset the quadrotor state
   // reset position
   // std::uniform_real_distribution<Scalar> tree_range_dist{tree_size_range_[0],
@@ -109,9 +109,10 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   // changeLevel();
   while (true) {
     quad_state_.x(QS::POSX) = uniform_dist_(random_gen_);
-    quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * y_lim * 0.9;
+    quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * world_box_[2] * 0.9;
     quad_state_.x(QS::POSZ) =
-      uniform_dist_(random_gen_) * z_lim * 0.4 + z_lim / 2;
+      uniform_dist_(random_gen_) * (world_box_[5] - world_box_[4]) * 0.4 +
+      (world_box_[4] + world_box_[5]) / 2;
 
     // quad_state_.x(QS::POSX) = 52.9;
     // quad_state_.x(QS::POSY) = 7.4;
@@ -612,6 +613,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
     }
 
     iter += 1;
+    // std::cout << iter << std::endl;
     // std::cout << "iter is " << iter << std::endl;
     if (iter == 100 && fly_result_) {
       std::cout << "collide_num is " << collide_num << std::endl;
