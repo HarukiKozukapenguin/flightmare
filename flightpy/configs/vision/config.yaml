@@ -1,15 +1,15 @@
 environment:
-  level: ["hard"]
+  level: ["medium"]
   env_folder: 0 # beginning of env
   world_box: [-10, 70, -1.5, 1.5, 0.2, 2]
-  tree_size: 0.2
+  tree_size: 0.15
   y_lim: [1,10]
   z_lim: [2,10]
   # tree_size_range: [0.25, 0.5]
   goal_vel: [5.0, 0.0, 0.0]
   max_detection_range: 10.0
   goal: 60
-  fly_result: true
+  fly_result: false
   control_feedthrough: false
   momentum_bool: true
   momentum: 0.9

@@ -190,7 +190,7 @@ bool VisionEnv::getObstacleState(
   Ref<Vector<visionenv::Cuts * visionenv::Cuts>> sphericalboxel,
   Ref<Vector<visionenv::kNObstaclesState>> obs_state) {
   // Scalar safty_threshold = 0.2;
-  if (dynamic_objects_.size() <= 0 || static_objects_.size() <= 0) {
+  if (static_objects_.size() <= 0) {
     logger_.error("No dynamic or static obstacles.");
     return false;
   }
@@ -206,34 +206,34 @@ bool VisionEnv::getObstacleState(
 
   // compute relative distance to dynamic obstacles
   std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> relative_pos;
-  for (int i = 0; i < (int)dynamic_objects_.size(); i++) {
-    // compute relative position vector
-    Vector<3> delta_pos = dynamic_objects_[i]->getPos() - quad_state_.p;
-    relative_pos.push_back(delta_pos);
+  // for (int i = 0; i < (int)dynamic_objects_.size(); i++) {
+  //   // compute relative position vector
+  //   Vector<3> delta_pos = dynamic_objects_[i]->getPos() - quad_state_.p;
+  //   relative_pos.push_back(delta_pos);
 
-    // compute relative distance
-    Scalar obstacle_dist = delta_pos.norm();
-    Scalar obstacle_2d_dist =
-      std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));
-    // limit observation range
-    if (obstacle_dist > max_detection_range_) {
-      obstacle_dist = max_detection_range_;
-    }
-    relative_pos_norm_.push_back(obstacle_dist);
-    relative_2d_pos_norm_.push_back(obstacle_2d_dist);
+  //   // compute relative distance
+  //   Scalar obstacle_dist = delta_pos.norm();
+  //   Scalar obstacle_2d_dist =
+  //     std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));
+  //   // limit observation range
+  //   if (obstacle_dist > max_detection_range_) {
+  //     obstacle_dist = max_detection_range_;
+  //   }
+  //   relative_pos_norm_.push_back(obstacle_dist);
+  //   relative_2d_pos_norm_.push_back(obstacle_2d_dist);
 
-    // store the obstacle radius
-    Scalar obs_radius = dynamic_objects_[i]->getScale()[0] / 2;
-    // due to think quadsize, change obs_radius to more smaller to
-    // move forword
-    obs_radius = obs_radius / 2;
-    obstacle_radius_.push_back(obs_radius);
+  //   // store the obstacle radius
+  //   Scalar obs_radius = dynamic_objects_[i]->getScale()[0] / 2;
+  //   // due to think quadsize, change obs_radius to more smaller to
+  //   // move forword
+  //   obs_radius = obs_radius / 2;
+  //   obstacle_radius_.push_back(obs_radius);
 
-    //
-    if (obstacle_2d_dist < obs_radius + quad_size_) {
-      is_collision_ = true;
-    }
-  }
+  //   //
+  //   if (obstacle_2d_dist < obs_radius + quad_size_) {
+  //     is_collision_ = true;
+  //   }
+  // }
 
   // std::cout << "get dynamic_objects_" << std::endl;
 
@@ -796,14 +796,14 @@ bool VisionEnv::changeLevel() {
   cfg_["environment"]["env_folder"] = (env_id_ + 1) % 101;
 
   // add dynamic objects
-  std::string dynamic_object_yaml =
-    obstacle_cfg_path_ + std::string("/dynamic_obstacles.yaml");
-  if (!configDynamicObjects(dynamic_object_yaml)) {
-    // std::cout << dynamic_object_yaml << std::endl;
-    logger_.error(
-      "Cannot config Dynamic Object Yaml. Something wrong with the config "
-      "file");
-  }
+  // std::string dynamic_object_yaml =
+  //   obstacle_cfg_path_ + std::string("/dynamic_obstacles.yaml");
+  // if (!configDynamicObjects(dynamic_object_yaml)) {
+  //   // std::cout << dynamic_object_yaml << std::endl;
+  //   logger_.error(
+  //     "Cannot config Dynamic Object Yaml. Something wrong with the config "
+  //     "file");
+  // }
 
   // add static objects
   static_object_csv_ =
@@ -985,9 +985,9 @@ bool VisionEnv::addQuadrotorToUnity(const std::shared_ptr<UnityBridge> bridge) {
   if (!quad_ptr_) return false;
   bridge->addQuadrotor(quad_ptr_);
 
-  for (int i = 0; i < (int)dynamic_objects_.size(); i++) {
-    bridge->addDynamicObject(dynamic_objects_[i]);
-  }
+  // for (int i = 0; i < (int)dynamic_objects_.size(); i++) {
+  //   bridge->addDynamicObject(dynamic_objects_[i]);
+  // }
 
   //
   bridge->setRenderOffset(unity_render_offset_);
@@ -1048,8 +1048,9 @@ std::ostream &operator<<(std::ostream &os, const VisionEnv &vision_env) {
   os.precision(3);
   os << "Vision Environment:\n"
      << "obs dim =            [" << vision_env.obs_dim_ << "]\n"
-     << "act dim =            [" << vision_env.act_dim_ << "]\n"
-     << "#dynamic objects=    [" << vision_env.num_dynamic_objects_ << "]\n"
+     << "act dim =            [" << vision_env.act_dim_
+     << "]\n"
+     //  << "#dynamic objects=    [" << vision_env.num_dynamic_objects_ << "]\n"
      << "#static objects=     [" << vision_env.num_static_objects_ << "]\n"
      << "obstacle dim =       [" << vision_env.num_detected_obstacles_ << "]\n"
      << "sim dt =             [" << vision_env.sim_dt_ << "]\n"

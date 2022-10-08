@@ -4,7 +4,6 @@ dist
 *.so
 __pycache__
 
-
 # Gitignore
 
 # VScode
@@ -20,3 +19,4 @@ _posts
 _site
 
 saved
+*visualize_obs.py
