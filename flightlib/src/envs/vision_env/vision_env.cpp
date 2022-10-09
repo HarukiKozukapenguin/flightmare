@@ -615,7 +615,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
     iter += 1;
     // std::cout << iter << std::endl;
     // std::cout << "iter is " << iter << std::endl;
-    if (iter == 100 && fly_result_) {
+    if (iter == 80 && fly_result_) {
       std::cout << "collide_num is " << collide_num << std::endl;
       std::cout << "time_num is " << time_num << std::endl;
       std::cout << "bound_num is " << bound_num << std::endl;
@@ -793,7 +793,7 @@ bool VisionEnv::changeLevel() {
     difficulty_level_ + std::string("/") + std::string("environment_") +
     std::to_string(env_id_ % 101);
   // std::cout << obstacle_cfg_path_ << std::endl;
-  cfg_["environment"]["env_folder"] = (env_id_ + 1) % 101;
+  cfg_["environment"]["env_folder"] = (env_id_ + 1) % 500;
 
   // add dynamic objects
   // std::string dynamic_object_yaml =
@@ -915,7 +915,7 @@ bool VisionEnv::configStaticObjects(const std::string &csv_file) {
     // actual size in meters
     obj->setSize(Vector<3>(1.0, 1.0, 1.0));
     // scale of the original size
-    obj->setScale(scale * tree_size_);
+    obj->setScale(scale);
     static_objects_.push_back(obj);
   }
   num_static_objects_ = static_objects_.size();
