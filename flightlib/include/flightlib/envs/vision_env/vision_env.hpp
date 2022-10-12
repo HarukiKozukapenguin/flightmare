@@ -40,13 +40,14 @@ enum Vision : int {
 
   Cuts = 8,
 
-  // observations
-  kObs = 0,
-  kNObs = 3 + 9 + 3 + 3 + 3 + 3 + 4 + Cuts * Cuts,
-
   // control actions
   kAct = 0,
   kNAct = 7,
+
+  // observations
+  kObs = 0,
+  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Cuts * Cuts + 3 + 4,
+
 };
 }  // namespace visionenv
 
@@ -149,7 +150,10 @@ class VisionEnv final : public EnvBase {
   std::vector<std::shared_ptr<UnityObject>> dynamic_objects_;
 
   QuadState quad_state_, quad_old_state_;
+  // set act_ to member valuable to include act to obs
+  Vector<visionenv::kNAct> act_;
   Command cmd_;
+
   Logger logger_{"VisionEnv"};
 
   // Define reward for training
