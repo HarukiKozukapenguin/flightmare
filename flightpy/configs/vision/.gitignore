@@ -1,6 +1,8 @@
 easy/*
 medium/*
 hard/*
-real_tree/*
+real_tree_easy/*
+real_tree_medium/*
+real_tree_hard/*
 
 *.py
