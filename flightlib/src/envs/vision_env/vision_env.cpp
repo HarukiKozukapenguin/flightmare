@@ -257,8 +257,8 @@ bool VisionEnv::getObstacleState(
 
 
     // store the obstacle radius
-    Scalar obs_radius = static_objects_[i]->getScale()[0] / 2;
-    obs_radius = obs_radius / 2;
+    Scalar obs_radius = static_objects_[i]->getScale()[0];
+    // obs_radius = obs_radius / 2;
 
     obstacle_radius_.push_back(obs_radius);
     if (obstacle_2d_dist < obs_radius + quad_size_) {
@@ -515,11 +515,15 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     // std::cout << "dist margin is " << relative_dist -
     // obstacle_radius_[sort_idx]<< std::endl;
 
-    // const Scalar dist_margin = 2;
-    if (relative_2d_pos_norm_[sort_idx] - obstacle_radius_[sort_idx] <=
-        dist_margin) {
+    // const Scalar dist_margin_ = 2;
+    if (relative_2d_pos_norm_[sort_idx] - obstacle_radius_[sort_idx] -
+          quad_size_ <=
+        dist_margin_) {
       // compute distance penalty
-      collision_penalty += collision_coeff_ * std::exp(-1.0 * 1.0);
+      Scalar collision_distance = relative_2d_pos_norm_[sort_idx] -
+                                  obstacle_radius_[sort_idx] - quad_size_;
+      collision_penalty +=
+        collision_coeff_ * std::exp(-collision_exp_coeff_ * collision_distance);
     }
     idx += 1;
   }
@@ -579,7 +583,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
   if (is_collision_ || cmd_.t >= max_t_ - sim_dt_ || !x_valid || !y_valid ||
       !z_valid || quad_state_.p(QS::POSX) > goal_) {
     if (is_collision_) {
-      reward = fabs(quad_state_.x(QS::VELX)) * -10.0;
+      reward = -10.0;
       // std::cout << "terminate by collision" << std::endl;
       // return true;
       // std::cout << "t is " << cmd_.t << std::endl;]
@@ -739,7 +743,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     vel_coeff_ = cfg["rewards"]["vel_coeff"].as<Scalar>();
     collision_coeff_ = cfg["rewards"]["collision_coeff"].as<Scalar>();
     collision_exp_coeff_ = cfg["rewards"]["collision_exp_coeff"].as<Scalar>();
-    dist_margin = cfg["rewards"]["dist_margin"].as<Scalar>();
+    dist_margin_ = cfg["rewards"]["dist_margin"].as<Scalar>();
     angular_vel_coeff_ = cfg["rewards"]["angular_vel_coeff"].as<Scalar>();
     survive_rew_ = cfg["rewards"]["survive_rew"].as<Scalar>();
     world_box_coeff_ =
@@ -748,7 +752,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     command_coeff_ = cfg["rewards"]["command_coeff"].as<std::vector<Scalar>>();
 
 
-    // std::cout << dist_margin << std::endl;
+    // std::cout << dist_margin_ << std::endl;
 
     // load reward settings
     reward_names_ = cfg["rewards"]["names"].as<std::vector<std::string>>();
