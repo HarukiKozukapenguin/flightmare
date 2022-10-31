@@ -168,6 +168,12 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   Vector<visionenv::kNObstaclesState> unused;
   // std::cout << "getObstacleState is being called" << std::endl;
   getObstacleState(sphericalboxel, unused);
+  Scalar average_depth = 0;
+  for (int i = 0; i < visionenv::Cuts * visionenv::Cuts; i++) {
+    average_depth += sphericalboxel[i];
+  }
+  average_depth /= visionenv::Cuts * visionenv::Cuts;
+
   // std::cout << "getObstacleState is called" << std::endl;
 
   // std::cout << sphericalboxel << std::endl;
@@ -179,7 +185,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << act_, goal_linear_vel_, ori, quad_state_.p, normalized_p,
-    quad_state_.v, sphericalboxel, quad_state_.w,
+    quad_state_.v, sphericalboxel, average_depth, quad_state_.w,
     world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY),
     world_box_[4] - quad_state_.x(QS::POSZ),
@@ -192,7 +198,7 @@ bool VisionEnv::getObstacleState(
   Ref<Vector<visionenv::Cuts * visionenv::Cuts>> sphericalboxel,
   Ref<Vector<visionenv::kNObstaclesState>> obs_state) {
   // Scalar safty_threshold = 0.2;
-  if (static_objects_.size() <= 0) {
+  if (static_objects_.size() < 0) {
     logger_.error("No dynamic or static obstacles.");
     return false;
   }

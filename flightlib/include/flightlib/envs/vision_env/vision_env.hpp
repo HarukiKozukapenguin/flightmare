@@ -46,7 +46,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Cuts * Cuts + 3 + 4,
+  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Cuts * Cuts + 1 + 3 + 4,
 
 };
 }  // namespace visionenv
