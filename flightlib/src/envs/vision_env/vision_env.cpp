@@ -377,9 +377,12 @@ Scalar VisionEnv::getClosestDistance(
     Scalar D = std::pow(b, 2) - a * c;
     if (0 <= D) {
       Scalar dist = (b - std::sqrt(D)) / a;
-      rmin = std::min(dist, rmin);
+      if (dist >= quad_size_) {
+        rmin = std::min(dist, rmin);
+      }
     }
   }
+
   return rmin / max_detection_range_;
 }
 
