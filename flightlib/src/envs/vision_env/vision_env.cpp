@@ -276,7 +276,7 @@ bool VisionEnv::getObstacleState(
 
   // std::cout << relative_pos_norm_ << std::endl;
   size_t idx = 0;
-  obstacle_num = 0;  // obstacle_num is declared at hpp
+  obstacle_num_ = 0;  // obstacle_num_ is declared at hpp
   std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> pos_b_list;
   std::vector<Scalar> pos_norm_list;
   std::vector<Scalar> obs_radius_list;
@@ -318,7 +318,7 @@ bool VisionEnv::getObstacleState(
   idx = 0;
   for (size_t sort_idx : sort_indexes(relative_2d_pos_norm_)) {
     if (idx >= visionenv::kNObstacles) {
-      obstacle_num = idx;
+      obstacle_num_ = idx;
       break;
     }
     // if enough obstacles in the environment
@@ -328,7 +328,7 @@ bool VisionEnv::getObstacleState(
       pos_norm_list.push_back(relative_2d_pos_norm_[sort_idx]);
       obs_radius_list.push_back(obstacle_radius_[sort_idx]);
     } else {
-      obstacle_num = idx;
+      obstacle_num_ = idx;
       break;
     }
     idx += 1;
@@ -365,7 +365,7 @@ Scalar VisionEnv::getClosestDistance(
   const Scalar &tcell, const Scalar &fcell) {
   Vector<3> Cell = getCartesianFromAng(tcell, fcell);
   Scalar rmin = max_detection_range_;
-  for (size_t i = 0; i < obstacle_num; ++i) {
+  for (size_t i = 0; i < obstacle_num_; ++i) {
     Vector<3> pos = pos_b_list[i];
     Scalar radius = obs_radius_list[i];
     Eigen::Vector3d alpha = cross_product(Cell, poll_v);

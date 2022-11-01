@@ -165,7 +165,7 @@ class VisionEnv final : public EnvBase {
   Vector<3> goal_linear_vel_;
   bool is_collision_;
 
-  size_t obstacle_num;
+  size_t obstacle_num_;
 
   // max detection range (meter)
   Scalar max_detection_range_;
