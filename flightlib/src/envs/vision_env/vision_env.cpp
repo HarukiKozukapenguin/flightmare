@@ -522,9 +522,12 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     // obstacle_radius_[sort_idx]<< std::endl;
 
     // const Scalar dist_margin_ = 2;
-    if (relative_2d_pos_norm_[sort_idx] - quad_size_ <= dist_margin_) {
+    if (relative_2d_pos_norm_[sort_idx] - obstacle_radius_[soft_idx] -
+          quad_size_ <=
+        dist_margin_) {
       // compute distance penalty
-      Scalar collision_distance = relative_2d_pos_norm_[sort_idx] - quad_size_;
+      Scalar collision_distance = relative_2d_pos_norm_[sort_idx] -
+                                  obstacle_radius_[soft_idx] - quad_size_;
       collision_penalty +=
         collision_coeff_ * std::exp(-collision_exp_coeff_ * collision_distance);
     }
