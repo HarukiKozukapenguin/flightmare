@@ -29,8 +29,8 @@ rewards:
   angular_vel_coeff: -0.0001
   survive_rew: 0.03
   world_box_coeff: [-0.0005, -0.002] # y,z
-  attitude_coeff: -0.1
-  command_coeff: [-0.000025, -0.0001, -0.0001, -0.0005, -0.0005, -0.0005, -0.00025]
+  attitude_coeff: -0.025
+  command_coeff: [-0.000005, -0.000025, -0.000025, -0.0001, -0.0001, -0.0001, -0.00005]
 
   names:
     [
