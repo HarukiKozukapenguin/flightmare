@@ -94,6 +94,10 @@ class VisionEnv final : public EnvBase {
   Scalar inner_product(const Vector<3> &a, const Vector<3> &b);
   Vector<3> cross_product(const Vector<3> &a, const Vector<3> &b);
   // void comp(Scalar &rmin, Scalar r);
+  Scalar get_vel_obs_distance(
+    const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
+      &pos_b_list,
+    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v);
 
   // get quadrotor states
   bool getQuadAct(Ref<Vector<>> act) const;
@@ -157,13 +161,14 @@ class VisionEnv final : public EnvBase {
   Logger logger_{"VisionEnv"};
 
   // Define reward for training
-  Scalar move_coeff_, vel_coeff_, collision_coeff_, collision_exp_coeff_,
-    angular_vel_coeff_, survive_rew_, dist_margin_;
+  Scalar move_coeff_, vel_coeff_, collision_coeff_, vel_collision_coeff_,
+    collision_exp_coeff_, angular_vel_coeff_, survive_rew_, dist_margin_;
   std::vector<Scalar> world_box_coeff_;
   Scalar attitude_coeff_;
   std::vector<Scalar> command_coeff_;
   Vector<3> goal_linear_vel_;
   bool is_collision_;
+  Scalar vel_obs_distance_;
 
   size_t obstacle_num_;
 

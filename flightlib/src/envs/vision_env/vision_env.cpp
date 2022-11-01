@@ -340,6 +340,8 @@ bool VisionEnv::getObstacleState(
   // std::cout << "getsphericalboxel is being called" << std::endl;
   sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_v);
 
+  vel_obs_distance_ = get_vel_obs_distance(pos_b_list, obs_radius_list, poll_v);
+
   return true;
 }
 
@@ -408,6 +410,31 @@ Vector<3> VisionEnv::cross_product(const Vector<3> &a, const Vector<3> &b) {
       a[(i + 1) % 3] * b[(i + 2) % 3] - a[(i + 2) % 3] * b[(i + 1) % 3];
   }
   return cross_product;
+}
+
+Scalar VisionEnv::get_vel_obs_distance(
+  const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v) {
+  Vector<3> Cell = (quad_state_.v).normalized();
+  Scalar rmin = max_detection_range_;
+  for (size_t i = 0; i < obstacle_num_; ++i) {
+    Vector<3> pos = pos_b_list[i];
+    Scalar radius = obs_radius_list[i];
+    Eigen::Vector3d alpha = cross_product(Cell, poll_v);
+    Eigen::Vector3d beta = cross_product(pos, poll_v);
+    Scalar a = std::pow(alpha.norm(), 2);
+    if (a == 0) continue;
+    Scalar b = inner_product(alpha, beta);
+    Scalar c = std::pow(beta.norm(), 2) - std::pow(radius, 2);
+    Scalar D = std::pow(b, 2) - a * c;
+    if (0 <= D) {
+      Scalar dist = (b - std::sqrt(D)) / a;
+      if (dist >= quad_size_) {
+        rmin = std::min(dist, rmin);
+      }
+    }
+  }
+  return rmin;
 }
 
 // void VisionEnv::comp(Scalar &rmin, Scalar r) {
@@ -536,6 +563,12 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     }
     idx += 1;
   }
+
+  Scalar vel_collision_penalty =
+    vel_collision_coeff_ * (quad_state_.v).norm() *
+    std::exp(-collision_exp_coeff_ * vel_obs_distance_);
+
+  // std::cout << vel_collision_penalty << std::endl;
   // std::cout << "collision_penalty is " << collision_penalty << std::endl;
   // std::cout << ' ' << std::endl;
 
@@ -567,15 +600,16 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   }
 
   //  change progress reward as survive reward
-  const Scalar total_reward =
-    move_reward + lin_vel_reward + collision_penalty + ang_vel_penalty +
-    survive_rew_ + world_box_penalty + attitude_penalty + command_penalty;
+  const Scalar total_reward = move_reward + lin_vel_reward + collision_penalty +
+                              vel_collision_penalty + ang_vel_penalty +
+                              survive_rew_ + world_box_penalty +
+                              attitude_penalty + command_penalty;
 
   // return all reward components for debug purposes
   // only the total reward is used by the RL algorithm
-  reward << move_reward, lin_vel_reward, collision_penalty, ang_vel_penalty,
-    survive_rew_, world_box_penalty, attitude_penalty, command_penalty,
-    total_reward;
+  reward << move_reward, lin_vel_reward, collision_penalty,
+    vel_collision_penalty, ang_vel_penalty, survive_rew_, world_box_penalty,
+    attitude_penalty, command_penalty, total_reward;
   return true;
 }
 
@@ -751,6 +785,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     move_coeff_ = cfg["rewards"]["move_coeff"].as<Scalar>();
     vel_coeff_ = cfg["rewards"]["vel_coeff"].as<Scalar>();
     collision_coeff_ = cfg["rewards"]["collision_coeff"].as<Scalar>();
+    vel_collision_coeff_ = cfg["rewards"]["vel_collision_coeff"].as<Scalar>();
     collision_exp_coeff_ = cfg["rewards"]["collision_exp_coeff"].as<Scalar>();
     dist_margin_ = cfg["rewards"]["dist_margin"].as<Scalar>();
     angular_vel_coeff_ = cfg["rewards"]["angular_vel_coeff"].as<Scalar>();

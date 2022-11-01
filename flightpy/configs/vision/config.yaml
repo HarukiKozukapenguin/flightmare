@@ -23,6 +23,7 @@ rewards:
   move_coeff: 1
   vel_coeff: 0
   collision_coeff: -5
+  vel_collision_coeff: -2.0
   collision_exp_coeff: 1
   dist_margin: 2
   angular_vel_coeff: -0.0001
@@ -36,6 +37,7 @@ rewards:
       "move_reward",
       "lin_vel_reward",
       "collision_penalty",
+      "vel_collision_penalty",
       "ang_vel_penalty",
       "survive_rew",
       "world_box_penalty",
