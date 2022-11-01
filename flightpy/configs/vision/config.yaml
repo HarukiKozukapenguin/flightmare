@@ -1,7 +1,7 @@
 environment:
   level: ["real_tree_medium"]
   env_folder: 0 # beginning of env
-  world_box: [-10, 70, -1.5, 1.5, 0.2, 2]
+  world_box: [-0.3, 70, -1.5, 1.5, 0.2, 2]
   tree_size: 0.15
   y_lim: [1,10]
   z_lim: [2,10]
