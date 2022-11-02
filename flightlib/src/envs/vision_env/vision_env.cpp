@@ -395,7 +395,7 @@ Vector<3> VisionEnv::getCartesianFromAng(const Scalar &theta,
   return cartesian;
 }
 
-Scalar VisionEnv::inner_product(const Vector<3> &a, const Vector<3> &b) {
+Scalar VisionEnv::inner_product(const Vector<3> &a, const Vector<3> &b) const {
   Scalar inner_product = 0;
   for (int i = 0; i < 3; i++) {
     inner_product += a[i] * b[i];
@@ -403,7 +403,8 @@ Scalar VisionEnv::inner_product(const Vector<3> &a, const Vector<3> &b) {
   return inner_product;
 }
 
-Vector<3> VisionEnv::cross_product(const Vector<3> &a, const Vector<3> &b) {
+Vector<3> VisionEnv::cross_product(const Vector<3> &a,
+                                   const Vector<3> &b) const {
   Vector<3> cross_product;
   for (int i = 0; i < 3; i++) {
     cross_product[i] =
