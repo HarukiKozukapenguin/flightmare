@@ -340,7 +340,8 @@ bool VisionEnv::getObstacleState(
   // std::cout << "getsphericalboxel is being called" << std::endl;
   sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_v);
 
-  vel_obs_distance_ = get_vel_obs_distance(pos_b_list, obs_radius_list, poll_v);
+  vel_obs_distance_ =
+    get_vel_obs_distance(pos_b_list, obs_radius_list, poll_v, R_T);
 
   return true;
 }
@@ -415,8 +416,10 @@ Vector<3> VisionEnv::cross_product(const Vector<3> &a,
 
 Scalar VisionEnv::get_vel_obs_distance(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
-  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v) {
-  Vector<3> Cell = (quad_state_.v).normalized();
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+  const Matrix<3, 3> &R_T) const {
+  Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
+  Vector<3> Cell = (R_T * vel_2d).normalized();
   Scalar rmin = max_detection_range_;
   for (size_t i = 0; i < obstacle_num_; ++i) {
     Vector<3> pos = pos_b_list[i];

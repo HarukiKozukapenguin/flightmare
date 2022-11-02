@@ -97,7 +97,8 @@ class VisionEnv final : public EnvBase {
   Scalar get_vel_obs_distance(
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
       &pos_b_list,
-    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v);
+    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+    const Matrix<3, 3> &R_T) const;
 
   // get quadrotor states
   bool getQuadAct(Ref<Vector<>> act) const;
