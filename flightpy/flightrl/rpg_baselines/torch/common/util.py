@@ -6,6 +6,8 @@ import os
 from mpl_toolkits.mplot3d import Axes3D
 import statistics
 import matplotlib.pyplot as plt
+from matplotlib import cm
+import csv
 
 columns = [
     "episode_id",
@@ -119,6 +121,23 @@ def test_policy(env, model, render=False):
         final_x = 0
         final_t = 0
         lstm_states = None
+
+        if render:
+            x_list=[]
+            y_list=[]
+            vel_list=[]
+            path = os.environ["FLIGHTMARE_PATH"]+"/flightpy/configs/vision/real_tree_medium/environment_"+"0"+"/"
+            figure, axes = plt.subplots()
+            with open(path+'static_obstacles.csv') as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    x = float(row[1])
+                    y = float(row[2])
+                    r = float(row[8]) #+body_size
+                    draw_circle = plt.Circle((x, y), r)
+                    axes.add_artist(draw_circle)
+            plt.ylim([-1.5, 1.5])
+
         while not (done or (ep_len >= max_ep_length)):
             # print(obs)
             past_act = act
@@ -169,6 +188,11 @@ def test_policy(env, model, render=False):
 
 
             #
+            if render:
+                x_list.append(env.getQuadState()[0][1])
+                y_list.append(env.getQuadState()[0][2])
+                vel_list.append(np.sqrt(env.getQuadState()[0][9]**2+env.getQuadState()[0][10]**2))
+
             if done:
                 if final_x == 0:
                     # reset the test, becuase the drone collide with object in the initial state
@@ -181,6 +205,16 @@ def test_policy(env, model, render=False):
                 print("final x: {}".format(final_x))
                 ave_vel_list.append(final_x/final_t)
                 print("ave vel: {}".format(final_x/final_t))
+                if render:
+                    plt.xlim(right=final_x+5)
+                    plt.scatter(x_list,y_list,
+                        c=vel_list,
+                        cmap=cm.jet,
+                        marker='.',lw=0)
+                    ax=plt.colorbar()
+                    ax.set_label('vel [m/s]')
+                    plt.show()
+                    # https://villageofsound.hatenadiary.jp/entry/2015/09/13/010352
             else:
                 final_x = env.getQuadState()[0][1]
                 final_t = env.getQuadState()[0][0]
