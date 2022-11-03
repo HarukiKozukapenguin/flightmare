@@ -341,7 +341,7 @@ bool VisionEnv::getObstacleState(
   sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_v);
 
   vel_obs_distance_ =
-    get_vel_obs_distance(pos_b_list, obs_radius_list, poll_v, R_T);
+    get_vel_sphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
 
   return true;
 }
@@ -365,7 +365,7 @@ Vector<visionenv::Cuts * visionenv::Cuts> VisionEnv::getsphericalboxel(
 Scalar VisionEnv::getClosestDistance(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
   const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
-  const Scalar &tcell, const Scalar &fcell) {
+  const Scalar &tcell, const Scalar &fcell) const {
   Vector<3> Cell = getCartesianFromAng(tcell, fcell);
   Scalar rmin = max_detection_range_;
   for (size_t i = 0; i < obstacle_num_; ++i) {
@@ -414,31 +414,37 @@ Vector<3> VisionEnv::cross_product(const Vector<3> &a,
   return cross_product;
 }
 
-Scalar VisionEnv::get_vel_obs_distance(
+Vector<visionenv::RewardCuts * visionenv::RewardCuts>
+VisionEnv::get_vel_sphericalboxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
   const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
   const Matrix<3, 3> &R_T) const {
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
-  Vector<3> Cell = (R_T * vel_2d).normalized();
-  Scalar rmin = max_detection_range_;
-  for (size_t i = 0; i < obstacle_num_; ++i) {
-    Vector<3> pos = pos_b_list[i];
-    Scalar radius = obs_radius_list[i];
-    Eigen::Vector3d alpha = cross_product(Cell, poll_v);
-    Eigen::Vector3d beta = cross_product(pos, poll_v);
-    Scalar a = std::pow(alpha.norm(), 2);
-    if (a == 0) continue;
-    Scalar b = inner_product(alpha, beta);
-    Scalar c = std::pow(beta.norm(), 2) - std::pow(radius, 2);
-    Scalar D = std::pow(b, 2) - a * c;
-    if (0 <= D) {
-      Scalar dist = (b - std::sqrt(D)) / a;
-      if (dist >= quad_size_) {
-        rmin = std::min(dist, rmin);
-      }
+  Vector<3> body_vel = R_T * vel_2d;
+  Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
+  Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2) +
+                                                     std::pow(body_vel[1], 2)));
+
+  Vector<visionenv::RewardCuts * visionenv::RewardCuts> vel_obstacle_obs;
+  // angle of the velocity direction in 2D map
+  for (int t = -(visionenv::RewardCuts - 1) / 2;
+       t < (visionenv::RewardCuts - 1) / 2 + 1; ++t) {
+    for (int p = -(visionenv::RewardCuts - 1) / 2;
+         p < (visionenv::RewardCuts - 1) / 2 + 1; ++p) {
+      Scalar tcell =
+        t / ((visionenv::RewardCuts - 1) / 2) * vel_collision_angle_max_ +
+        vel_theta;
+      Scalar pcell =
+        p / ((visionenv::RewardCuts - 1) / 2) * vel_collision_angle_max_ +
+        vel_phi;
+      vel_obstacle_obs[(t + (visionenv::RewardCuts - 1) / 2) *
+                         visionenv::RewardCuts +
+                       (p + (visionenv::RewardCuts - 1) / 2)] =
+        getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, pcell) *
+        max_detection_range_;
     }
   }
-  return rmin;
+  return vel_obstacle_obs;
 }
 
 // void VisionEnv::comp(Scalar &rmin, Scalar r) {
@@ -568,9 +574,18 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     idx += 1;
   }
 
-  Scalar vel_collision_penalty =
-    vel_collision_coeff_ * (quad_state_.v).norm() *
-    std::exp(-collision_exp_coeff_ * vel_obs_distance_);
+  Scalar vel_collision_penalty = 0;
+  for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
+    Scalar vel_obs_dist = vel_obs_distance_[i];
+    int p = (i % visionenv::RewardCuts) - (visionenv::RewardCuts - 1) / 2;
+    int t = (i / visionenv::RewardCuts) - (visionenv::RewardCuts - 1) / 2;
+    Scalar angle_discount_factor = std::sqrt(std::pow(p, 2) + std::pow(t, 2)) /
+                                   ((visionenv::RewardCuts - 1) / 2) *
+                                   vel_collision_angle_max_;
+    vel_collision_penalty += vel_collision_coeff_ * (quad_state_.v).norm() *
+                             std::exp(-collision_exp_coeff_ * vel_obs_dist) *
+                             std::exp(-angle_discount_factor);
+  }
 
   // std::cout << vel_collision_penalty << std::endl;
   // std::cout << "collision_penalty is " << collision_penalty << std::endl;
@@ -790,6 +805,9 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     vel_coeff_ = cfg["rewards"]["vel_coeff"].as<Scalar>();
     collision_coeff_ = cfg["rewards"]["collision_coeff"].as<Scalar>();
     vel_collision_coeff_ = cfg["rewards"]["vel_collision_coeff"].as<Scalar>();
+    vel_collision_angle_max_ =
+      cfg["rewards"]["vel_collision_angle_max"].as<Scalar>() * M_PI /
+      180;  // vel_collision_angle_max_ [rad]
     collision_exp_coeff_ = cfg["rewards"]["collision_exp_coeff"].as<Scalar>();
     dist_margin_ = cfg["rewards"]["dist_margin"].as<Scalar>();
     angular_vel_coeff_ = cfg["rewards"]["angular_vel_coeff"].as<Scalar>();
