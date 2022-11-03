@@ -390,7 +390,7 @@ Scalar VisionEnv::getClosestDistance(
 }
 
 Vector<3> VisionEnv::getCartesianFromAng(const Scalar &theta,
-                                         const Scalar &phi) {
+                                         const Scalar &phi) const {
   Vector<3> cartesian = {std::cos(theta) * std::cos(phi),
                          std::sin(theta) * std::cos(phi), std::sin(phi)};
   return cartesian;

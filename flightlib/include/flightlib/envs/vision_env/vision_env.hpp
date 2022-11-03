@@ -89,8 +89,8 @@ class VisionEnv final : public EnvBase {
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
       &pos_b_list,
     const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
-    const Scalar &tcell, const Scalar &fcell);
-  Vector<3> getCartesianFromAng(const Scalar &theta, const Scalar &phi);
+    const Scalar &tcell, const Scalar &fcell) const;
+  Vector<3> getCartesianFromAng(const Scalar &theta, const Scalar &phi) const;
   Scalar inner_product(const Vector<3> &a, const Vector<3> &b) const;
   Vector<3> cross_product(const Vector<3> &a, const Vector<3> &b) const;
   // void comp(Scalar &rmin, Scalar r);
