@@ -619,17 +619,28 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     command_penalty += command_coeff_[i] * std::pow(pi_act_diff_[i], 2);
   }
 
+  Vector<3> vel_3d = (quad_state_.v).normalized();
+
+  Matrix<3, 3> R = quad_state_.R();
+  Vector<3> body_x(R(0, 0), R(1, 0), R(2, 0));
+  // R's componet (in this case e_x) is always normalized, so we don't have to
+  // normalize
+
+  Scalar attitude_vel_penalty =
+    attitude_vel_coeff_ * (vel_3d.cross(body_x)).norm();
+
+
   //  change progress reward as survive reward
-  const Scalar total_reward = move_reward + lin_vel_reward + collision_penalty +
-                              vel_collision_penalty + ang_vel_penalty +
-                              survive_rew_ + world_box_penalty +
-                              attitude_penalty + command_penalty;
+  const Scalar total_reward =
+    move_reward + lin_vel_reward + collision_penalty + vel_collision_penalty +
+    ang_vel_penalty + survive_rew_ + world_box_penalty + attitude_penalty +
+    command_penalty + attitude_vel_penalty;
 
   // return all reward components for debug purposes
   // only the total reward is used by the RL algorithm
   reward << move_reward, lin_vel_reward, collision_penalty,
     vel_collision_penalty, ang_vel_penalty, survive_rew_, world_box_penalty,
-    attitude_penalty, command_penalty, total_reward;
+    attitude_penalty, command_penalty, attitude_vel_penalty, total_reward;
   return true;
 }
 
@@ -817,7 +828,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
       cfg["rewards"]["world_box_coeff"].as<std::vector<Scalar>>();
     attitude_coeff_ = cfg["rewards"]["attitude_coeff"].as<Scalar>();
     command_coeff_ = cfg["rewards"]["command_coeff"].as<std::vector<Scalar>>();
-
+    attitude_vel_coeff_ = cfg["rewards"]["attitude_vel_coeff"].as<Scalar>();
 
     // std::cout << dist_margin_ << std::endl;
 

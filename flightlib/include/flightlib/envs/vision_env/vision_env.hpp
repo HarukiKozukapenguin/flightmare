@@ -169,6 +169,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> world_box_coeff_;
   Scalar attitude_coeff_;
   std::vector<Scalar> command_coeff_;
+  Scalar attitude_vel_coeff_;
   Vector<3> goal_linear_vel_;
   bool is_collision_;
   Vector<visionenv::RewardCuts * visionenv::RewardCuts> vel_obs_distance_;

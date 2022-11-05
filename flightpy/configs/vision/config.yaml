@@ -32,6 +32,7 @@ rewards:
   world_box_coeff: [-0.0005, -0.002] # y,z
   attitude_coeff: -0.025
   command_coeff: [-0.000005, -0.000025, -0.000025, -0.0001, -0.0001, -0.0001, -0.00005]
+  attitude_vel_coeff: -5.0
 
   names:
     [
@@ -44,6 +45,7 @@ rewards:
       "world_box_penalty",
       "attitude_penalty",
       "command_penalty",
+      "attitude_vel_penalty",
       "total",
     ] #this size determines the size of rewards. (cf. vision_env.cpp l460)
 
