@@ -606,9 +606,9 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 
   Scalar world_box_penalty =
     world_box_coeff_[0] *
-      std::pow(quad_state_.x(QS::POSY) - world_box_center_[0], 2) +
+      std::pow(quad_state_.x(QS::POSY) - world_box_center_[0], 4) +
     world_box_coeff_[1] *
-      std::pow(quad_state_.x(QS::POSZ) - world_box_center_[1], 2);
+      std::pow(quad_state_.x(QS::POSZ) - world_box_center_[1], 4);
 
   Scalar tilt = quad_state_.Horizontal_Tilt();
   Scalar attitude_penalty = attitude_coeff_ * std::pow(tilt, 2);
