@@ -582,7 +582,8 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     Scalar angle_discount_factor = std::sqrt(std::pow(p, 2) + std::pow(t, 2)) /
                                    ((visionenv::RewardCuts - 1) / 2) *
                                    vel_collision_angle_max_;
-    vel_collision_penalty += vel_collision_coeff_ * (quad_state_.v).norm() *
+    vel_collision_penalty += vel_collision_coeff_ *
+                             (quad_state_.v).squaredNorm() *
                              std::exp(-collision_exp_coeff_ * vel_obs_dist) *
                              std::exp(-angle_discount_factor);
   }
