@@ -681,6 +681,10 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
     // - x, y, and z
     if (!x_valid || !y_valid || !z_valid) {
       reward = -5;
+
+      if (quad_state_.p(QS::POSX) < world_box_[0] + safty_threshold) {
+        reward = -25.0;
+      }
       // std::cout << "terminate by box" << std::endl;
       // return true;
       bound_num += 1;
