@@ -489,25 +489,39 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
 
 
   if (control_feedthrough_) {
-    cmd_.p = act.segment<3>(0);
-    cmd_.v = act.segment<3>(3);
-    cmd_.yaw = act(6);
+    cmd_.p[0] = pi_act_(0);
+    cmd_.p[1] = pi_act_(1);
+    cmd_.p[2] = 1.0;
+    cmd_.v[0] = pi_act_(2);
+    cmd_.v[1] = pi_act_(3);
+    cmd_.v[2] = 0.0;
+    cmd_.yaw = pi_act_(4);
 
   } else if (momentum_bool_) {
-    cmd_.p = (1 - momentum_) * (pi_act_.segment<3>(0) + quad_state_.p) +
-             momentum_ * cmd_.p;
-    cmd_.v = (1 - momentum_) * (pi_act_.segment<3>(3) + quad_state_.v) +
-             momentum_ * cmd_.v;
-    cmd_.yaw = (1 - momentum_) * (pi_act_(6) + euler[2]) + momentum_ * cmd_.yaw;
+    cmd_.p[0] =
+      (1 - momentum_) * (pi_act_(0) + quad_state_.p[0]) + momentum_ * cmd_.p[0];
+    cmd_.p[1] =
+      (1 - momentum_) * (pi_act_(1) + quad_state_.p[1]) + momentum_ * cmd_.p[1];
+    cmd_.p[2] = 1.0;
+    cmd_.v[0] =
+      (1 - momentum_) * (pi_act_(2) + quad_state_.v[0]) + momentum_ * cmd_.v[0];
+    cmd_.v[1] =
+      (1 - momentum_) * (pi_act_(3) + quad_state_.v[1]) + momentum_ * cmd_.v[1];
+    cmd_.v[2] = 0.0;
+    cmd_.yaw = (1 - momentum_) * (pi_act_(4) + euler[2]) + momentum_ * cmd_.yaw;
     // std::cout << "momentum now" << std::endl;
   }
 
   else {
-    cmd_.p = pi_act_.segment<3>(0) + quad_state_.p;
-    cmd_.v = pi_act_.segment<3>(3) + quad_state_.v;
+    cmd_.p[0] = pi_act_(0) + quad_state_.p[0];
+    cmd_.p[1] = pi_act_(1) + quad_state_.p[1];
+    cmd_.p[2] = 1.0;
+    cmd_.v[0] = pi_act_(2) + quad_state_.v[0];
+    cmd_.v[1] = pi_act_(3) + quad_state_.v[1];
+    cmd_.v[2] = 0.0;
     // std::cout << "cmd_.v" << std::endl;
     // std::cout << cmd_.v << std::endl;
-    cmd_.yaw = pi_act_(6) + euler[2];
+    cmd_.yaw = pi_act_(4) + euler[2];
   }
 
   // std::cout << euler[2] << std::endl;
