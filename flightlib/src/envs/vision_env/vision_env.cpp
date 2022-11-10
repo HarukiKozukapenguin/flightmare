@@ -73,9 +73,8 @@ void VisionEnv::init() {
   // act_mean_ << (max_force / quad_ptr_->getMass()) / 2, 0.0, 0.0, 0.0;
   // act_std_ << (max_force / quad_ptr_->getMass()) / 2, max_omega.x(),
   //   max_omega.y(), max_omega.z();
-  act_mean_ << 0, 0, 0, 0, 0, 0, 0;
-  act_std_ << 0.6, 0.6, 0.3, 1.0, 1.0, 1.0,
-    0.1;  // set by my experience (cmd difference)
+  act_mean_ << 0, 0, 0, 0, 0;
+  act_std_ << 1.0, 1.0, 1.0, 1.0, 0.1;  // set by my experience (cmd difference)
 
   collide_num = 0;
   time_num = 0;
