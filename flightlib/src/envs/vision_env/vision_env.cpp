@@ -338,7 +338,7 @@ bool VisionEnv::getObstacleState(
 
   // std::cout << "obstacle_num is " << obstacle_num << std::endl;
   // std::cout << "getsphericalboxel is being called" << std::endl;
-  sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_v);
+  sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
 
   vel_obs_distance_ =
     get_vel_sphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
