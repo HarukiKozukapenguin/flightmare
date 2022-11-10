@@ -184,7 +184,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << act_, goal_linear_vel_, ori, quad_state_.p, normalized_p,
-    quad_state_.v, sphericalboxel, average_depth, quad_state_.w,
+    quad_state_.v, sphericalboxel, quad_state_.w,
     world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY),
     world_box_[4] - quad_state_.x(QS::POSZ),
