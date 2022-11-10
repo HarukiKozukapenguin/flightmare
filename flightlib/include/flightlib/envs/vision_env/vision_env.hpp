@@ -38,7 +38,8 @@ enum Vision : int {
   kNObstacles = 30,
   kNObstaclesState = 4,
 
-  Cuts = 8,
+  Theta_Cuts = 16,
+  Phi_Cuts = 4,
   RewardCuts = 5,
 
   // control actions
@@ -47,7 +48,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Cuts * Cuts + 3 + 4,
+  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Theta_Cuts * Phi_Cuts + 3 + 4,
 
 };
 }  // namespace visionenv
@@ -78,10 +79,10 @@ class VisionEnv final : public EnvBase {
   bool getDepthImage(Ref<DepthImgVector<>> img) override;
 
   bool getObstacleState(
-    Ref<Vector<visionenv::Cuts * visionenv::Cuts>> sphericalboxel,
+    Ref<Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts>> sphericalboxel,
     Ref<Vector<visionenv::kNObstaclesState * 1>> obs_state);
 
-  Vector<visionenv::Cuts * visionenv::Cuts> getsphericalboxel(
+  Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> getsphericalboxel(
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
       &pos_b_list,
     const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
@@ -188,7 +189,8 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> relative_2d_pos_norm_;
   std::vector<Scalar> obstacle_radius_;
   Scalar tree_size_;
-
+  std::vector<Scalar> theta_list_;
+  std::vector<Scalar> phi_list_;
 
   int num_detected_obstacles_;
   std::vector<std::string> difficulty_level_list_;

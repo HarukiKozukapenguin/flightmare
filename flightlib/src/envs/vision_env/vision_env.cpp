@@ -144,7 +144,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
 
 void VisionEnv::init_isCollision(void) {
-  Vector<visionenv::Cuts * visionenv::Cuts> unused1;
+  Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> unused1;
   Vector<visionenv::kNObstaclesState> unused2;
   getObstacleState(
     unused1, unused2);  // change "is_collision_" depending on current state
@@ -163,15 +163,15 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // std::cout << "ori is called" << std::endl;
 
   // get N most closest obstacles as the observation
-  Vector<visionenv::Cuts * visionenv::Cuts> sphericalboxel;
+  Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> sphericalboxel;
   Vector<visionenv::kNObstaclesState> unused;
   // std::cout << "getObstacleState is being called" << std::endl;
   getObstacleState(sphericalboxel, unused);
   Scalar average_depth = 0;
-  for (int i = 0; i < visionenv::Cuts * visionenv::Cuts; i++) {
+  for (int i = 0; i < visionenv::Theta_Cuts * visionenv::Phi_Cuts; i++) {
     average_depth += sphericalboxel[i];
   }
-  average_depth /= visionenv::Cuts * visionenv::Cuts;
+  average_depth /= visionenv::Theta_Cuts * visionenv::Phi_Cuts;
 
   // std::cout << "getObstacleState is called" << std::endl;
 
@@ -194,7 +194,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
 }
 
 bool VisionEnv::getObstacleState(
-  Ref<Vector<visionenv::Cuts * visionenv::Cuts>> sphericalboxel,
+  Ref<Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts>> sphericalboxel,
   Ref<Vector<visionenv::kNObstaclesState>> obs_state) {
   // Scalar safty_threshold = 0.2;
   if (static_objects_.size() < 0) {
@@ -345,16 +345,27 @@ bool VisionEnv::getObstacleState(
   return true;
 }
 
-Vector<visionenv::Cuts * visionenv::Cuts> VisionEnv::getsphericalboxel(
+Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts>
+VisionEnv::getsphericalboxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
-  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v) {
-  Vector<visionenv::Cuts * visionenv::Cuts> obstacle_obs;
-  for (int t = -visionenv::Cuts / 2; t < visionenv::Cuts / 2; ++t) {
-    for (int p = -visionenv::Cuts / 2; p < visionenv::Cuts / 2; ++p) {
-      Scalar tcell = (t + 0.5) * (PI / visionenv::Cuts) / 2;
-      Scalar fcell = (p + 0.5) * (PI / visionenv::Cuts) / 2;
-      obstacle_obs[(t + visionenv::Cuts / 2) * visionenv::Cuts +
-                   (p + visionenv::Cuts / 2)] =
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+  const Matrix<3, 3> &R_T) {
+  Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
+  Vector<3> body_vel = R_T * vel_2d;
+  Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
+  Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2) +
+                                                     std::pow(body_vel[1], 2)));
+
+  Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> obstacle_obs;
+  for (int t = -visionenv::Theta_Cuts / 2; t < visionenv::Theta_Cuts / 2; ++t) {
+    Scalar theta = (t >= 0) ? theta_list_[t] : -theta_list_[(-t) - 1];  //[deg]
+    for (int p = -visionenv::Phi_Cuts / 2; p < visionenv::Phi_Cuts / 2; ++p) {
+      Scalar phi = (p >= 0) ? phi_list_[p] : -phi_list_[(-p) - 1];  //[deg]
+
+      Scalar tcell = theta * (PI / 180) + vel_theta;
+      Scalar fcell = phi * (PI / 180) + vel_phi;
+      obstacle_obs[(t + visionenv::Theta_Cuts / 2) * visionenv::Phi_Cuts +
+                   (p + visionenv::Phi_Cuts / 2)] =
         getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, fcell);
     }
   }
@@ -818,6 +829,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
     momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
+    theta_list_ = cfg["environment"]["theta_list"].as<std::vector<Scalar>>();
+    phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
   }
 
   if (cfg["simulation"]) {
