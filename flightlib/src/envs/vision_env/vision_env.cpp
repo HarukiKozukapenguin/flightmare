@@ -352,9 +352,11 @@ VisionEnv::getsphericalboxel(
   const Matrix<3, 3> &R_T) {
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
   Vector<3> body_vel = R_T * vel_2d;
-  Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
-  Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2) +
-                                                     std::pow(body_vel[1], 2)));
+  // Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
+  // Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2)
+  // +
+  //                                                    std::pow(body_vel[1],
+  //                                                    2)));
 
   Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> obstacle_obs;
   for (int t = -visionenv::Theta_Cuts / 2; t < visionenv::Theta_Cuts / 2; ++t) {
@@ -362,8 +364,8 @@ VisionEnv::getsphericalboxel(
     for (int p = -visionenv::Phi_Cuts / 2; p < visionenv::Phi_Cuts / 2; ++p) {
       Scalar phi = (p >= 0) ? phi_list_[p] : -phi_list_[(-p) - 1];  //[deg]
 
-      Scalar tcell = theta * (PI / 180) + vel_theta;
-      Scalar fcell = phi * (PI / 180) + vel_phi;
+      Scalar tcell = theta * (PI / 180);
+      Scalar fcell = phi * (PI / 180);
       obstacle_obs[(t + visionenv::Theta_Cuts / 2) * visionenv::Phi_Cuts +
                    (p + visionenv::Phi_Cuts / 2)] =
         getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, fcell);
