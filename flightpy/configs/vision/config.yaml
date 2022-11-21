@@ -1,7 +1,7 @@
 environment:
   level: ["HYDRUS_tree_1"]
   env_folder: 0 # beginning of env
-  world_box: [-0.3, 70, -1.5, 1.5, 0.2, 2]
+  world_box: [-0.3, 70, -5.0, 5.0, 0.2, 2]
   tree_size: 0.15
   y_lim: [1,10]
   z_lim: [2,10]
@@ -35,7 +35,7 @@ rewards:
   dist_margin: 2
   angular_vel_coeff: -0.0001
   survive_rew: 0.03
-  world_box_coeff: [-0.0005, -0.002] # y,z
+  world_box_coeff:  [-0.0008,-0.0001] # y,z
   attitude_coeff: -0.025
   command_coeff: [-0.000005, -0.000025, -0.000025, -0.0001, -0.0001, -0.0001, -0.00005]
   attitude_vel_coeff: -5.0
