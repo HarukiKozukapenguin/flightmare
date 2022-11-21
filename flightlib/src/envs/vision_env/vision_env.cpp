@@ -66,6 +66,8 @@ void VisionEnv::init() {
   }
   changeLevel();
 
+  set_collision_point();
+
   // use single rotor control or bodyrate control
   // Scalar max_force = quad_ptr_->getDynamics().getForceMax();
   // Vector<3> max_omega = quad_ptr_->getDynamics().getOmegaMax();
@@ -245,29 +247,52 @@ bool VisionEnv::getObstacleState(
   // std::cout << "get dynamic_objects_" << std::endl;
 
   // compute relatiev distance to static obstacles
+  Matrix<3, 3> R = quad_state_.R();
   for (int i = 0; i < (int)static_objects_.size(); i++) {
     // compute relative position vector
     Vector<3> delta_pos = static_objects_[i]->getPos() - quad_state_.p;
     relative_pos.push_back(delta_pos);
-
-    // compute relative distance
-    Scalar obstacle_dist = delta_pos.norm();
     Scalar obstacle_2d_dist =
       std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));
-    if (obstacle_dist > max_detection_range_) {
-      obstacle_dist = max_detection_range_;
+
+    if (obstacle_2d_dist > max_detection_range_) {
+      obstacle_2d_dist = max_detection_range_;
     }
-    relative_pos_norm_.push_back(obstacle_dist);
     relative_2d_pos_norm_.push_back(obstacle_2d_dist);
 
-
-    // store the obstacle radius
     Scalar obs_radius = static_objects_[i]->getScale()[0];
-    // obs_radius = obs_radius / 2;
-
     obstacle_radius_.push_back(obs_radius);
-    if (obstacle_2d_dist < obs_radius + quad_size_) {
-      is_collision_ = true;
+
+    for (Eigen::Vector2d C : C_list_) {
+      Vector<3> corner_pos{C(0), C(1), 0};
+      Vector<3> c_delta_pos =
+        static_objects_[i]->getPos() - (quad_state_.p + R * corner_pos);
+
+      // compute relative distance
+      Scalar c_obstacle_2d_dist =
+        std::sqrt(std::pow(c_delta_pos[0], 2) + std::pow(c_delta_pos[1], 2));
+      if (c_obstacle_2d_dist > max_detection_range_) {
+        c_obstacle_2d_dist = max_detection_range_;
+      }
+      if (c_obstacle_2d_dist < obs_radius) {
+        is_collision_ = true;
+      }
+    }
+
+    for (Eigen::Vector2d rotor : R_list_) {
+      Vector<3> corner_pos{rotor(0), rotor(1), 0};
+      Vector<3> r_delta_pos =
+        static_objects_[i]->getPos() - (quad_state_.p + R * corner_pos);
+
+      // compute relative distance
+      Scalar r_obstacle_2d_dist =
+        std::sqrt(std::pow(r_delta_pos[0], 2) + std::pow(r_delta_pos[1], 2));
+      if (r_obstacle_2d_dist > max_detection_range_) {
+        r_obstacle_2d_dist = max_detection_range_;
+      }
+      if (r_obstacle_2d_dist < obs_radius + hydrus_r_) {
+        is_collision_ = true;
+      }
     }
   }
 
@@ -279,7 +304,6 @@ bool VisionEnv::getObstacleState(
   std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> pos_b_list;
   std::vector<Scalar> pos_norm_list;
   std::vector<Scalar> obs_radius_list;
-  Matrix<3, 3> R = quad_state_.R();
   Matrix<3, 3> R_T = R.transpose();
   Vector<3> poll_v(R_T(0, 2), R_T(1, 2), R_T(2, 2));
 
@@ -350,8 +374,8 @@ VisionEnv::getsphericalboxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
   const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
   const Matrix<3, 3> &R_T) {
-  Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
-  Vector<3> body_vel = R_T * vel_2d;
+  // Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
+  // Vector<3> body_vel = R_T * vel_2d;
   // Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
   // Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2)
   // +
@@ -831,6 +855,11 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
     theta_list_ = cfg["environment"]["theta_list"].as<std::vector<Scalar>>();
     phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
+
+    hydrus_theta_ =
+      cfg["environment"]["hydrus_theta"].as<std::vector<Scalar>>();
+    hydrus_l_ = cfg["environment"]["hydrus_l"].as<Scalar>();
+    hydrus_r_ = cfg["environment"]["hydrus_r"].as<Scalar>();
   }
 
   if (cfg["simulation"]) {
@@ -937,6 +966,53 @@ bool VisionEnv::chooseLevel() {
   // std::mt19937 gen(rd());
   // int rand_int_ = gen() % size_;
   difficulty_level_ = difficulty_level_list_[0];
+  return true;
+}
+
+bool VisionEnv::set_collision_point() {
+  Scalar theta_1 = hydrus_theta_[0] * M_PI / 180;
+  Scalar theta_2 = hydrus_theta_[1] * M_PI / 180;
+  Scalar theta_3 = hydrus_theta_[2] * M_PI / 180;
+
+  Eigen::Vector2d bR2(0.0, 0.0);
+  Eigen::Vector2d bC2(-hydrus_l_ / 2, 0.0);
+  Eigen::Vector2d bC2TobR1(hydrus_l_ / 2 * (-std::cos(theta_1)),
+                           hydrus_l_ / 2 * (std::sin(theta_1)));
+  Eigen::Vector2d bR1 = bC2 + bC2TobR1;
+  Eigen::Vector2d bC1 = bC2 + 2 * bC2TobR1;
+
+  Eigen::Vector2d bC3(hydrus_l_ / 2, 0.0);
+  Eigen::Vector2d bC3TobR3(hydrus_l_ / 2 * (std::cos(theta_2)),
+                           hydrus_l_ / 2 * (std::sin(theta_2)));
+  Eigen::Vector2d bR3 = bC3 + bC3TobR3;
+  Eigen::Vector2d bC4 = bC3 + 2 * bC3TobR3;
+
+  Eigen::Vector2d bC4TobR4(hydrus_l_ / 2 * (std::cos(theta_2 + theta_3)),
+                           hydrus_l_ / 2 * (std::sin(theta_2 + theta_3)));
+  Eigen::Vector2d bR4 = bC4 + bC4TobR4;
+  Eigen::Vector2d bC5 = bC4 + 2 * bC4TobR4;
+
+  Eigen::Vector2d CG = (bR1 + bR2 + bR3 + bR4) / 4;
+
+  Eigen::Vector2d C1 = bC1 - CG;
+  C_list_.push_back(C1);
+  Eigen::Vector2d R1 = bR1 - CG;
+  R_list_.push_back(R1);
+  Eigen::Vector2d C2 = bC2 - CG;
+  C_list_.push_back(C2);
+  Eigen::Vector2d R2 = bR2 - CG;
+  R_list_.push_back(R2);
+  Eigen::Vector2d C3 = bC3 - CG;
+  C_list_.push_back(C3);
+  Eigen::Vector2d R3 = bR3 - CG;
+  R_list_.push_back(R3);
+  Eigen::Vector2d C4 = bC4 - CG;
+  C_list_.push_back(C4);
+  Eigen::Vector2d R4 = bR4 - CG;
+  R_list_.push_back(R4);
+  Eigen::Vector2d C5 = bC5 - CG;
+  C_list_.push_back(C5);
+
   return true;
 }
 

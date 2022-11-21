@@ -120,6 +120,7 @@ class VisionEnv final : public EnvBase {
   bool configCamera(const YAML::Node &cfg_node);
   bool changeLevel();
   bool chooseLevel();
+  bool set_collision_point();
   bool configDynamicObjects(const std::string &yaml_file);
   bool configStaticObjects(const std::string &csv_file);
 
@@ -191,6 +192,13 @@ class VisionEnv final : public EnvBase {
   Scalar tree_size_;
   std::vector<Scalar> theta_list_;
   std::vector<Scalar> phi_list_;
+
+  std::vector<Scalar> hydrus_theta_;
+  Scalar hydrus_l_;
+  Scalar hydrus_r_;
+
+  std::vector<Eigen::Vector2d> C_list_;
+  std::vector<Eigen::Vector2d> R_list_;
 
   int num_detected_obstacles_;
   std::vector<std::string> difficulty_level_list_;
