@@ -263,6 +263,8 @@ bool VisionEnv::getObstacleState(
     Scalar obs_radius = static_objects_[i]->getScale()[0];
     obstacle_radius_.push_back(obs_radius);
 
+    int c_num = 1;
+
     for (Eigen::Vector2d C : C_list_) {
       Vector<3> corner_pos{C(0), C(1), 0};
       Vector<3> c_delta_pos =
@@ -276,9 +278,14 @@ bool VisionEnv::getObstacleState(
       }
       if (c_obstacle_2d_dist < obs_radius) {
         is_collision_ = true;
+        if (fly_result_) {
+          std::cout << "collide c_" << c_num << std::endl;
+        }
       }
+      c_num++;
     }
 
+    int r_num = 1;
     for (Eigen::Vector2d rotor : R_list_) {
       Vector<3> corner_pos{rotor(0), rotor(1), 0};
       Vector<3> r_delta_pos =
@@ -292,7 +299,11 @@ bool VisionEnv::getObstacleState(
       }
       if (r_obstacle_2d_dist < obs_radius + hydrus_r_) {
         is_collision_ = true;
+        if (fly_result_) {
+          std::cout << "collide r_" << r_num << std::endl;
+        }
       }
+      r_num++;
     }
   }
 
