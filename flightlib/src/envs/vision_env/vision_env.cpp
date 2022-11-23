@@ -76,7 +76,7 @@ void VisionEnv::init() {
   // act_std_ << (max_force / quad_ptr_->getMass()) / 2, max_omega.x(),
   //   max_omega.y(), max_omega.z();
   act_mean_ << 0, 0, 0;
-  act_std_ << 1.0, 1.0, 0.1;  // set by my experience (cmd difference)
+  act_std_ << 1.0, 1.0, 0.3;  // set by my experience (cmd difference)
 
   collide_num = 0;
   time_num = 0;
@@ -148,8 +148,8 @@ bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
 void VisionEnv::init_isCollision(void) {
   Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> unused1;
   Vector<visionenv::kNObstaclesState> unused2;
-  getObstacleState(
-    unused1, unused2);  // change "is_collision_" depending on current state
+  getObstacleState(unused1, unused2,
+                   false);  // change "is_collision_" depending on current state
 }
 
 bool VisionEnv::getObs(Ref<Vector<>> obs) {
@@ -168,7 +168,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> sphericalboxel;
   Vector<visionenv::kNObstaclesState> unused;
   // std::cout << "getObstacleState is being called" << std::endl;
-  getObstacleState(sphericalboxel, unused);
+  getObstacleState(sphericalboxel, unused, true);
   Scalar average_depth = 0;
   for (int i = 0; i < visionenv::Theta_Cuts * visionenv::Phi_Cuts; i++) {
     average_depth += sphericalboxel[i];
@@ -197,7 +197,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
 
 bool VisionEnv::getObstacleState(
   Ref<Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts>> sphericalboxel,
-  Ref<Vector<visionenv::kNObstaclesState>> obs_state) {
+  Ref<Vector<visionenv::kNObstaclesState>> obs_state, bool is_running) {
   // Scalar safty_threshold = 0.2;
   if (static_objects_.size() < 0) {
     logger_.error("No dynamic or static obstacles.");
@@ -265,6 +265,7 @@ bool VisionEnv::getObstacleState(
 
     int c_num = 1;
 
+    std::vector<int> c_collide;
     for (Eigen::Vector2d C : C_list_) {
       Vector<3> corner_pos{C(0), C(1), 0};
       Vector<3> c_delta_pos =
@@ -279,13 +280,14 @@ bool VisionEnv::getObstacleState(
       if (c_obstacle_2d_dist < obs_radius) {
         is_collision_ = true;
         if (fly_result_) {
-          std::cout << "collide c_" << c_num << std::endl;
+          c_collide.push_back(c_num);
         }
       }
       c_num++;
     }
 
     int r_num = 1;
+    std::vector<int> r_collide;
     for (Eigen::Vector2d rotor : R_list_) {
       Vector<3> corner_pos{rotor(0), rotor(1), 0};
       Vector<3> r_delta_pos =
@@ -300,10 +302,19 @@ bool VisionEnv::getObstacleState(
       if (r_obstacle_2d_dist < obs_radius + hydrus_r_) {
         is_collision_ = true;
         if (fly_result_) {
-          std::cout << "collide r_" << r_num << std::endl;
+          r_collide.push_back(r_num);
         }
       }
       r_num++;
+    }
+
+    if (is_running) {
+      for (int i : c_collide) {
+        std::cout << "collide c_" << i << std::endl;
+      }
+      for (int i : r_collide) {
+        std::cout << "collide r_" << i << std::endl;
+      }
     }
   }
 

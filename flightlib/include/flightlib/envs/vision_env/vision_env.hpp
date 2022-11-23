@@ -38,7 +38,7 @@ enum Vision : int {
   kNObstacles = 30,
   kNObstaclesState = 4,
 
-  Theta_Cuts = 16,
+  Theta_Cuts = 22,
   Phi_Cuts = 2,
   RewardCuts = 5,
 
@@ -80,7 +80,7 @@ class VisionEnv final : public EnvBase {
 
   bool getObstacleState(
     Ref<Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts>> sphericalboxel,
-    Ref<Vector<visionenv::kNObstaclesState * 1>> obs_state);
+    Ref<Vector<visionenv::kNObstaclesState * 1>> obs_state, bool is_running);
 
   Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> getsphericalboxel(
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
