@@ -69,7 +69,7 @@ class FlightEnvVec(VecEnv):
         self.obs_rms = RunningMeanStd(shape=[self.num_envs, self.obs_dim])
         self.obs_rms_new = RunningMeanStd(shape=[self.num_envs, self.obs_dim])
 
-        self.max_episode_steps = 1000
+        self.max_episode_steps = 3000
         # VecEnv.__init__(self, self.num_envs,
         #                 self._observation_space, self._action_space)
 
