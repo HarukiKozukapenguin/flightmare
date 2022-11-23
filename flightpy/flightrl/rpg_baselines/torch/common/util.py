@@ -8,6 +8,9 @@ import statistics
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import csv
+from scipy.spatial.transform import Rotation as R
+import matplotlib.patches as patches
+import matplotlib.collections as mc
 
 columns = [
     "episode_id",
@@ -102,18 +105,53 @@ def plot3d_traj(ax3d, pos, vel):
     # z_f = (zmax - zmin) / (xmax - xmin)
     # ax3d.set_box_aspect((x_f, y_f * 2, z_f * 2))
 
+def set_collision_point(hydrus_theta: list, hydrus_l: float) -> tuple:
+    theta = [np.deg2rad(i) for i in hydrus_theta] # from deg to rad
+    bR2 = np.array([0.0,0.0])
+    bC2 = np.array([-hydrus_l/2,0.0])
+    bC2ToR1 = np.array([-hydrus_l/2*np.cos(theta[0]),hydrus_l/2*np.sin(theta[0])])
+    bR1 = bC2+bC2ToR1
+    bC1 = bC2+bC2ToR1*2
+    bC3 = np.array([hydrus_l/2,0.0])
+    bC3ToR3 = np.array([hydrus_l/2*np.cos(theta[1]),hydrus_l/2*np.sin(theta[1])])
+    bR3 = bC3+bC3ToR3
+    bC4 = bC3+bC3ToR3*2
+    bC4ToR4 = np.array([hydrus_l/2*np.cos(theta[1]+theta[2]),hydrus_l/2*np.sin(theta[1]+theta[2])])
+    bR4 = bC4+bC4ToR4
+    bC5 = bC4+bC4ToR4*2
+    CG = (bR1+bR2+bR3+bR4)/4
+
+    print("CG: ",CG)
+
+    C_list = [bC1-CG,bC2-CG,bC3-CG,bC4-CG,bC5-CG]
+    R_list = [bR1-CG,bR2-CG,bR3-CG,bR4-CG]
+
+    C_list = [pos.reshape(2, 1) for pos in C_list]
+    R_list = [pos.reshape(2, 1) for pos in R_list]
+
+    return C_list,R_list
+
+
 def test_policy(env, model, render=False):
     max_ep_length = env.max_episode_steps
     num_rollouts = 100
     frame_id = 0
     final_x_list = []
     ave_vel_list = []
-    act_diff_sum = np.zeros(7)
+    act_diff_sum = np.zeros(3)
     # print(act_diff_sum.shape)
-    act = np.zeros(7)
-    past_act = np.zeros(7)
+    act = np.zeros(3)
+    past_act = np.zeros(3)
     step_num = 0
     tilt = 0
+
+    # parameters to show hydrus when they're done
+    hydrus_theta = [0,60,0]
+    hydrus_l = 0.6
+    hydrus_r = 0.2
+
+    C_list, R_list = set_collision_point(hydrus_theta,hydrus_l)
+
     if render:
         env.connectUnity()
     for n_roll in range(num_rollouts):
@@ -122,12 +160,14 @@ def test_policy(env, model, render=False):
         final_t = 0
         lstm_states = None
 
+        figure, axes = plt.subplots()
+
         if render:
             x_list=[]
             y_list=[]
             vel_list=[]
-            path = os.environ["FLIGHTMARE_PATH"]+"/flightpy/configs/vision/real_tree_medium/environment_"+"0"+"/"
-            figure, axes = plt.subplots()
+            path = os.environ["FLIGHTMARE_PATH"]+"/flightpy/configs/vision/HYDRUS_tree_2/environment_"+"490"+"/"
+            
             with open(path+'static_obstacles.csv') as f:
                 reader = csv.reader(f)
                 for row in reader:
@@ -136,14 +176,14 @@ def test_policy(env, model, render=False):
                     r = float(row[8]) #+body_size
                     draw_circle = plt.Circle((x, y), r)
                     axes.add_artist(draw_circle)
-            plt.ylim([-1.5, 1.5])
+            plt.ylim([-5.0, 5.0])
 
         while not (done or (ep_len >= max_ep_length)):
             # print(obs)
             past_act = act
             act, lstm_states = model.predict(obs, state = lstm_states, deterministic=True)
             # https://sb3-contrib.readthedocs.io/en/master/modules/ppo_recurrent.html#sb3_contrib.ppo_recurrent.RecurrentPPO
-            act = act.reshape(7)
+            act = act.reshape(3)
             # print(act.shape)
             # print(past_act.shape)
             # print(act_diff_sum.shape)
@@ -194,6 +234,17 @@ def test_policy(env, model, render=False):
                 vel_list.append(np.sqrt(env.getQuadState()[0][9]**2+env.getQuadState()[0][10]**2))
 
             if done:
+                r = R.from_quat([quaternion[0], quaternion[1], 
+                quaternion[2], quaternion[3]])
+                euler = r.as_euler('zyx')
+                print("euler: ",euler)
+                final_yaw = euler[0]
+                r = np.array([
+                    [np.cos(final_yaw), -np.sin(final_yaw)],
+                    [np.sin(final_yaw), np.cos(final_yaw)]
+                ])
+
+
                 if final_x == 0:
                     # reset the test, becuase the drone collide with object in the initial state
                     obs, done, ep_len = env.reset(), False, 0
@@ -205,19 +256,42 @@ def test_policy(env, model, render=False):
                 print("final x: {}".format(final_x))
                 ave_vel_list.append(final_x/final_t)
                 print("ave vel: {}".format(final_x/final_t))
+
+                final_pos = np.array([
+                    [final_x],
+                    [final_y]
+                    ])
+
                 if render:
-                    plt.xlim(right=final_x+5)
+                    plt.xlim(final_x-5,final_x+5)
+                    # plt.ylim(final_y-5,final_y+5)
                     plt.scatter(x_list,y_list,
                         c=vel_list,
                         cmap=cm.jet,
                         marker='.',lw=0)
-                    ax=plt.colorbar()
-                    ax.set_label('vel [m/s]')
+                    # ax=plt.colorbar()
+                    # ax.set_label('vel [m/s]')
+
+                    edge_list = [final_pos + r @ pos for pos in C_list]
+                    lines = [[(edge_list[i][0,0],edge_list[i][1,0]),(edge_list[i+1][0,0],edge_list[i+1][1,0])]
+                    for i in range(len(edge_list)-1)]
+                    lc = mc.LineCollection(lines, colors = "g",linewidths=2)
+                    axes.add_collection(lc)
+
+                    rotor_list = [final_pos + r @ pos for pos in R_list]
+                    # axes = plt.axes()
+                    for rotor in rotor_list:
+                        c = patches.Circle(xy=(rotor[0,0], rotor[1,0]), radius=hydrus_r, fc="none", ec='r')
+                        axes.add_patch(c)
+
                     plt.show()
                     # https://villageofsound.hatenadiary.jp/entry/2015/09/13/010352
             else:
-                final_x = env.getQuadState()[0][1]
                 final_t = env.getQuadState()[0][0]
+                final_x = env.getQuadState()[0][1]
+                final_y = env.getQuadState()[0][2]
+                quaternion = [env.getQuadState()[0][4],env.getQuadState()[0][5],
+                env.getQuadState()[0][6],env.getQuadState()[0][7]]
 
             ep_len += 1
             frame_id += 1
