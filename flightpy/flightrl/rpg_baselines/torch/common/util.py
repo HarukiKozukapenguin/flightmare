@@ -166,6 +166,7 @@ def test_policy(env, model, render=False):
             x_list=[]
             y_list=[]
             vel_list=[]
+            yaw_list=[]
             path = os.environ["FLIGHTMARE_PATH"]+"/flightpy/configs/vision/HYDRUS_tree_2/environment_"+"490"+"/"
             
             with open(path+'static_obstacles.csv') as f:
@@ -232,6 +233,14 @@ def test_policy(env, model, render=False):
                 x_list.append(env.getQuadState()[0][1])
                 y_list.append(env.getQuadState()[0][2])
                 vel_list.append(np.sqrt(env.getQuadState()[0][9]**2+env.getQuadState()[0][10]**2))
+                quaternion = [env.getQuadState()[0][4],env.getQuadState()[0][5],
+                env.getQuadState()[0][6],env.getQuadState()[0][7]]
+                r = R.from_quat([quaternion[0], quaternion[1], 
+                quaternion[2], quaternion[3]])
+                euler = r.as_euler('zyx')
+                # print("euler: ",euler)
+                yaw_list.append(euler[0])
+                
 
             if done:
                 r = R.from_quat([quaternion[0], quaternion[1], 
@@ -284,6 +293,9 @@ def test_policy(env, model, render=False):
                         c = patches.Circle(xy=(rotor[0,0], rotor[1,0]), radius=hydrus_r, fc="none", ec='r')
                         axes.add_patch(c)
 
+                    plt.show()
+
+                    plt.plot(yaw_list)
                     plt.show()
                     # https://villageofsound.hatenadiary.jp/entry/2015/09/13/010352
             else:
