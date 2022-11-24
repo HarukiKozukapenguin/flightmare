@@ -41,6 +41,8 @@ enum Vision : int {
   Theta_Cuts = 22,
   Phi_Cuts = 2,
   RewardCuts = 5,
+  CornerNum = 5,
+  RotorNum = 4,
 
   // control actions
   kAct = 0,
@@ -48,7 +50,8 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Theta_Cuts * Phi_Cuts + 3 + 4,
+  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Theta_Cuts * Phi_Cuts + CornerNum +
+          RotorNum + 3 + 4,
 
 };
 }  // namespace visionenv
@@ -102,6 +105,12 @@ class VisionEnv final : public EnvBase {
       &pos_b_list,
     const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
     const Matrix<3, 3> &R_T) const;
+
+  void get_hydrus_sphericalboxel(
+    const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
+      &pos_b_list,
+    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+    const Matrix<3, 3> &R_T);
 
   // get quadrotor states
   bool getQuadAct(Ref<Vector<>> act) const;
@@ -167,8 +176,8 @@ class VisionEnv final : public EnvBase {
 
   // Define reward for training
   Scalar move_coeff_, vel_coeff_, collision_coeff_, vel_collision_coeff_,
-    vel_collision_angle_max_, collision_exp_coeff_, angular_vel_coeff_,
-    survive_rew_, dist_margin_;
+    vel_hydrus_collision_coeff_, vel_collision_angle_max_, collision_exp_coeff_,
+    angular_vel_coeff_, survive_rew_, dist_margin_;
   std::vector<Scalar> world_box_coeff_;
   Scalar attitude_coeff_;
   std::vector<Scalar> command_coeff_;
@@ -176,6 +185,10 @@ class VisionEnv final : public EnvBase {
   Vector<3> goal_linear_vel_;
   bool is_collision_;
   Vector<visionenv::RewardCuts * visionenv::RewardCuts> vel_obs_distance_;
+  Vector<visionenv::CornerNum> C_vel_obs_distance_;
+  Vector<visionenv::RotorNum> R_vel_obs_distance_;
+  Vector<visionenv::CornerNum> C_vel_;
+  Vector<visionenv::RotorNum> R_vel_;
 
   size_t obstacle_num_;
 

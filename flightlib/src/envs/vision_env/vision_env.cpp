@@ -186,8 +186,8 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << act_, goal_linear_vel_, ori, quad_state_.p, normalized_p,
-    quad_state_.v, sphericalboxel, quad_state_.w,
-    world_box_[2] - quad_state_.x(QS::POSY),
+    quad_state_.v, sphericalboxel, C_vel_obs_distance_, R_vel_obs_distance_,
+    quad_state_.w, world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY),
     world_box_[4] - quad_state_.x(QS::POSZ),
     world_box_[5] - quad_state_.x(QS::POSZ);
@@ -388,6 +388,9 @@ bool VisionEnv::getObstacleState(
   vel_obs_distance_ =
     get_vel_sphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
 
+
+  get_hydrus_sphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
+
   return true;
 }
 
@@ -503,6 +506,56 @@ VisionEnv::get_vel_sphericalboxel(
     }
   }
   return vel_obstacle_obs;
+}
+
+void VisionEnv::get_hydrus_sphericalboxel(
+  const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+  const Matrix<3, 3> &R_T) {
+  for (size_t i = 0; i < C_list_.size(); i++) {
+    Vector<3> b_p_ref{C_list_[i](0), C_list_[i](1), 0};
+    std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> pos_from_corner;
+    for (Vector<3> pos : pos_b_list) {
+      pos_from_corner.push_back(pos - b_p_ref);
+    }
+    Vector<3> w_vel =
+      quad_state_.v + (quad_state_.w).cross((quad_state_.R()) * b_p_ref);
+    Vector<3> w_vel_2d = {w_vel[0], w_vel[1], 0};
+    C_vel_[i] = w_vel_2d.norm();
+
+    Vector<3> body_vel = R_T * w_vel_2d;
+    Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
+    Scalar vel_phi =
+      std::atan(body_vel[2] /
+                std::sqrt(std::pow(body_vel[0], 2) + std::pow(body_vel[1], 2)));
+
+    C_vel_obs_distance_[i] =
+      getClosestDistance(pos_from_corner, obs_radius_list, poll_v, vel_theta,
+                         vel_phi) *
+      max_detection_range_;
+  }
+  for (size_t i = 0; i < R_list_.size(); i++) {
+    Vector<3> b_p_ref{R_list_[i](0), R_list_[i](1), 0};
+    std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> pos_from_corner;
+    for (Vector<3> pos : pos_b_list) {
+      pos_from_corner.push_back(pos - b_p_ref);
+    }
+    Vector<3> w_vel =
+      quad_state_.v + (quad_state_.w).cross((quad_state_.R()) * b_p_ref);
+    Vector<3> w_vel_2d = {w_vel[0], w_vel[1], 0};
+    R_vel_[i] = w_vel_2d.norm();
+
+    Vector<3> body_vel = R_T * w_vel_2d;
+    Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
+    Scalar vel_phi =
+      std::atan(body_vel[2] /
+                std::sqrt(std::pow(body_vel[0], 2) + std::pow(body_vel[1], 2)));
+
+    R_vel_obs_distance_[i] =
+      getClosestDistance(pos_from_corner, obs_radius_list, poll_v, vel_theta,
+                         vel_phi) *
+      max_detection_range_;
+  }
 }
 
 // void VisionEnv::comp(Scalar &rmin, Scalar r) {
@@ -658,6 +711,25 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
                              std::exp(-angle_discount_factor);
   }
 
+  Scalar vel_hydrus_collision_penalty = 0;
+  for (size_t i = 0; i < C_list_.size(); i++) {
+    Scalar vel_obs_dist = C_vel_obs_distance_[i];
+    double vel =
+      C_vel_[i];  // content of C_vel_ is setted as double (norm of velocity)
+    vel_hydrus_collision_penalty +=
+      vel_hydrus_collision_coeff_ * std::pow(vel, 2) *
+      std::exp(-collision_exp_coeff_ * vel_obs_dist);
+  }
+  for (size_t i = 0; i < R_list_.size(); i++) {
+    Scalar vel_obs_dist = R_vel_obs_distance_[i];
+    double vel =
+      R_vel_[i];  // content of R_vel_ is setted as double (norm of velocity)
+    vel_hydrus_collision_penalty +=
+      vel_hydrus_collision_coeff_ * std::pow(vel, 2) *
+      std::exp(-collision_exp_coeff_ * vel_obs_dist);
+  }
+
+
   // std::cout << vel_collision_penalty << std::endl;
   // std::cout << "collision_penalty is " << collision_penalty << std::endl;
   // std::cout << ' ' << std::endl;
@@ -703,14 +775,16 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   //  change progress reward as survive reward
   const Scalar total_reward =
     move_reward + lin_vel_reward + collision_penalty + vel_collision_penalty +
-    ang_vel_penalty + survive_rew_ + world_box_penalty + attitude_penalty +
-    command_penalty + attitude_vel_penalty;
+    vel_hydrus_collision_penalty + ang_vel_penalty + survive_rew_ +
+    world_box_penalty + attitude_penalty + command_penalty +
+    attitude_vel_penalty;
 
   // return all reward components for debug purposes
   // only the total reward is used by the RL algorithm
   reward << move_reward, lin_vel_reward, collision_penalty,
-    vel_collision_penalty, ang_vel_penalty, survive_rew_, world_box_penalty,
-    attitude_penalty, command_penalty, attitude_vel_penalty, total_reward;
+    vel_collision_penalty, vel_hydrus_collision_penalty, ang_vel_penalty,
+    survive_rew_, world_box_penalty, attitude_penalty, command_penalty,
+    attitude_vel_penalty, total_reward;
   return true;
 }
 
@@ -898,6 +972,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     vel_coeff_ = cfg["rewards"]["vel_coeff"].as<Scalar>();
     collision_coeff_ = cfg["rewards"]["collision_coeff"].as<Scalar>();
     vel_collision_coeff_ = cfg["rewards"]["vel_collision_coeff"].as<Scalar>();
+    vel_hydrus_collision_coeff_ =
+      cfg["rewards"]["vel_hydrus_collision_coeff"].as<Scalar>();
     vel_collision_angle_max_ =
       cfg["rewards"]["vel_collision_angle_max"].as<Scalar>() * M_PI /
       180;  // vel_collision_angle_max_ [rad]
