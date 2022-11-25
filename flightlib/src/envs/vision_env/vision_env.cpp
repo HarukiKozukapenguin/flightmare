@@ -554,7 +554,9 @@ void VisionEnv::get_hydrus_sphericalboxel(
     R_vel_obs_distance_[i] =
       getClosestDistance(pos_from_corner, obs_radius_list, poll_v, vel_theta,
                          vel_phi) *
-      max_detection_range_;
+        max_detection_range_ -
+      hydrus_r_;  // this is distance from out of rotor and obstacle in
+                  // velocity's direction
   }
 }
 
