@@ -167,8 +167,8 @@ def test_policy(env, model, render=False):
             y_list=[]
             vel_list=[]
             yaw_list=[]
-            path = os.environ["FLIGHTMARE_PATH"]+"/flightpy/configs/vision/HYDRUS_tree_2/environment_"+"490"+"/"
-            
+            path = os.environ["FLIGHTMARE_PATH"]+"/flightpy/configs/vision/HYDRUS_tree_2/environment_"+"500"+"/"
+            quaternion = []
             with open(path+'static_obstacles.csv') as f:
                 reader = csv.reader(f)
                 for row in reader:
@@ -233,13 +233,12 @@ def test_policy(env, model, render=False):
                 x_list.append(env.getQuadState()[0][1])
                 y_list.append(env.getQuadState()[0][2])
                 vel_list.append(np.sqrt(env.getQuadState()[0][9]**2+env.getQuadState()[0][10]**2))
-                quaternion = [env.getQuadState()[0][4],env.getQuadState()[0][5],
-                env.getQuadState()[0][6],env.getQuadState()[0][7]]
-                r = R.from_quat([quaternion[0], quaternion[1], 
-                quaternion[2], quaternion[3]])
-                euler = r.as_euler('zyx')
-                # print("euler: ",euler)
-                yaw_list.append(euler[0])
+                if len(quaternion)==4:
+                    r = R.from_quat([quaternion[0], quaternion[1], 
+                    quaternion[2], quaternion[3]])
+                    euler = r.as_euler('zyx')
+                    # print("euler: ",euler)
+                    yaw_list.append(euler[0])
                 
 
             if done:
@@ -263,6 +262,8 @@ def test_policy(env, model, render=False):
                 final_x_list.append(final_x)
                 # print("n_roll: ",n_roll)
                 print("final x: {}".format(final_x))
+                print("final y: {}".format(final_y))
+                print("final yaw: {}".format(final_yaw))
                 ave_vel_list.append(final_x/final_t)
                 print("ave vel: {}".format(final_x/final_t))
 
