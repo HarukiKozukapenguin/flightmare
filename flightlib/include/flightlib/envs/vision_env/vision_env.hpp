@@ -39,7 +39,7 @@ enum Vision : int {
   kNObstaclesState = 4,
 
   Theta_Cuts = 22,
-  Phi_Cuts = 2,
+  // Phi_Cuts = 2,
   RewardCuts = 5,
   CornerNum = 5,
   RotorNum = 4,
@@ -50,8 +50,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Theta_Cuts * Phi_Cuts + CornerNum +
-          RotorNum + 3 + 4,
+  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Theta_Cuts + CornerNum + RotorNum + 3 + 4,
 
 };
 }  // namespace visionenv
@@ -81,11 +80,11 @@ class VisionEnv final : public EnvBase {
   bool getImage(Ref<ImgVector<>> img, const bool rgb = true) override;
   bool getDepthImage(Ref<DepthImgVector<>> img) override;
 
-  bool getObstacleState(
-    Ref<Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts>> sphericalboxel,
-    Ref<Vector<visionenv::kNObstaclesState * 1>> obs_state, bool is_running);
+  bool getObstacleState(Ref<Vector<visionenv::Theta_Cuts>> sphericalboxel,
+                        Ref<Vector<visionenv::kNObstaclesState * 1>> obs_state,
+                        bool is_running);
 
-  Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> getsphericalboxel(
+  Vector<visionenv::Theta_Cuts> getsphericalboxel(
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
       &pos_b_list,
     const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
