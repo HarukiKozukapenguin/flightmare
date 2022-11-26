@@ -144,7 +144,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
 
 void VisionEnv::init_isCollision(void) {
-  Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> unused1;
+  Vector<visionenv::Theta_Cuts> unused1;
   Vector<visionenv::kNObstaclesState> unused2;
   getObstacleState(
     unused1, unused2);  // change "is_collision_" depending on current state
@@ -163,15 +163,15 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // std::cout << "ori is called" << std::endl;
 
   // get N most closest obstacles as the observation
-  Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> sphericalboxel;
+  Vector<visionenv::Theta_Cuts> sphericalboxel;
   Vector<visionenv::kNObstaclesState> unused;
   // std::cout << "getObstacleState is being called" << std::endl;
   getObstacleState(sphericalboxel, unused);
   Scalar average_depth = 0;
-  for (int i = 0; i < visionenv::Theta_Cuts * visionenv::Phi_Cuts; i++) {
+  for (int i = 0; i < visionenv::Theta_Cuts; i++) {
     average_depth += sphericalboxel[i];
   }
-  average_depth /= visionenv::Theta_Cuts * visionenv::Phi_Cuts;
+  average_depth /= visionenv::Theta_Cuts;
 
   // std::cout << "getObstacleState is called" << std::endl;
 
@@ -194,7 +194,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
 }
 
 bool VisionEnv::getObstacleState(
-  Ref<Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts>> sphericalboxel,
+  Ref<Vector<visionenv::Theta_Cuts>> sphericalboxel,
   Ref<Vector<visionenv::kNObstaclesState>> obs_state) {
   // Scalar safty_threshold = 0.2;
   if (static_objects_.size() < 0) {
@@ -345,8 +345,7 @@ bool VisionEnv::getObstacleState(
   return true;
 }
 
-Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts>
-VisionEnv::getsphericalboxel(
+Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
   const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
   const Matrix<3, 3> &R_T) {
@@ -358,18 +357,12 @@ VisionEnv::getsphericalboxel(
   //                                                    std::pow(body_vel[1],
   //                                                    2)));
 
-  Vector<visionenv::Theta_Cuts * visionenv::Phi_Cuts> obstacle_obs;
+  Vector<visionenv::Theta_Cuts> obstacle_obs;
   for (int t = -visionenv::Theta_Cuts / 2; t < visionenv::Theta_Cuts / 2; ++t) {
     Scalar theta = (t >= 0) ? theta_list_[t] : -theta_list_[(-t) - 1];  //[deg]
-    for (int p = -visionenv::Phi_Cuts / 2; p < visionenv::Phi_Cuts / 2; ++p) {
-      Scalar phi = (p >= 0) ? phi_list_[p] : -phi_list_[(-p) - 1];  //[deg]
-
-      Scalar tcell = theta * (PI / 180);
-      Scalar fcell = phi * (PI / 180);
-      obstacle_obs[(t + visionenv::Theta_Cuts / 2) * visionenv::Phi_Cuts +
-                   (p + visionenv::Phi_Cuts / 2)] =
-        getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, fcell);
-    }
+    Scalar tcell = theta * (PI / 180);
+    obstacle_obs[(t + visionenv::Theta_Cuts / 2)] =
+      getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, 0);
   }
   return obstacle_obs;
 }
