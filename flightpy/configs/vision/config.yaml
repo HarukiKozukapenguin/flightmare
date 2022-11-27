@@ -1,5 +1,5 @@
 environment:
-  level: ["HYDRUS_tree_1"]
+  level: ["HYDRUS_tree_2"]
   env_folder: 0 # beginning of env
   world_box: [-0.3, 70, -5.0, 5.0, 0.2, 2]
   tree_size: 0.15
