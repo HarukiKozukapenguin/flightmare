@@ -350,7 +350,7 @@ Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
   const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
   const Matrix<3, 3> &R_T) {
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
-  Vector<3> body_vel = R_T * vel_2d;
+  // Vector<3> body_vel = R_T * vel_2d;
   // Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
   // Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2)
   // +
@@ -823,7 +823,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
     theta_list_ = cfg["environment"]["theta_list"].as<std::vector<Scalar>>();
-    phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
+    // phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
   }
 
   if (cfg["simulation"]) {
