@@ -632,7 +632,7 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 
   Scalar command_penalty = 0;
   Vector<visionenv::kNAct> pi_act_diff_ = pi_act_ - old_pi_act_;
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < visionenv::kNAct; i++) {
     command_penalty += command_coeff_[i] * std::pow(pi_act_diff_[i], 2);
   }
 
