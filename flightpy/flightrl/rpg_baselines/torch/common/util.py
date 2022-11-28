@@ -108,10 +108,10 @@ def test_policy(env, model, render=False):
     frame_id = 0
     final_x_list = []
     ave_vel_list = []
-    act_diff_sum = np.zeros(7)
+    act_diff_sum = np.zeros(3)
     # print(act_diff_sum.shape)
-    act = np.zeros(7)
-    past_act = np.zeros(7)
+    act = np.zeros(3)
+    past_act = np.zeros(3)
     step_num = 0
     tilt = 0
     if render:
@@ -143,7 +143,7 @@ def test_policy(env, model, render=False):
             past_act = act
             act, lstm_states = model.predict(obs, state = lstm_states, deterministic=True)
             # https://sb3-contrib.readthedocs.io/en/master/modules/ppo_recurrent.html#sb3_contrib.ppo_recurrent.RecurrentPPO
-            act = act.reshape(7)
+            act = act.reshape(3)
             # print(act.shape)
             # print(past_act.shape)
             # print(act_diff_sum.shape)
