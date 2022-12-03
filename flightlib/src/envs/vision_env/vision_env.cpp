@@ -135,7 +135,9 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   // std::cout << "z_vel is " << quad_state_.x(QS::VELZ) << std::endl;
   // reset control command
   act_.setZero();
-  cmd_.setZeros();
+  // cmd_.setZeros();
+  cmd_.p[0] = quad_state_.x(QS::POSX);
+  cmd_.p[1] = quad_state_.x(QS::POSY);
 
   // obtain observations
   getObs(obs);
