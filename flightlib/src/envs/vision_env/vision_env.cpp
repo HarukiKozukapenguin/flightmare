@@ -78,6 +78,9 @@ void VisionEnv::init() {
   act_mean_ << 0, 0, 0;
   act_std_ << 1.0, 1.0, 1.0;  // set by my experience (cmd difference)
 
+  c_collide_num_ << 0, 0, 0, 0, 0;
+  r_collide_num_ << 0, 0, 0, 0;
+
   collide_num = 0;
   time_num = 0;
   bound_num = 0;
@@ -272,7 +275,7 @@ bool VisionEnv::getObstacleState(
     Scalar obs_radius = static_objects_[i]->getScale()[0];
     obstacle_radius_.push_back(obs_radius);
 
-    int c_num = 1;
+    int c_num = 0;
 
     std::vector<int> c_collide;
     for (Eigen::Vector2d C : C_list_) {
@@ -295,7 +298,7 @@ bool VisionEnv::getObstacleState(
       c_num++;
     }
 
-    int r_num = 1;
+    int r_num = 0;
     std::vector<int> r_collide;
     for (Eigen::Vector2d rotor : R_list_) {
       Vector<3> corner_pos{rotor(0), rotor(1), 0};
@@ -320,9 +323,11 @@ bool VisionEnv::getObstacleState(
     if (is_running) {
       for (int i : c_collide) {
         std::cout << "collide c_" << i << std::endl;
+        c_collide_num_[i] += 1;
       }
       for (int i : r_collide) {
         std::cout << "collide r_" << i << std::endl;
+        r_collide_num_[i] += 1;
       }
     }
   }
@@ -854,6 +859,15 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
       std::cout << "time_num is " << time_num << std::endl;
       std::cout << "bound_num is " << bound_num << std::endl;
       std::cout << "goal_num is " << goal_num << std::endl;
+
+      for (int i = 0; i < visionenv::CornerNum; i++) {
+        std::cout << "c_collide_num_" << i << "is " << c_collide_num_[i]
+                  << std::endl;
+      }
+      for (int i = 0; i < visionenv::RotorNum; i++) {
+        std::cout << "r_collide_num_" << i << "is " << r_collide_num_[i]
+                  << std::endl;
+      }
     }
     return true;
   }

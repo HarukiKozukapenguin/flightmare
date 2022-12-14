@@ -265,6 +265,10 @@ class VisionEnv final : public EnvBase {
   int time_num;
   int bound_num;
   int goal_num;
+
+  // where they collide?
+  Vector<visionenv::CornerNum> c_collide_num_;
+  Vector<visionenv::RotorNum> r_collide_num_;
   int iter;
 };
 
