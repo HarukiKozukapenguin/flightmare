@@ -39,6 +39,7 @@ enum Vision : int {
   kNObstaclesState = 4,
 
   Theta_Cuts = 22,
+  Tip_Theta_Cuts = 10,
   // Phi_Cuts = 2,
   RewardCuts = 5,
   CornerNum = 5,
@@ -50,7 +51,8 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Theta_Cuts + CornerNum + RotorNum + 3 + 4,
+  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Theta_Cuts + Tip_Theta_Cuts * 2 +
+          CornerNum + RotorNum + 3 + 4,
 
 };
 }  // namespace visionenv
@@ -186,6 +188,10 @@ class VisionEnv final : public EnvBase {
   Vector<visionenv::RewardCuts * visionenv::RewardCuts> vel_obs_distance_;
   Vector<visionenv::CornerNum> C_vel_obs_distance_;
   Vector<visionenv::RotorNum> R_vel_obs_distance_;
+
+  Vector<visionenv::Theta_Cuts> C0_obs_distance_;
+  Vector<visionenv::Theta_Cuts> C4_obs_distance_;
+
   Vector<visionenv::CornerNum> C_vel_;
   Vector<visionenv::RotorNum> R_vel_;
 
@@ -204,6 +210,7 @@ class VisionEnv final : public EnvBase {
   Scalar tree_size_;
   std::vector<Scalar> theta_list_;
   std::vector<Scalar> phi_list_;
+  std::vector<Scalar> tip_theta_list_;
 
   std::vector<Scalar> hydrus_theta_;
   Scalar hydrus_l_;

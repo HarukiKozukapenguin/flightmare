@@ -195,8 +195,9 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << act_, goal_linear_vel_, ori, quad_state_.p, normalized_p,
-    quad_state_.v, sphericalboxel, C_vel_obs_distance_, R_vel_obs_distance_,
-    quad_state_.w, world_box_[2] - quad_state_.x(QS::POSY),
+    quad_state_.v, sphericalboxel, C0_obs_distance_, C4_obs_distance_,
+    C_vel_obs_distance_, R_vel_obs_distance_, quad_state_.w,
+    world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY),
     world_box_[4] - quad_state_.x(QS::POSZ),
     world_box_[5] - quad_state_.x(QS::POSZ);
@@ -526,6 +527,31 @@ void VisionEnv::get_hydrus_sphericalboxel(
     for (Vector<3> pos : pos_b_list) {
       pos_from_corner.push_back(pos - b_p_ref);
     }
+    if (i == 0) {
+      for (int t = -visionenv::Tip_Theta_Cuts / 2;
+           t < visionenv::Tip_Theta_Cuts / 2; ++t) {
+        Scalar theta =
+          (t >= 0) ? tip_theta_list_[t] : -tip_theta_list_[(-t) - 1];  //[deg]
+        Scalar tcell = theta * (PI / 180);
+        tcell += M_PI / 2 - hydrus_theta_[0] * M_PI / 180;
+        C0_obs_distance_[(t + visionenv::Tip_Theta_Cuts / 2)] =
+          getClosestDistance(pos_from_corner, obs_radius_list, poll_v, tcell,
+                             0);
+      }
+    }
+    if (i == 4) {
+      for (int t = -visionenv::Tip_Theta_Cuts / 2;
+           t < visionenv::Tip_Theta_Cuts / 2; ++t) {
+        Scalar theta =
+          (t >= 0) ? tip_theta_list_[t] : -tip_theta_list_[(-t) - 1];  //[deg]
+        Scalar tcell = theta * (PI / 180);
+        tcell += (hydrus_theta_[1] + hydrus_theta_[2]) * M_PI / 180 + M_PI / 2;
+        C4_obs_distance_[(t + visionenv::Tip_Theta_Cuts / 2)] =
+          getClosestDistance(pos_from_corner, obs_radius_list, poll_v, tcell,
+                             0);
+      }
+    }
+
     Vector<3> w_vel =
       quad_state_.v + (quad_state_.w).cross((quad_state_.R()) * b_p_ref);
     Vector<3> w_vel_2d = {w_vel[0], w_vel[1], 0};
@@ -970,6 +996,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
     theta_list_ = cfg["environment"]["theta_list"].as<std::vector<Scalar>>();
     phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
+    tip_theta_list_ =
+      cfg["environment"]["tip_theta_list"].as<std::vector<Scalar>>();
 
     hydrus_theta_ =
       cfg["environment"]["hydrus_theta"].as<std::vector<Scalar>>();
