@@ -11,6 +11,7 @@ import csv
 from scipy.spatial.transform import Rotation as R
 import matplotlib.patches as patches
 import matplotlib.collections as mc
+import argparse
 
 columns = [
     "episode_id",
@@ -140,6 +141,32 @@ def set_collision_point(hydrus_theta: list, hydrus_l: float) -> tuple:
     R_list = [pos.reshape(2, 1) for pos in R_list]
 
     return C_list, R_list
+
+
+def csv_path():
+    return (
+        os.environ["FLIGHTMARE_PATH"]
+        + "/flightpy/configs/vision/HYDRUS_tree_2/environment_"
+        + "400"
+        + "/"
+    )
+
+
+def calc_dist(idx1: int, idx2: int):
+    path = csv_path()
+    with open(path + "static_obstacles.csv") as f:
+        reader = csv.reader(f)
+        reader = [row for row in reader]
+        row = reader[idx1]
+        x1 = float(row[1])
+        y1 = float(row[2])
+        r1 = float(row[8])  # +body_size
+        row = reader[idx2]
+        x2 = float(row[1])
+        y2 = float(row[2])
+        r2 = float(row[8])  # +body_size
+        dist = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+        print("desired dist is: ", dist - r1 - r2)
 
 
 def test_policy(env, model, render=False):
@@ -349,3 +376,19 @@ def test_policy(env, model, render=False):
     print("tilt: {}".format(np.round(tilt / step_num, decimals=2)))
     if render:
         env.disconnectUnity()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("function_name", type=str, help="set fuction name in this file")
+    parser.add_argument(
+        "-i", "--func_args", nargs="*", help="args in function", default=[]
+    )
+    args = parser.parse_args()
+
+    # このファイル内の関数を取得
+    func_dict = {k: v for k, v in locals().items() if callable(v)}
+    # 引数のうち，数値として解釈できる要素はintにcastする
+    func_args = [int(x) if x.isnumeric() else x for x in args.func_args]
+    # 関数実行
+    ret = func_dict[args.function_name](*func_args)
