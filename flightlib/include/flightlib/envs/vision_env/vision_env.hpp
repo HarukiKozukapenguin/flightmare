@@ -189,8 +189,8 @@ class VisionEnv final : public EnvBase {
   Vector<visionenv::CornerNum> C_vel_obs_distance_;
   Vector<visionenv::RotorNum> R_vel_obs_distance_;
 
-  Vector<visionenv::Theta_Cuts> C0_obs_distance_;
-  Vector<visionenv::Theta_Cuts> C4_obs_distance_;
+  Vector<visionenv::Tip_Theta_Cuts> C0_obs_distance_;
+  Vector<visionenv::Tip_Theta_Cuts> C4_obs_distance_;
 
   Vector<visionenv::CornerNum> C_vel_;
   Vector<visionenv::RotorNum> R_vel_;
