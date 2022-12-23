@@ -186,8 +186,8 @@ def test_policy(env, model, render=False):
     hydrus_theta = [0, 60, 0]
     hydrus_l = 0.6
     hydrus_r = 0.2
-    camera_yaw = -120
-    camera_yaw = np.deg2rad(camera_yaw)
+    init_camera_yaw = -120
+    init_camera_yaw = np.deg2rad(init_camera_yaw)
 
     C_list, R_list = set_collision_point(hydrus_theta, hydrus_l)
 
@@ -291,12 +291,12 @@ def test_policy(env, model, render=False):
                 r = np.array(
                     [
                         [
-                            np.cos(final_yaw + camera_yaw),
-                            -np.sin(final_yaw + camera_yaw),
+                            np.cos(final_yaw + init_camera_yaw),
+                            -np.sin(final_yaw + init_camera_yaw),
                         ],
                         [
-                            np.sin(final_yaw + camera_yaw),
-                            np.cos(final_yaw + camera_yaw),
+                            np.sin(final_yaw + init_camera_yaw),
+                            np.cos(final_yaw + init_camera_yaw),
                         ],
                     ]
                 )
