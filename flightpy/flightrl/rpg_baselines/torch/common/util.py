@@ -186,6 +186,8 @@ def test_policy(env, model, render=False):
     hydrus_theta = [0, 60, 0]
     hydrus_l = 0.6
     hydrus_r = 0.2
+    camera_yaw = -120
+    camera_yaw = np.deg2rad(camera_yaw)
 
     C_list, R_list = set_collision_point(hydrus_theta, hydrus_l)
 
@@ -288,8 +290,14 @@ def test_policy(env, model, render=False):
                 final_yaw = euler[0]
                 r = np.array(
                     [
-                        [np.cos(final_yaw), -np.sin(final_yaw)],
-                        [np.sin(final_yaw), np.cos(final_yaw)],
+                        [
+                            np.cos(final_yaw + camera_yaw),
+                            -np.sin(final_yaw + camera_yaw),
+                        ],
+                        [
+                            np.sin(final_yaw + camera_yaw),
+                            np.cos(final_yaw + camera_yaw),
+                        ],
                     ]
                 )
 
@@ -345,6 +353,8 @@ def test_policy(env, model, render=False):
                     plt.show()
 
                     plt.plot(yaw_list)
+                    plt.show()
+                    plt.plot(vel_list)
                     plt.show()
                     # https://villageofsound.hatenadiary.jp/entry/2015/09/13/010352
             else:
