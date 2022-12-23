@@ -122,7 +122,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
       Eigen::AngleAxis<Scalar>(0, Vector<3>::UnitX()) *
       Eigen::AngleAxis<Scalar>(0, Vector<3>::UnitY()) *
       Eigen::AngleAxis<Scalar>(camera_yaw_, Vector<3>::UnitZ());
-    quad_state_.q() = init_q;
+    quad_state_.q(init_q);
 
     // quad_state_.x(QS::POSX) = 52.9;
     // quad_state_.x(QS::POSY) = 7.4;
