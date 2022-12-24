@@ -807,20 +807,26 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   Scalar attitude_vel_penalty =
     attitude_vel_coeff_ * (vel_3d.cross(body_x)).norm();
 
+  Scalar yaw = quad_state_.Euler()[2];
+  Scalar old_yaw = quad_old_state_.Euler()[2];
+  Scalar min_yaw = std::min(yaw, old_yaw);
+  Scalar max_yaw = std::max(yaw, old_yaw);
+  Scalar yaw_diff = std::min(max_yaw - min_yaw, min_yaw + 2 * M_PI - max_yaw);
+  Scalar yaw_diff_reward = yaw_diff_coeff_ * std::pow(yaw_diff, 2);
 
   //  change progress reward as survive reward
   const Scalar total_reward =
     move_reward + lin_vel_reward + collision_penalty + vel_collision_penalty +
     vel_hydrus_collision_penalty + ang_vel_penalty + survive_rew_ +
     world_box_penalty + attitude_penalty + command_penalty +
-    attitude_vel_penalty;
+    attitude_vel_penalty + yaw_diff_reward;
 
   // return all reward components for debug purposes
   // only the total reward is used by the RL algorithm
   reward << move_reward, lin_vel_reward, collision_penalty,
     vel_collision_penalty, vel_hydrus_collision_penalty, ang_vel_penalty,
     survive_rew_, world_box_penalty, attitude_penalty, command_penalty,
-    attitude_vel_penalty, total_reward;
+    attitude_vel_penalty, yaw_diff_reward, total_reward;
   return true;
 }
 
@@ -1034,6 +1040,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     attitude_coeff_ = cfg["rewards"]["attitude_coeff"].as<Scalar>();
     command_coeff_ = cfg["rewards"]["command_coeff"].as<std::vector<Scalar>>();
     attitude_vel_coeff_ = cfg["rewards"]["attitude_vel_coeff"].as<Scalar>();
+    yaw_diff_coeff_ = cfg["rewards"]["yaw_diff_coeff"].as<Scalar>();
 
     // std::cout << dist_margin_ << std::endl;
 

@@ -42,6 +42,7 @@ rewards:
   attitude_coeff: -0.025
   command_coeff: [-0.000005, -0.000025, -0.000025, -0.0001, -0.0001, -0.0001, -0.00005]
   attitude_vel_coeff: -5.0
+  yaw_diff_coeff: 0.002
 
   names:
     [
@@ -56,6 +57,7 @@ rewards:
       "attitude_penalty",
       "command_penalty",
       "attitude_vel_penalty",
+      "yaw_diff_reward",
       "total",
     ] #this size determines the size of rewards. (cf. vision_env.cpp l460)
 

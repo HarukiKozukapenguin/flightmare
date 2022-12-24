@@ -178,7 +178,7 @@ class VisionEnv final : public EnvBase {
   // Define reward for training
   Scalar move_coeff_, vel_coeff_, collision_coeff_, vel_collision_coeff_,
     vel_hydrus_collision_coeff_, vel_collision_angle_max_, collision_exp_coeff_,
-    angular_vel_coeff_, survive_rew_, dist_margin_;
+    angular_vel_coeff_, survive_rew_, yaw_diff_coeff_, dist_margin_;
   std::vector<Scalar> world_box_coeff_;
   Scalar attitude_coeff_;
   std::vector<Scalar> command_coeff_;
