@@ -286,7 +286,7 @@ def test_policy(env, model, render=False):
                 )
                 euler = r.as_euler("xyz")
                 final_yaw = euler[2]
-                r = np.array(
+                rotation_matrix = np.array(
                     [
                         [
                             np.cos(final_yaw),
@@ -326,7 +326,7 @@ def test_policy(env, model, render=False):
                     # ax=plt.colorbar()
                     # ax.set_label('vel [m/s]')
 
-                    edge_list = [final_pos + r @ pos for pos in C_list]
+                    edge_list = [final_pos + rotation_matrix @ pos for pos in C_list]
                     lines = [
                         [
                             (edge_list[i][0, 0], edge_list[i][1, 0]),
@@ -337,7 +337,7 @@ def test_policy(env, model, render=False):
                     lc = mc.LineCollection(lines, colors="g", linewidths=2)
                     axes.add_collection(lc)
 
-                    rotor_list = [final_pos + r @ pos for pos in R_list]
+                    rotor_list = [final_pos + rotation_matrix @ pos for pos in R_list]
                     # axes = plt.axes()
                     for rotor in rotor_list:
                         c = patches.Circle(
