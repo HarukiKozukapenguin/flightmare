@@ -275,28 +275,26 @@ def test_policy(env, model, render=False):
                 )
                 if len(quaternion) == 4:
                     r = R.from_quat(
-                        [quaternion[0], quaternion[1], quaternion[2], quaternion[3]]
+                        [quaternion[1], quaternion[2], quaternion[3], quaternion[0]]
                     )
-                    euler = r.as_euler("zyx")
-                    # print("euler: ",euler)
-                    yaw_list.append(euler[0])
+                    euler = r.as_euler("xyz")
+                    yaw_list.append(euler[2])
 
             if done:
                 r = R.from_quat(
-                    [quaternion[0], quaternion[1], quaternion[2], quaternion[3]]
+                    [quaternion[1], quaternion[2], quaternion[3], quaternion[0]]
                 )
-                euler = r.as_euler("zyx")
-                print("euler: ", euler)
-                final_yaw = euler[0]
+                euler = r.as_euler("xyz")
+                final_yaw = euler[2]
                 r = np.array(
                     [
                         [
-                            np.cos(final_yaw + init_camera_yaw),
-                            -np.sin(final_yaw + init_camera_yaw),
+                            np.cos(final_yaw),
+                            -np.sin(final_yaw),
                         ],
                         [
-                            np.sin(final_yaw + init_camera_yaw),
-                            np.cos(final_yaw + init_camera_yaw),
+                            np.sin(final_yaw),
+                            np.cos(final_yaw),
                         ],
                     ]
                 )
