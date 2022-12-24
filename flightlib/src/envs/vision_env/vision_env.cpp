@@ -121,7 +121,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     Quaternion init_q =
       Eigen::AngleAxis<Scalar>(0, Vector<3>::UnitX()) *
       Eigen::AngleAxis<Scalar>(0, Vector<3>::UnitY()) *
-      Eigen::AngleAxis<Scalar>(init_camera_yaw_, Vector<3>::UnitZ());
+      Eigen::AngleAxis<Scalar>(init_camera_yaw_ + uniform_dist_(random_gen_) * 0.5, Vector<3>::UnitZ());
     quad_state_.q(init_q);
 
     // quad_state_.x(QS::POSX) = 52.9;
