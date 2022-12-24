@@ -280,9 +280,9 @@ bool VisionEnv::getObstacleState(
 
     std::vector<int> c_collide;
     for (Eigen::Vector2d C : C_list_) {
-      Vector<3> corner_pos{C(0), C(1), 0};
+      Vector<3> edge_pos{C(0), C(1), 0};
       Vector<3> c_delta_pos =
-        static_objects_[i]->getPos() - (quad_state_.p + R * corner_pos);
+        static_objects_[i]->getPos() - (quad_state_.p + R * edge_pos);
 
       // compute relative distance
       Scalar c_obstacle_2d_dist =
@@ -302,9 +302,9 @@ bool VisionEnv::getObstacleState(
     int r_num = 0;
     std::vector<int> r_collide;
     for (Eigen::Vector2d rotor : R_list_) {
-      Vector<3> corner_pos{rotor(0), rotor(1), 0};
+      Vector<3> rotor_pos{rotor(0), rotor(1), 0};
       Vector<3> r_delta_pos =
-        static_objects_[i]->getPos() - (quad_state_.p + R * corner_pos);
+        static_objects_[i]->getPos() - (quad_state_.p + R * rotor_pos);
 
       // compute relative distance
       Scalar r_obstacle_2d_dist =
