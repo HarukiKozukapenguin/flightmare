@@ -74,6 +74,7 @@ struct QuadState {
   void q(const Quaternion quaternion);
   Matrix<3, 3> R() const;
   Vector<3> Euler() const;
+  Scalar Yaw() const;
   Scalar Horizontal_Tilt() const;
 
   void setZero();

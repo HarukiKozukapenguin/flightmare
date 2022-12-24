@@ -21,7 +21,6 @@ environment:
   hydrus_l: 0.6
   hydrus_r: 0.2
   init_yaw: -120
-  camera_yaw: 120
 # three difficulty level [easy, medium, hard](list when they learn)
 # configurations for dynamic and static obstacles, environment_(0~100)
 # Bounding box applied during training, exiting this box terminates the episode. [xmin, xmax, ymin, ymax, zmin, zmax]

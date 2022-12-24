@@ -425,7 +425,8 @@ Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
   for (int t = -visionenv::Theta_Cuts / 2; t < visionenv::Theta_Cuts / 2; ++t) {
     Scalar theta = (t >= 0) ? theta_list_[t] : -theta_list_[(-t) - 1];  //[deg]
     Scalar tcell = theta * (PI / 180); //camera is x_w direction
-    tcell += camera_yaw_;
+    Scalar yaw = quad_state_.Yaw();
+    tcell -= yaw;
     obstacle_obs[(t + visionenv::Theta_Cuts / 2)] =
       getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, 0);
   }
@@ -1010,7 +1011,6 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     hydrus_l_ = cfg["environment"]["hydrus_l"].as<Scalar>();
     hydrus_r_ = cfg["environment"]["hydrus_r"].as<Scalar>();
     init_yaw_ = cfg["environment"]["init_yaw"].as<Scalar>() * M_PI / 180;
-    camera_yaw_ = cfg["environment"]["camera_yaw"].as<Scalar>() * M_PI / 180;
   }
 
   if (cfg["simulation"]) {
