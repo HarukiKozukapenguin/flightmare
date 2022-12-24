@@ -215,7 +215,8 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> hydrus_theta_;
   Scalar hydrus_l_;
   Scalar hydrus_r_;
-  Scalar init_camera_yaw_;
+  Scalar init_yaw_;
+  Scalar camera_yaw_;
 
   std::vector<Eigen::Vector2d> C_list_;
   std::vector<Eigen::Vector2d> R_list_;

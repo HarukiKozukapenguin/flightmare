@@ -121,7 +121,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     Quaternion init_q =
       Eigen::AngleAxis<Scalar>(0, Vector<3>::UnitX()) *
       Eigen::AngleAxis<Scalar>(0, Vector<3>::UnitY()) *
-      Eigen::AngleAxis<Scalar>(init_camera_yaw_ + uniform_dist_(random_gen_) * 0.5, Vector<3>::UnitZ());
+      Eigen::AngleAxis<Scalar>(init_yaw_ + uniform_dist_(random_gen_) * 0.5, Vector<3>::UnitZ());
     quad_state_.q(init_q);
 
     // quad_state_.x(QS::POSX) = 52.9;
@@ -424,8 +424,8 @@ Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
   Vector<visionenv::Theta_Cuts> obstacle_obs;
   for (int t = -visionenv::Theta_Cuts / 2; t < visionenv::Theta_Cuts / 2; ++t) {
     Scalar theta = (t >= 0) ? theta_list_[t] : -theta_list_[(-t) - 1];  //[deg]
-    Scalar tcell = theta * (PI / 180);
-    tcell -= init_camera_yaw_;
+    Scalar tcell = theta * (PI / 180); //camera is x_w direction
+    tcell += camera_yaw_;
     obstacle_obs[(t + visionenv::Theta_Cuts / 2)] =
       getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, 0);
   }
@@ -1009,7 +1009,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
       cfg["environment"]["hydrus_theta"].as<std::vector<Scalar>>();
     hydrus_l_ = cfg["environment"]["hydrus_l"].as<Scalar>();
     hydrus_r_ = cfg["environment"]["hydrus_r"].as<Scalar>();
-    init_camera_yaw_ = cfg["environment"]["init_camera_yaw"].as<Scalar>() * M_PI / 180;
+    init_yaw_ = cfg["environment"]["init_yaw"].as<Scalar>() * M_PI / 180;
+    camera_yaw_ = cfg["environment"]["camera_yaw"].as<Scalar>() * M_PI / 180;
   }
 
   if (cfg["simulation"]) {
