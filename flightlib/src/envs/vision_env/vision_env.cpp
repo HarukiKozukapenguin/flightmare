@@ -503,7 +503,7 @@ VisionEnv::get_vel_sphericalboxel(
          p < (visionenv::RewardCuts - 1) / 2 + 1; ++p) {
       Scalar tcell =
         t / ((visionenv::RewardCuts - 1) / 2) * vel_collision_angle_max_ +
-        vel_theta - init_camera_yaw_;
+        vel_theta;
       Scalar pcell =
         p / ((visionenv::RewardCuts - 1) / 2) * vel_collision_angle_max_ +
         vel_phi;
@@ -558,7 +558,7 @@ void VisionEnv::get_hydrus_sphericalboxel(
     C_vel_[i] = w_vel_2d.norm();
 
     Vector<3> body_vel = R_T * w_vel_2d;
-    Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]) - init_camera_yaw_;
+    Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
     Scalar vel_phi =
       std::atan(body_vel[2] /
                 std::sqrt(std::pow(body_vel[0], 2) + std::pow(body_vel[1], 2)));
@@ -580,7 +580,7 @@ void VisionEnv::get_hydrus_sphericalboxel(
     R_vel_[i] = w_vel_2d.norm();
 
     Vector<3> body_vel = R_T * w_vel_2d;
-    Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]) - init_camera_yaw_;
+    Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
     Scalar vel_phi =
       std::atan(body_vel[2] /
                 std::sqrt(std::pow(body_vel[0], 2) + std::pow(body_vel[1], 2)));
