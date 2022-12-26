@@ -155,10 +155,10 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
 
 void VisionEnv::init_isCollision(void) {
-  Vector<visionenv::Theta_Cuts> unused1;
+  Vector<visionenv::Theta_Cuts*visionenv::RotorNum> unused1;
   Vector<visionenv::kNObstaclesState> unused2;
   getObstacleState(unused1, unused2,
-                   false);  // change "is_collision_" depending on current state
+                   false,0);  // change "is_collision_" depending on current state
 }
 
 bool VisionEnv::getObs(Ref<Vector<>> obs) {
@@ -174,10 +174,15 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // std::cout << "ori is called" << std::endl;
 
   // get N most closest obstacles as the observation
-  Vector<visionenv::Theta_Cuts> sphericalboxel;
-  Vector<visionenv::kNObstaclesState> unused;
-  // std::cout << "getObstacleState is being called" << std::endl;
-  getObstacleState(sphericalboxel, unused, true);
+  Vector<visionenv::Theta_Cuts*visionenv::RotorNum> sphericalboxel_vector;
+  for (size_t rotor_idx=0; rotor_idx<visionenv::RotorNum; rotor_idx++) {
+    Vector<visionenv::Theta_Cuts> sphericalboxel;
+    Vector<visionenv::kNObstaclesState> unused;
+    getObstacleState(sphericalboxel, unused, true, rotor_idx);
+    for (size_t i=0; i<visionenv::Theta_Cuts; i++) {
+      sphericalboxel_vector[rotor_idx*visionenv::Theta_Cuts+i] = sphericalboxel[i];
+    }
+  }
   // Scalar average_depth = 0;
   // for (int i = 0; i < visionenv::Theta_Cuts; i++) {
   //   average_depth += sphericalboxel[i];
@@ -195,7 +200,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << act_, goal_linear_vel_, ori, quad_state_.p, normalized_p,
-    quad_state_.v, sphericalboxel, C0_obs_distance_, C4_obs_distance_,
+    quad_state_.v, sphericalboxel_vector, C0_obs_distance_, C4_obs_distance_,
     C_vel_obs_distance_, R_vel_obs_distance_, quad_state_.w,
     world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY),
@@ -207,7 +212,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
 
 bool VisionEnv::getObstacleState(
   Ref<Vector<visionenv::Theta_Cuts>> sphericalboxel,
-  Ref<Vector<visionenv::kNObstaclesState>> obs_state, bool is_running) {
+  Ref<Vector<visionenv::kNObstaclesState>> obs_state, bool is_running,size_t rotor_idx) {
   // Scalar safty_threshold = 0.2;
   if (static_objects_.size() < 0) {
     logger_.error("No dynamic or static obstacles.");
@@ -260,10 +265,10 @@ bool VisionEnv::getObstacleState(
   Matrix<3, 3> R = quad_state_.R();
   for (int i = 0; i < (int)static_objects_.size(); i++) {
     // compute relative position from C-2
-    Eigen::Vector2d C_centor = C_list_[2];
-    Vector<3> corner_pos{C_centor(0), C_centor(1), 0};
+    Eigen::Vector2d R_position = R_list_[rotor_idx];
+    Vector<3> rotor_pos{R_position(0), R_position(1), 0};
     Vector<3> delta_pos =
-      static_objects_[i]->getPos() - (quad_state_.p + R * corner_pos);
+      static_objects_[i]->getPos() - (quad_state_.p + R * rotor_pos);
     relative_pos.push_back(delta_pos);
     Scalar obstacle_2d_dist =
       std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));

@@ -51,7 +51,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Theta_Cuts + Tip_Theta_Cuts * 2 +
+  kNObs = kNAct + 3 + 9 + 3 + 3 + 3 + Theta_Cuts*RotorNum + Tip_Theta_Cuts * 2 +
           CornerNum + RotorNum + 3 + 4,
 
 };
@@ -84,7 +84,7 @@ class VisionEnv final : public EnvBase {
 
   bool getObstacleState(Ref<Vector<visionenv::Theta_Cuts>> sphericalboxel,
                         Ref<Vector<visionenv::kNObstaclesState * 1>> obs_state,
-                        bool is_running);
+                        bool is_running, size_t rotor_idx);
 
   Vector<visionenv::Theta_Cuts> getsphericalboxel(
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
