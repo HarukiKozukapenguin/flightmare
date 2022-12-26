@@ -539,7 +539,7 @@ void VisionEnv::get_hydrus_sphericalboxel(
         Scalar theta =
           (t >= 0) ? tip_theta_list_[t] : -tip_theta_list_[(-t) - 1];  //[deg]
         Scalar tcell = theta * (PI / 180);
-        tcell += M_PI / 2 ;
+        tcell += 0 ;
         C0_obs_distance_[(t + visionenv::Tip_Theta_Cuts / 2)] =
           getClosestDistance(pos_from_corner, obs_radius_list, poll_v, tcell,
                              0);
@@ -551,7 +551,7 @@ void VisionEnv::get_hydrus_sphericalboxel(
         Scalar theta =
           (t >= 0) ? tip_theta_list_[t] : -tip_theta_list_[(-t) - 1];  //[deg]
         Scalar tcell = theta * (PI / 180);
-        tcell += M_PI / 2;
+        tcell += PI ;
         C4_obs_distance_[(t + visionenv::Tip_Theta_Cuts / 2)] =
           getClosestDistance(pos_from_corner, obs_radius_list, poll_v, tcell,
                              0);
