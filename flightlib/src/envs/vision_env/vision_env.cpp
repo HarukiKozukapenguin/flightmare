@@ -539,19 +539,19 @@ void VisionEnv::get_hydrus_sphericalboxel(
         Scalar theta =
           (t >= 0) ? tip_theta_list_[t] : -tip_theta_list_[(-t) - 1];  //[deg]
         Scalar tcell = theta * (PI / 180);
-        tcell += M_PI / 2 - hydrus_theta_[0] * M_PI / 180;
+        tcell += M_PI / 2 ;
         C0_obs_distance_[(t + visionenv::Tip_Theta_Cuts / 2)] =
           getClosestDistance(pos_from_corner, obs_radius_list, poll_v, tcell,
                              0);
       }
     }
-    if (i == 4) {
+    if (i == visionenv::CornerNum) {
       for (int t = -visionenv::Tip_Theta_Cuts / 2;
            t < visionenv::Tip_Theta_Cuts / 2; ++t) {
         Scalar theta =
           (t >= 0) ? tip_theta_list_[t] : -tip_theta_list_[(-t) - 1];  //[deg]
         Scalar tcell = theta * (PI / 180);
-        tcell += (hydrus_theta_[1] + hydrus_theta_[2]) * M_PI / 180 + M_PI / 2;
+        tcell += M_PI / 2;
         C4_obs_distance_[(t + visionenv::Tip_Theta_Cuts / 2)] =
           getClosestDistance(pos_from_corner, obs_radius_list, poll_v, tcell,
                              0);
@@ -1129,29 +1129,11 @@ bool VisionEnv::chooseLevel() {
 }
 
 bool VisionEnv::set_collision_point() {
-  Scalar theta_1 = hydrus_theta_[0] * M_PI / 180;
-  Scalar theta_2 = hydrus_theta_[1] * M_PI / 180;
-  Scalar theta_3 = hydrus_theta_[2] * M_PI / 180;
+  Eigen::Vector2d bR1(0.0, 0.0);
+  Eigen::Vector2d bC1(-hydrus_l_ / 2, 0.0);
+  Eigen::Vector2d bC2(hydrus_l_ / 2, 0.0);
 
-  Eigen::Vector2d bR2(0.0, 0.0);
-  Eigen::Vector2d bC2(-hydrus_l_ / 2, 0.0);
-  Eigen::Vector2d bC2TobR1(hydrus_l_ / 2 * (-std::cos(theta_1)),
-                           hydrus_l_ / 2 * (std::sin(theta_1)));
-  Eigen::Vector2d bR1 = bC2 + bC2TobR1;
-  Eigen::Vector2d bC1 = bC2 + 2 * bC2TobR1;
-
-  Eigen::Vector2d bC3(hydrus_l_ / 2, 0.0);
-  Eigen::Vector2d bC3TobR3(hydrus_l_ / 2 * (std::cos(theta_2)),
-                           hydrus_l_ / 2 * (std::sin(theta_2)));
-  Eigen::Vector2d bR3 = bC3 + bC3TobR3;
-  Eigen::Vector2d bC4 = bC3 + 2 * bC3TobR3;
-
-  Eigen::Vector2d bC4TobR4(hydrus_l_ / 2 * (std::cos(theta_2 + theta_3)),
-                           hydrus_l_ / 2 * (std::sin(theta_2 + theta_3)));
-  Eigen::Vector2d bR4 = bC4 + bC4TobR4;
-  Eigen::Vector2d bC5 = bC4 + 2 * bC4TobR4;
-
-  Eigen::Vector2d CG = (bR1 + bR2 + bR3 + bR4) / 4;
+  Eigen::Vector2d CG = (bR1) / 4;
 
   Eigen::Vector2d C1 = bC1 - CG;
   C_list_.push_back(C1);
@@ -1159,18 +1141,6 @@ bool VisionEnv::set_collision_point() {
   R_list_.push_back(R1);
   Eigen::Vector2d C2 = bC2 - CG;
   C_list_.push_back(C2);
-  Eigen::Vector2d R2 = bR2 - CG;
-  R_list_.push_back(R2);
-  Eigen::Vector2d C3 = bC3 - CG;
-  C_list_.push_back(C3);
-  Eigen::Vector2d R3 = bR3 - CG;
-  R_list_.push_back(R3);
-  Eigen::Vector2d C4 = bC4 - CG;
-  C_list_.push_back(C4);
-  Eigen::Vector2d R4 = bR4 - CG;
-  R_list_.push_back(R4);
-  Eigen::Vector2d C5 = bC5 - CG;
-  C_list_.push_back(C5);
 
   return true;
 }
