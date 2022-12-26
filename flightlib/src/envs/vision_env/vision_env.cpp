@@ -545,7 +545,7 @@ void VisionEnv::get_hydrus_sphericalboxel(
                              0);
       }
     }
-    if (i == visionenv::CornerNum) {
+    if (i == visionenv::CornerNum-1) {
       for (int t = -visionenv::Tip_Theta_Cuts / 2;
            t < visionenv::Tip_Theta_Cuts / 2; ++t) {
         Scalar theta =
@@ -1133,7 +1133,7 @@ bool VisionEnv::set_collision_point() {
   Eigen::Vector2d bC1(-hydrus_l_ / 2, 0.0);
   Eigen::Vector2d bC2(hydrus_l_ / 2, 0.0);
 
-  Eigen::Vector2d CG = (bR1) / 4;
+  Eigen::Vector2d CG = (bR1) /1.0;
 
   Eigen::Vector2d C1 = bC1 - CG;
   C_list_.push_back(C1);
