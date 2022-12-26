@@ -13,7 +13,7 @@ environment:
   control_feedthrough: false
   momentum_bool: true
   momentum: 0.9
-  theta_list: [5, 15, 25, 35, 45, 60, 75, 90, 105, 120, 135] #[deg] size should be Theta_Cuts/2
+  theta_list: [5, 15, 25, 35, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195] #[deg] size should be Theta_Cuts/2
   tip_theta_list: [5, 25, 45, 75, 105] #[deg] size should be Theta_Cuts/2
   phi_list: [5, 15] #[deg] size should be Phi_Cuts/2
 
