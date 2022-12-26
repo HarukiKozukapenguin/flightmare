@@ -146,8 +146,8 @@ def set_collision_point(hydrus_theta: list, hydrus_l: float) -> tuple:
 def csv_path():
     return (
         os.environ["FLIGHTMARE_PATH"]
-        + "/flightpy/configs/vision/HYDRUS_tree_2/environment_"
-        + "400"
+        + "/flightpy/configs/vision/HYDRUS_tree_3/environment_"
+        + "500"
         + "/"
     )
 
