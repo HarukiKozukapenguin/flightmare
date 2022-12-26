@@ -1,6 +1,6 @@
 environment:
   level: ["HYDRUS_tree_3"]
-  env_folder: 0 # beginning of env
+  env_folder: 500 # beginning of env
   world_box: [-0.3, 70, -5.0, 5.0, 0.2, 2]
   tree_size: 0.15
   y_lim: [1,10]
@@ -60,6 +60,13 @@ rewards:
       "yaw_diff_reward",
       "total",
     ] #this size determines the size of rewards. (cf. vision_env.cpp l460)
+
+teleport:
+  CoG_dist: 1.5
+  edge_dist: 1.0
+  speed: 0.2
+  time: 5.0
+  angle: 45
 
 rgb_camera:
   on: yes 

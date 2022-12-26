@@ -174,10 +174,9 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // std::cout << "ori is called" << std::endl;
 
   // get N most closest obstacles as the observation
-  Vector<visionenv::Theta_Cuts> sphericalboxel;
   Vector<visionenv::kNObstaclesState> unused;
   // std::cout << "getObstacleState is being called" << std::endl;
-  getObstacleState(sphericalboxel, unused, true);
+  getObstacleState(sphericalboxel_, unused, true);
   // Scalar average_depth = 0;
   // for (int i = 0; i < visionenv::Theta_Cuts; i++) {
   //   average_depth += sphericalboxel[i];
@@ -195,7 +194,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << act_, goal_linear_vel_, ori, quad_state_.p, normalized_p,
-    quad_state_.v, sphericalboxel, C0_obs_distance_, C4_obs_distance_,
+    quad_state_.v, sphericalboxel_, C0_obs_distance_, C4_obs_distance_,
     C_vel_obs_distance_, R_vel_obs_distance_, quad_state_.w,
     world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY),
@@ -607,6 +606,85 @@ void VisionEnv::get_hydrus_sphericalboxel(
 //          sqrt(std::pow(size, 2) - std::pow(distance * std::sin(theta), 2));
 // }
 
+// bool VisionEnv::is_teleport(){
+//   teleport_.is_teleport = false;
+//   if (quad_state_.v.norm() > teleport_speed_){
+//     teleport_.reset();
+//     return false;
+//   }
+//   teleport_.t+=sim_dt_;
+//   if (teleport_.t < teleport_time_){
+//     return false;
+//   }
+
+//   // check to teleport by CoG_distance
+//   Scalar abs_max_cos = std::cos(teleport_angle_);
+//   for (int i = 0; i < (int)static_objects_.size(); i++) {
+//     Vector<3> delta_pos =
+//       static_objects_[i]->getPos() - quad_state_.p;
+//     Scalar obstacle_2d_dist =
+//       std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));
+//     Scalar cos = delta_pos[0] / obstacle_2d_dist;
+//     if (obstacle_2d_dist < teleport_CoG_distance_ &&  std::abs(abs_max_cos) < std::abs(cos) ){
+//       teleport_.tree_pos = -delta_pos;
+//       teleport_.is_teleport = true;
+//       abs_max_cos = cos;
+//     }
+//   }
+//   // if teleport by CoG_distance
+//   if (teleport_.is_teleport){
+//   Quaternion quaternion = quad_state_.q();
+//   Vector<3> euler;
+//   quaternionToEuler(quaternion, euler);
+//   Scalar yaw = euler[2]; // [rad]
+//   Scalar obs_theta = std::acos(abs_max_cos); // [rad]
+//   std::vector<Scalar> positive_obs;
+//   std::vector<Scalar> negative_obs;
+//   for (int t = -visionenv::Theta_Cuts / 2; t < visionenv::Theta_Cuts / 2; ++t) {
+//     Scalar theta = (t >= 0) ? theta_list_[t] : -theta_list_[(-t) - 1];  //[deg]
+//     Scalar tcell = theta * (PI / 180); //[rad]
+//     obs_direction = tcell + (yaw+camera_yaw_) -obs_theta;
+//     if (fmod(fmod(obs_direction, 2*PI)+2*PI, 2*PI)<PI){
+//       positive_obs.push_back(sphericalboxel_[t+visionenv::Theta_Cuts/2]);
+//     }
+//     else{
+//       negative_obs.push_back(sphericalboxel_[t+visionenv::Theta_Cuts/2]);
+//     }
+//   }
+//   Scalar positive_obs_ave = std::accumulate(positive_obs.begin(), positive_obs.end(), 0.0) / positive_obs.size();
+//   Scalar negative_obs_ave = std::accumulate(negative_obs.begin(), negative_obs.end(), 0.0) / negative_obs.size();
+//   teleport_.direction = !(positive_obs_ave > negative_obs_ave);
+//   return true;
+//   }
+
+//   // check to teleport by C0,C4_distance
+
+//   Matrix<3, 3> R = quad_state_.R();
+//   for (int i = 0; i < (int)static_objects_.size(); i++) {
+//     // compute relative position from C-2
+//     Eigen::Vector2d C_centor = C_list_[0];
+//     Vector<3> corner_pos{C_centor(0), C_centor(1), 0};
+//     Vector<3> delta_pos =
+//       static_objects_[i]->getPos() - (quad_state_.p + R * corner_pos);
+//   }
+
+//   Scalar abs_max_cos = std::cos(teleport_angle_);
+//   for (int i = 0; i < (int)static_objects_.size(); i++) {
+//     Vector<3> delta_pos =
+//       static_objects_[i]->getPos() - quad_state_.p;
+//     Scalar obstacle_2d_dist =
+//       std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));
+//     Scalar cos = delta_pos[0] / obstacle_2d_dist;
+//     if (obstacle_2d_dist < teleport_CoG_distance_ &&  std::abs(abs_max_cos) < std::abs(cos) ){
+//       teleport_.tree_pos = -delta_pos;
+//       teleport_.is_teleport = true;
+//       abs_max_cos = cos;
+//     }
+//   }
+
+
+// }
+
 bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
                      Ref<Vector<>> reward) {
   if (!act.allFinite() || act.rows() != act_dim_ || rew_dim_ != reward.rows()) {
@@ -687,6 +765,11 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
 
   // update observations
   getObs(obs);
+
+
+  // if (is_teleport()){
+  //   teleport();
+  // }
 
   return computeReward(reward);
 }
@@ -858,7 +941,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
 
     // simulation time out
     if (cmd_.t >= max_t_ - sim_dt_) {
-      reward = -1;
+      reward = -3;
       // std::cout << "terminate by time" << std::endl;
       // return true;
       time_num += 1;

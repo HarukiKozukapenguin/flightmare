@@ -24,6 +24,7 @@
 #include "flightlib/envs/env_base.hpp"
 #include "flightlib/objects/quadrotor.hpp"
 #include "flightlib/objects/unity_object.hpp"
+#include "flightlib/objects/teleport.hpp"
 #include "flightlib/sensors/rgb_camera.hpp"
 
 #define PI 3.14159265359
@@ -161,6 +162,11 @@ class VisionEnv final : public EnvBase {
  private:
   bool computeReward(Ref<Vector<>> reward);
   void init();
+  
+  // bool is_teleport();
+  // void teleport();
+  // Teleport teleport_;
+
   int env_id_;
   // quadrotor
   std::shared_ptr<Quadrotor> quad_ptr_;
@@ -185,6 +191,7 @@ class VisionEnv final : public EnvBase {
   Scalar attitude_vel_coeff_;
   Vector<3> goal_linear_vel_;
   bool is_collision_;
+  Vector<visionenv::Theta_Cuts> sphericalboxel_;
   Vector<visionenv::RewardCuts * visionenv::RewardCuts> vel_obs_distance_;
   Vector<visionenv::CornerNum> C_vel_obs_distance_;
   Vector<visionenv::RotorNum> R_vel_obs_distance_;
