@@ -73,8 +73,8 @@ void VisionEnv::init() {
   // act_mean_ << (max_force / quad_ptr_->getMass()) / 2, 0.0, 0.0, 0.0;
   // act_std_ << (max_force / quad_ptr_->getMass()) / 2, max_omega.x(),
   //   max_omega.y(), max_omega.z();
-  act_mean_ << 0, 0, 0;
-  act_std_ << 1.0, 1.0, 0.1;  // set by my experience (cmd difference)
+  act_mean_ << 0, 0;
+  act_std_ << 1.0, 1.0;  // set by my experience (cmd difference)
 
   collide_num = 0;
   time_num = 0;
@@ -527,7 +527,7 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.v[2] = 0.0;
     // std::cout << "cmd_.v" << std::endl;
     // std::cout << cmd_.v << std::endl;
-    cmd_.yaw = pi_act_(2) + euler[2];
+    cmd_.yaw = 0.0;
   }
 
   // std::cout << euler[2] << std::endl;

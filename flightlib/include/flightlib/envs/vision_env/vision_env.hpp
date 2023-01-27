@@ -44,7 +44,7 @@ enum Vision : int {
 
   // control actions
   kAct = 0,
-  kNAct = 3,
+  kNAct = 2,
 
   // observations
   kObs = 0,
