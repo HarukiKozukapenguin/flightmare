@@ -11,7 +11,7 @@ environment:
   goal: 60
   fly_result: false
   control_feedthrough: false
-  momentum_bool: true
+  momentum_bool: false
   momentum: 0.9
   theta_list: [5, 15, 25, 35, 45, 60, 75, 90] #[deg] size should be Theta_Cuts/2
   # phi_list: [5, 15] #[deg] size should be Phi_Cuts/2
