@@ -139,6 +139,9 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   cmd_.p[0] = quad_state_.x(QS::POSX);
   cmd_.p[1] = quad_state_.x(QS::POSY);
 
+  // size: the size of the quadrotor, 0.25 ~ 1.0[m]
+  Scalar size = uniform_dist_one_direction_(random_gen_)*0.75 + 0.25;
+  quad_size_ = size;
   // obtain observations
   getObs(obs);
   return true;
@@ -190,7 +193,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY),
     world_box_[4] - quad_state_.x(QS::POSZ),
-    world_box_[5] - quad_state_.x(QS::POSZ),
+    world_box_[5] - quad_state_.x(QS::POSZ), quad_size_,
     sphericalboxel;
   // std::cout << "obs is called" << std::endl;
   return true;
