@@ -142,11 +142,42 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   // size: the size of the quadrotor, 0.25 ~ 1.0[m]
   Scalar size = uniform_dist_one_direction_(random_gen_)*0.75 + 0.25;
   quad_size_ = size;
+  // resetSize(size);
+
   // obtain observations
   getObs(obs);
   return true;
 }
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
+
+void VisionEnv::resetSize(Scalar size) {
+  cfg_["quadrotor_dynamics"]["quad_size"] = size;
+  cfg_["quadrotor_dynamics"]["mass"] = std::pow(size/init_size_,3)*init_mass_;
+  for (size_t i; i < init_inertia_.size(); i++) {
+    cfg_["quadrotor_dynamics"]["inertia"][i] = std::pow(size/init_size_,5)*init_inertia_[i];
+  }
+  Scalar tbm_x_length = size/init_size_*init_tbm_x_length_;
+  Scalar tbm_y_length = size/init_size_*init_tbm_y_length_;
+  std::vector<Scalar> tbm_fr{tbm_x_length, -tbm_y_length, 0.0};
+  cfg_["quadrotor_dynamics"]["tbm_fr"] = tbm_fr;
+  std::vector<Scalar> tbm_bl{-tbm_x_length, tbm_y_length, 0.0};
+  cfg_["quadrotor_dynamics"]["tbm_bl"] = tbm_bl;
+  std::vector<Scalar> tbm_br{-tbm_x_length, -tbm_y_length, 0.0};
+  cfg_["quadrotor_dynamics"]["tbm_br"] = tbm_br;
+  std::vector<Scalar> tbm_fl{tbm_x_length, tbm_y_length, 0.0};
+  cfg_["quadrotor_dynamics"]["tbm_fl"] = tbm_fl;
+
+  cfg_["quadrotor_dynamics"]["motor_omega_min"] = std::pow(size/init_size_,-1/2)*init_motor_omega_min_;
+  cfg_["quadrotor_dynamics"]["motor_omega_max"] = std::pow(size/init_size_,-1/2)*init_motor_omega_max_;
+  for (size_t i; i < init_thrust_map_.size(); i++) {
+    cfg_["quadrotor_dynamics"]["thrust_map"][i] = std::pow(size/init_size_,4)*init_thrust_map_[i];
+  }
+  quad_size_ = size;
+  QuadrotorDynamics dynamics;
+  dynamics.updateParams(cfg_);
+  quad_ptr_->updateDynamics(dynamics);
+}
+
 
 void VisionEnv::init_isCollision(void) {
   Vector<visionenv::Theta_Cuts> unused1;
@@ -877,6 +908,15 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
 
   if (cfg["quadrotor_dynamics"]) {
     quad_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
+    // init_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
+    // init_mass_ = cfg["quadrotor_dynamics"]["mass"].as<Scalar>();
+    // init_inertia_ = cfg["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>();
+    // std::vector tbm_fl = cfg["quadrotor_dynamics"]["tbm_fl"].as<std::vector<Scalar>>();
+    // init_tbm_x_length_ = tbm_fl[0];
+    // init_tbm_y_length_ = tbm_fl[1];
+    // init_motor_omega_min_ = cfg["quadrotor_dynamics"]["motor_omega_min"].as<Scalar>();
+    // init_motor_omega_max_ = cfg["quadrotor_dynamics"]["motor_omega_max"].as<Scalar>();
+    // init_thrust_map_ = cfg["quadrotor_dynamics"]["thrust_map"].as<std::vector<Scalar>>();
   }
   //
   std::string scene_file =

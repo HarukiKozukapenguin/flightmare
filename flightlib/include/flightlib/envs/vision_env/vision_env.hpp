@@ -149,6 +149,7 @@ class VisionEnv final : public EnvBase {
  private:
   bool computeReward(Ref<Vector<>> reward);
   void init();
+  void resetSize(Scalar size);
   int env_id_;
   // quadrotor
   std::shared_ptr<Quadrotor> quad_ptr_;
@@ -244,6 +245,16 @@ class VisionEnv final : public EnvBase {
   int bound_num;
   int goal_num;
   int iter;
+
+  Scalar init_size_;
+  Scalar init_mass_;
+  std::vector<Scalar> init_inertia_;
+  Scalar init_tbm_x_length_;
+  Scalar init_tbm_y_length_;
+  Scalar init_motor_omega_min_;
+  Scalar init_motor_omega_max_;
+  std::vector<Scalar> init_thrust_map_;
+
 };
 
 }  // namespace flightlib
