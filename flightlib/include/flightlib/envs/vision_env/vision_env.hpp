@@ -150,6 +150,7 @@ class VisionEnv final : public EnvBase {
   bool computeReward(Ref<Vector<>> reward);
   void init();
   void resetSize(Scalar size);
+  bool resetCollision();
   int env_id_;
   // quadrotor
   std::shared_ptr<Quadrotor> quad_ptr_;
@@ -245,6 +246,9 @@ class VisionEnv final : public EnvBase {
   int bound_num;
   int goal_num;
   int iter;
+
+  Scalar max_collide_vel_;
+  Scalar when_collision_coeff_;
 
   Scalar init_size_;
   Scalar init_mass_;

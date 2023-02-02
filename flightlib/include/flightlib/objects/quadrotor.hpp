@@ -75,6 +75,8 @@ class Quadrotor : ObjectBase {
   inline void setSize(const Ref<Vector<3>> size) { size_ = size; };
   inline void setCollision(const bool collision) { collision_ = collision; };
 
+  bool resetCollision(QuadState& collide_state);
+
  private:
   // quadrotor dynamics, integrators
   QuadrotorDynamics dynamics_;

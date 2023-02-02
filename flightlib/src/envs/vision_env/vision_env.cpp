@@ -582,7 +582,11 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
   // update observations
   getObs(obs);
 
-  return computeReward(reward);
+  bool compute_reward = computeReward(reward);
+  if (is_collision_ && (quad_state_.v).norm() < max_collide_vel_){
+    resetCollision();
+  }
+  return compute_reward;
 }
 
 bool VisionEnv::simDynamicObstacles(const Scalar dt) {
@@ -595,6 +599,16 @@ bool VisionEnv::simDynamicObstacles(const Scalar dt) {
     dynamic_objects_[i]->run(sim_dt_);
   }
   return true;
+}
+
+bool VisionEnv::resetCollision(){
+  // reset quadrotor state when they collide with obstacles, and this is not fatal.
+    QuadState collide_state = quad_old_state_;
+    quad_ptr_-> resetCollision(collide_state);
+    is_collision_ = false;
+    quad_state_ = collide_state;
+    quad_ptr_->setState(quad_state_);
+    return true;
 }
 
 bool VisionEnv::computeReward(Ref<Vector<>> reward) {
@@ -629,17 +643,23 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   }
 
   Scalar vel_collision_penalty = 0;
-  for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
-    Scalar vel_obs_dist = vel_obs_distance_[i];
-    int p = (i % visionenv::RewardCuts) - (visionenv::RewardCuts - 1) / 2;
-    int t = (i / visionenv::RewardCuts) - (visionenv::RewardCuts - 1) / 2;
-    Scalar angle_discount_factor = std::sqrt(std::pow(p, 2) + std::pow(t, 2)) /
-                                   ((visionenv::RewardCuts - 1) / 2) *
-                                   vel_collision_angle_max_;
-    vel_collision_penalty += vel_collision_coeff_ *
-                             (quad_state_.v).squaredNorm() *
-                             std::exp(-collision_exp_coeff_ * vel_obs_dist) *
-                             std::exp(-angle_discount_factor);
+
+  if (is_collision_ && (quad_state_.v).norm() < max_collide_vel_){
+    vel_collision_penalty = when_collision_coeff_ * (quad_state_.v).squaredNorm();
+  }
+  else{
+    for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
+      Scalar vel_obs_dist = vel_obs_distance_[i];
+      int p = (i % visionenv::RewardCuts) - (visionenv::RewardCuts - 1) / 2;
+      int t = (i / visionenv::RewardCuts) - (visionenv::RewardCuts - 1) / 2;
+      Scalar angle_discount_factor = std::sqrt(std::pow(p, 2) + std::pow(t, 2)) /
+                                    ((visionenv::RewardCuts - 1) / 2) *
+                                    vel_collision_angle_max_;
+      vel_collision_penalty += vel_collision_coeff_ *
+                              (quad_state_.v).squaredNorm() *
+                              std::exp(-collision_exp_coeff_ * vel_obs_dist) *
+                              std::exp(-angle_discount_factor);
+    }
   }
 
   // std::cout << vel_collision_penalty << std::endl;
@@ -707,8 +727,10 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
                  quad_state_.p(QS::POSY) <= world_box_[3] - safty_threshold;
   bool z_valid = quad_state_.x(QS::POSZ) >= world_box_[4] + safty_threshold &&
                  quad_state_.x(QS::POSZ) <= world_box_[5] - safty_threshold;
+  Scalar vel = quad_state_.v.norm();
 
-  if (is_collision_ || cmd_.t >= max_t_ - sim_dt_ || !x_valid || !y_valid ||
+
+  if ((is_collision_ && max_collide_vel_< vel )|| cmd_.t >= max_t_ - sim_dt_ || !x_valid || !y_valid ||
       !z_valid || quad_state_.p(QS::POSX) > goal_) {
     if (is_collision_) {
       reward = -50.0;
@@ -860,6 +882,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
     theta_list_ = cfg["environment"]["theta_list"].as<std::vector<Scalar>>();
+    max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();
     // phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
   }
 
@@ -889,6 +912,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     attitude_coeff_ = cfg["rewards"]["attitude_coeff"].as<Scalar>();
     command_coeff_ = cfg["rewards"]["command_coeff"].as<std::vector<Scalar>>();
     attitude_vel_coeff_ = cfg["rewards"]["attitude_vel_coeff"].as<Scalar>();
+    when_collision_coeff_ =
+      cfg["rewards"]["when_collision_coeff"].as<Scalar>();
 
     // std::cout << dist_margin_ << std::endl;
 

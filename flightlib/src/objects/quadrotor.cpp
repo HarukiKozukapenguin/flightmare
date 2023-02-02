@@ -288,6 +288,15 @@ bool Quadrotor::constrainInWorldBox(const QuadState &old_state) {
   return true;
 }
 
+bool Quadrotor::resetCollision(QuadState& collide_state){
+  if (!collide_state.valid()) return false;
+  collide_state.v.fill(0);
+  collide_state.w.fill(0);
+  collide_state.t = state_.t;
+  return true;
+  // setState(collide_state);
+}
+
 bool Quadrotor::getState(QuadState *const state) const {
   if (!state_.valid()) return false;
 
