@@ -140,7 +140,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   cmd_.p[1] = quad_state_.x(QS::POSY);
 
   // size: the size of the quadrotor, 0.25 ~ 1.0[m]
-  Scalar size = uniform_dist_one_direction_(random_gen_)*0.75 + 0.25;
+  Scalar size = uniform_dist_one_direction_(random_gen_)*0.25 + 0.25;
   quad_size_ = size;
   // resetSize(size);
 
