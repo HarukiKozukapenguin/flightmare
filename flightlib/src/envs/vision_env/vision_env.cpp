@@ -203,6 +203,10 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   Vector<visionenv::kNObstaclesState> unused;
   // std::cout << "getObstacleState is being called" << std::endl;
   getObstacleState(sphericalboxel, unused);
+
+  for (int i = 0; i < visionenv::Theta_Cuts; i++) {
+    sphericalboxel[i] -= quad_size_;
+  }
   Scalar average_depth = 0;
   for (int i = 0; i < visionenv::Theta_Cuts; i++) {
     average_depth += sphericalboxel[i];
