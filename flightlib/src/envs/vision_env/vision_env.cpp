@@ -641,11 +641,11 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     }
     idx += 1;
   }
-
+  Scalar when_collision_penlty = 0;
   Scalar vel_collision_penalty = 0;
 
   if (is_collision_ && (quad_state_.v).norm() < max_collide_vel_){
-    vel_collision_penalty = when_collision_coeff_ * (quad_state_.v).squaredNorm();
+    when_collision_penlty = when_collision_coeff_ * (quad_state_.v).squaredNorm();
   }
   else{
     for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
@@ -706,14 +706,14 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 
   //  change progress reward as survive reward
   const Scalar total_reward =
-    move_reward + lin_vel_reward + collision_penalty + vel_collision_penalty +
+    move_reward + lin_vel_reward + collision_penalty + vel_collision_penalty + when_collision_penlty +
     ang_vel_penalty + survive_rew_ + world_box_penalty + attitude_penalty +
     command_penalty + attitude_vel_penalty;
 
   // return all reward components for debug purposes
   // only the total reward is used by the RL algorithm
   reward << move_reward, lin_vel_reward, collision_penalty,
-    vel_collision_penalty, ang_vel_penalty, survive_rew_, world_box_penalty,
+    vel_collision_penalty, when_collision_penlty, ang_vel_penalty, survive_rew_, world_box_penalty,
     attitude_penalty, command_penalty, attitude_vel_penalty, total_reward;
   return true;
 }

@@ -44,6 +44,7 @@ rewards:
       "lin_vel_reward",
       "collision_penalty",
       "vel_collision_penalty",
+      "when_collision_penlty",
       "ang_vel_penalty",
       "survive_rew",
       "world_box_penalty",
