@@ -205,7 +205,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   getObstacleState(sphericalboxel, unused);
 
   for (int i = 0; i < visionenv::Theta_Cuts; i++) {
-    sphericalboxel[i] -= quad_size_;
+    sphericalboxel[i] -= quad_size_/max_detection_range_;
   }
   Scalar average_depth = 0;
   for (int i = 0; i < visionenv::Theta_Cuts; i++) {
