@@ -751,7 +751,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
 
     // simulation time out
     if (cmd_.t >= max_t_ - sim_dt_) {
-      reward = -10;
+      reward = -30;
       // std::cout << "terminate by time" << std::endl;
       // return true;
       time_num += 1;
