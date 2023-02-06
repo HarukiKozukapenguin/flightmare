@@ -18,7 +18,7 @@ VisionEnv::VisionEnv(const std::string &cfg_path, const int env_id)
   cfg_ = YAML::LoadFile(cfg_path);
 
   env_folder_ = cfg_["environment"]["env_folder"].as<int>();
-  env_id_ = env_folder_;
+  env_id_ = env_id;
   init();
 }
 
@@ -26,7 +26,7 @@ VisionEnv::VisionEnv(const YAML::Node &cfg_node, const int env_id) : EnvBase() {
   cfg_ = cfg_node;
   //
   env_folder_ = cfg_["environment"]["env_folder"].as<int>();
-  env_id_ = env_folder_;
+  env_id_ = env_id;
   init();
 }
 
@@ -140,7 +140,8 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   cmd_.p[1] = quad_state_.x(QS::POSY);
 
   // size: the size of the quadrotor, 0.25 ~ 1.0[m]
-  Scalar size = uniform_dist_one_direction_(random_gen_)*0.25 + 0.25;
+  Scalar size_div = std::min((0.50-0.25)*(500-env_id_)/250 ,0.25);
+  Scalar size = uniform_dist_one_direction_(random_gen_)*size_div + 0.25;
   quad_size_ = size;
   // resetSize(size);
 
@@ -976,7 +977,7 @@ bool VisionEnv::changeLevel() {
     difficulty_level_ + std::string("/") + std::string("environment_") +
     std::to_string(env_id_ % 501);
   std::cout << obstacle_cfg_path_ << std::endl;
-  cfg_["environment"]["env_folder"] = (env_id_ + 1) % 500;
+  // cfg_["environment"]["env_folder"] = (env_id_ + 1) % 500;
 
   // add dynamic objects
   // std::string dynamic_object_yaml =
