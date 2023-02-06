@@ -650,7 +650,7 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   Scalar vel_collision_penalty = 0;
 
   if (is_collision_ && (quad_state_.v).norm() < max_collide_vel_){
-    when_collision_penlty = when_collision_coeff_ * (quad_state_.v).squaredNorm();
+    when_collision_penlty = when_collision_coeff_ * std::max((quad_state_.v).squaredNorm(),0.01);
   }
   else{
     for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
