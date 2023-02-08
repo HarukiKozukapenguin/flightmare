@@ -37,9 +37,10 @@ void VecEnvBase<EnvBaseName>::configEnv(const YAML::Node& cfg_node) {
 
   // set threads
   omp_set_num_threads(num_threads_);
+  int beginning_env_folder = cfg_node["environment"]["beginning_env_folder"].as<int>();
 
   // create & setup environments
-  for (int env_id = 0; env_id < num_envs_; env_id++) {
+  for (int env_id = beginning_env_folder; env_id < num_envs_+beginning_env_folder; env_id++) {
     envs_.push_back(std::make_unique<EnvBaseName>(cfg_node, env_id));
   }
   // std::cout << "creating envirionment" << std::endl;
