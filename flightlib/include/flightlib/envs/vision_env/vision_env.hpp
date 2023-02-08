@@ -204,6 +204,7 @@ class VisionEnv final : public EnvBase {
   // std::vector<Scalar> tree_size_range_;
   // quad_size (meter)
   Scalar quad_size_;
+  bool quad_size_fix_;
 
   // observations and actions (for RL)
   Vector<visionenv::kNObs> pi_obs_;

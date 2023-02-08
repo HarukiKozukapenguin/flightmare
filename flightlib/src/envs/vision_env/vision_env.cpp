@@ -139,11 +139,15 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   cmd_.p[0] = quad_state_.x(QS::POSX);
   cmd_.p[1] = quad_state_.x(QS::POSY);
 
-  // size: the size of the quadrotor, 0.25 ~ 1.0[m]
-  Scalar size_div = std::min((0.50-0.25)*(500-env_id_)/250 ,0.25);
-  Scalar size = uniform_dist_one_direction_(random_gen_)*size_div + 0.25;
-  quad_size_ = size;
-  // resetSize(size);
+  if (!quad_size_fix_){
+    // reset quadrotor size
+    // size: the size of the quadrotor, 0.25 ~ 1.0[m]
+    Scalar size_div = std::min((0.50-0.25)*(500-env_id_)/250 ,0.25);
+    Scalar size = uniform_dist_one_direction_(random_gen_)*size_div + 0.25;
+    quad_size_ = size;
+    // resetSize(size);
+  }
+  std::cout << "quad size is " << quad_size_ << std::endl;
 
   // obtain observations
   getObs(obs);
@@ -938,6 +942,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
 
   if (cfg["quadrotor_dynamics"]) {
     quad_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
+    quad_size_fix_ = cfg["quadrotor_dynamics"]["quad_size_fix"].as<bool>();
     // init_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
     // init_mass_ = cfg["quadrotor_dynamics"]["mass"].as<Scalar>();
     // init_inertia_ = cfg["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>();
