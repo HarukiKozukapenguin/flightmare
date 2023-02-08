@@ -17,6 +17,7 @@ environment:
   theta_list: [5, 15, 25, 35, 45, 60, 75, 90] #[deg] size should be Theta_Cuts/2
   # phi_list: [5, 15] #[deg] size should be Phi_Cuts/2
   max_collide_vel: 2.0
+  max_distance_log: -10.0
 # three difficulty level [easy, medium, hard](list when they learn)
 # configurations for dynamic and static obstacles, environment_(0~100)
 # Bounding box applied during training, exiting this box terminates the episode. [xmin, xmax, ymin, ymax, zmin, zmax]

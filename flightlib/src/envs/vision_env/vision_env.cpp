@@ -211,9 +211,13 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // std::cout << "getObstacleState is being called" << std::endl;
   getObstacleState(sphericalboxel, unused);
 
+  Vector<visionenv::Theta_Cuts> logsphericalboxel;
   for (int i = 0; i < visionenv::Theta_Cuts; i++) {
-    sphericalboxel[i] -= quad_size_/max_detection_range_;
+    sphericalboxel[i] -= quad_size_/max_detection_range_; // 0~1
+    logsphericalboxel[i] = std::max(max_distance_log_, log(sphericalboxel[i])); // -10~0
   }
+
+  // calculate log of the depth
   Scalar average_depth = 0;
   for (int i = 0; i < visionenv::Theta_Cuts; i++) {
     average_depth += sphericalboxel[i];
@@ -234,7 +238,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     quad_state_.v[0],quad_state_.v[1], ori, quad_state_.w,
     world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY), quad_size_,
-    sphericalboxel;
+    logsphericalboxel;
   // std::cout << "obs is called" << std::endl;
   return true;
 }
@@ -897,6 +901,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
     theta_list_ = cfg["environment"]["theta_list"].as<std::vector<Scalar>>();
     max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();
+    max_distance_log_ = cfg["environment"]["max_distance_log"].as<Scalar>();
     // phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
   }
 
