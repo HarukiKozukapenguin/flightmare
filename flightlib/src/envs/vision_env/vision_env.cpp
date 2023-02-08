@@ -674,9 +674,14 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   // std::cout << vel_collision_penalty << std::endl;
   // std::cout << "collision_penalty is " << collision_penalty << std::endl;
   // std::cout << ' ' << std::endl;
-
-  Scalar move_reward =
-    move_coeff_ * (quad_state_.p(QS::POSX) - quad_old_state_.p(QS::POSX));
+  Scalar move_diff = quad_state_.p(QS::POSX) - quad_old_state_.p(QS::POSX);
+  Scalar move_reward = 0;
+  if (move_diff>0){
+    move_reward = move_coeff_ * move_diff;
+  }
+  else{
+    move_reward = move_back_coeff_ * move_diff;
+  }
 
   // - tracking a constant linear velocity
   Scalar lin_vel_reward =
@@ -906,6 +911,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
   if (cfg["rewards"]) {
     // load reward coefficients for reinforcement learning
     move_coeff_ = cfg["rewards"]["move_coeff"].as<Scalar>();
+    move_back_coeff_ = cfg["rewards"]["move_back_coeff"].as<Scalar>();
     vel_coeff_ = cfg["rewards"]["vel_coeff"].as<Scalar>();
     collision_coeff_ = cfg["rewards"]["collision_coeff"].as<Scalar>();
     vel_collision_coeff_ = cfg["rewards"]["vel_collision_coeff"].as<Scalar>();
