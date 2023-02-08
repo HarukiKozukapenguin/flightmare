@@ -1,5 +1,5 @@
 environment:
-  level: ["real_tree_random_6"]
+  level: ["real_tree_random_7"]
   beginning_env_folder: 500 # beginning of env
   env_folder: 0 # (no meaning...)
   world_box: [-0.3, 70, -1.5, 1.5, 0.2, 2]
