@@ -147,7 +147,9 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     quad_size_ = size;
     // resetSize(size);
   }
-  std::cout << "quad size is " << quad_size_ << std::endl;
+      if (fly_result_){
+    std::cout << "quad size is " << quad_size_ << std::endl;
+    }
 
   // obtain observations
   getObs(obs);
