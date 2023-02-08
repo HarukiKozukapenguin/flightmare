@@ -141,7 +141,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
 
   if (!quad_size_fix_){
     // reset quadrotor size
-    // size: the size of the quadrotor, 0.25 ~ 1.0[m]
+    // size: the size of the quadrotor, 0.25 ~ 0.5[m]
     Scalar size_div = std::min((0.50-0.25)*(500-env_id_)/250 ,0.25);
     Scalar size = uniform_dist_one_direction_(random_gen_)*size_div + 0.25;
     quad_size_ = size;
