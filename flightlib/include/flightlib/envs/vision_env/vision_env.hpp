@@ -174,7 +174,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> command_coeff_;
   Scalar attitude_vel_coeff_;
   Vector<3> goal_linear_vel_;
-  bool is_collision_;
+  bool is_collision_, is_threshold_collision_;
   Vector<visionenv::RewardCuts * visionenv::RewardCuts> vel_obs_distance_;
 
   size_t obstacle_num_;
@@ -204,7 +204,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> z_lim_;
   // std::vector<Scalar> tree_size_range_;
   // quad_size (meter)
-  Scalar quad_size_;
+  Scalar quad_size_, quad_size_threshold_dev_, quad_size_threshold_;
   bool quad_size_fix_;
 
   // observations and actions (for RL)

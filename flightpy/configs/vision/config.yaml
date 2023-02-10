@@ -98,6 +98,7 @@ quadrotor_dynamics:
   body_drag_h: 0.00
   quad_size: 0.25 # [m]
   quad_size_fix: false
+  quad_size_threshold_dev: 0.05 # [m]
 
 Control:
   cmd_mode:                     2 # please check flightmare/flightlib/include/flightlib/common/command.hpp#9-13

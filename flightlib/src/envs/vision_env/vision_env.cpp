@@ -33,6 +33,7 @@ VisionEnv::VisionEnv(const YAML::Node &cfg_node, const int env_id) : EnvBase() {
 void VisionEnv::init() {
   //
   is_collision_ = false;
+  is_threshold_collision_ = false;
   unity_render_offset_ << 0.0, 0.0, 0.0;
   goal_linear_vel_ << 0.0, 0.0, 0.0;
   cmd_.setZeros();
@@ -91,6 +92,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   pi_act_.setZero();
   old_pi_act_.setZero();
   is_collision_ = false;
+  is_threshold_collision_ = false;
 
 
   // std::uniform_real_distribution<Scalar> y_range_dist{y_lim_[0], y_lim_[1]};
@@ -118,6 +120,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     // quad_state_.x(QS::POSZ) = 7.6;
     // reset quadrotor with random states
     is_collision_ = false;
+    is_threshold_collision_ = false;
     quad_ptr_->reset(quad_state_);
 
     init_isCollision();  // change is_collision depending on initial position
@@ -145,10 +148,12 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     Scalar size_div = std::min((0.50-0.25)*(500-env_id_)/250 ,0.25);
     Scalar size = uniform_dist_one_direction_(random_gen_)*size_div + 0.25;
     quad_size_ = size;
+    quad_size_threshold_ = quad_size_ - quad_size_threshold_dev_ * uniform_dist_one_direction_(random_gen_);
     // resetSize(size);
   }
       if (fly_result_){
     std::cout << "quad size is " << quad_size_ << std::endl;
+    std::cout << "quad size threshold is " << quad_size_threshold_ << std::endl;
     }
 
   // obtain observations
@@ -316,8 +321,12 @@ bool VisionEnv::getObstacleState(
     // obs_radius = obs_radius / 2;
 
     obstacle_radius_.push_back(obs_radius);
+
     if (obstacle_2d_dist < obs_radius + quad_size_) {
       is_collision_ = true;
+    }
+    if (obstacle_2d_dist < obs_radius + quad_size_threshold_) {
+      is_threshold_collision_ = true;
     }
   }
 
@@ -435,7 +444,7 @@ Scalar VisionEnv::getClosestDistance(
     Scalar D = std::pow(b, 2) - a * c;
     if (0 <= D) {
       Scalar dist = (b - std::sqrt(D)) / a;
-      if (dist >= quad_size_) {
+      if (dist >= 0) {
         rmin = std::min(dist, rmin);
       }
     }
@@ -596,7 +605,7 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
   getObs(obs);
 
   bool compute_reward = computeReward(reward);
-  if (is_collision_ && (quad_state_.v).norm() < max_collide_vel_){
+  if (is_threshold_collision_){
     resetCollision();
   }
   return compute_reward;
@@ -618,7 +627,7 @@ bool VisionEnv::resetCollision(){
   // reset quadrotor state when they collide with obstacles, and this is not fatal.
     QuadState collide_state = quad_old_state_;
     quad_ptr_-> resetCollision(collide_state);
-    is_collision_ = false;
+    is_threshold_collision_ = false;
     quad_state_ = collide_state;
     quad_ptr_->setState(quad_state_);
     return true;
@@ -954,6 +963,9 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
   if (cfg["quadrotor_dynamics"]) {
     quad_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
     quad_size_fix_ = cfg["quadrotor_dynamics"]["quad_size_fix"].as<bool>();
+    quad_size_threshold_dev_ =
+      cfg["quadrotor_dynamics"]["quad_size_threshold_dev"].as<Scalar>();
+    quad_size_threshold_ = quad_size_ - quad_size_threshold_dev_ * uniform_dist_one_direction_(random_gen_);
     // init_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
     // init_mass_ = cfg["quadrotor_dynamics"]["mass"].as<Scalar>();
     // init_inertia_ = cfg["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>();
