@@ -216,10 +216,10 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // std::cout << "getObstacleState is being called" << std::endl;
   getObstacleState(sphericalboxel, unused);
 
-  Vector<visionenv::Theta_Cuts> logsphericalboxel;
+  Vector<visionenv::Theta_Cuts> expsphericalboxel;
   for (int i = 0; i < visionenv::Theta_Cuts; i++) {
     sphericalboxel[i] -= quad_size_/max_detection_range_; // 0~1
-    logsphericalboxel[i] = std::max(max_distance_log_, log(sphericalboxel[i])); // -10~0
+    expsphericalboxel[i] = exp(-max_detection_range_*sphericalboxel[i]); // -10~0
   }
 
   // calculate log of the depth
@@ -243,7 +243,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     quad_state_.v[0],quad_state_.v[1], ori, quad_state_.w,
     world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY), quad_size_,
-    logsphericalboxel;
+    expsphericalboxel;
   // std::cout << "obs is called" << std::endl;
   return true;
 }
