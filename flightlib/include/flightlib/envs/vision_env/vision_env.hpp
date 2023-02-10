@@ -38,7 +38,7 @@ enum Vision : int {
   kNObstacles = 30,
   kNObstaclesState = 4,
 
-  Theta_Cuts = 16,
+  Theta_Cuts = 22,
   // Phi_Cuts = 2,
   RewardCuts = 5,
 
