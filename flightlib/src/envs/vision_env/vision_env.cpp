@@ -308,6 +308,8 @@ bool VisionEnv::getObstacleState(
 
   // std::cout << "get dynamic_objects_" << std::endl;
 
+  is_collision_ = false;
+  is_threshold_collision_ = false;
   // compute relatiev distance to static obstacles
   for (int i = 0; i < (int)static_objects_.size(); i++) {
     // compute relative position vector
