@@ -224,7 +224,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   for (int i = 0; i < visionenv::Theta_Cuts; i++) {
     sphericalboxel[i] -= quad_size_/max_detection_range_; // 0~1
     if (sphericalboxel[i]> linear_transition_log_){
-    logsphericalboxel[i] = log(sphericalboxel[i]);
+    logsphericalboxel[i] = -log(sphericalboxel[i]);
     }
     else{
       logsphericalboxel[i] = a*sphericalboxel[i]+b;
