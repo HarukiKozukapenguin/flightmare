@@ -89,6 +89,7 @@ VisionEnv::~VisionEnv() {}
 bool VisionEnv::reset(Ref<Vector<>> obs) {
   // std::cout << "reset call in VisionEnv" << std::endl;
   quad_state_.setZero();
+  quad_old_state_.setZero();
   pi_act_.setZero();
   old_pi_act_.setZero();
   is_collision_ = false;
@@ -134,6 +135,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     // std::cout << "initial y" << quad_state_.x(QS::POSY) << std::endl;
     // std::cout << "initial z" << quad_state_.x(QS::POSZ) << std::endl;
   }
+  quad_old_state_ = quad_state_;
 
   // std::cout << "z_vel is " << quad_state_.x(QS::VELZ) << std::endl;
   // reset control command
