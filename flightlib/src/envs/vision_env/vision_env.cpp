@@ -770,7 +770,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
 
   if ((is_collision_ && max_collide_vel_< vel )|| cmd_.t >= max_t_ - sim_dt_ || !x_valid || !y_valid ||
       !z_valid || quad_state_.p(QS::POSX) > goal_) {
-    if (is_collision_) {
+    if (is_collision_ && max_collide_vel_< vel) {
       reward = -100.0;
       // std::cout << "terminate by collision" << std::endl;
       // return true;
