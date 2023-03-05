@@ -536,6 +536,9 @@ VisionEnv::get_vel_sphericalboxel(
 
 bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
                      Ref<Vector<>> reward) {
+  if (is_threshold_collision_){
+    resetCollision();
+  }
   if (!act.allFinite() || act.rows() != act_dim_ || rew_dim_ != reward.rows()) {
     return false;
     logger_.error(
@@ -616,9 +619,6 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
   getObs(obs);
 
   bool compute_reward = computeReward(reward);
-  if (is_threshold_collision_){
-    resetCollision();
-  }
   return compute_reward;
 }
 
