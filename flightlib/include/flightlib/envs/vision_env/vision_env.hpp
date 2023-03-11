@@ -171,6 +171,7 @@ class VisionEnv final : public EnvBase {
     survive_rew_, dist_margin_;
   std::vector<Scalar> world_box_coeff_;
   Scalar attitude_coeff_;
+  Scalar command_accum_diff_;
   std::vector<Scalar> command_coeff_;
   Scalar attitude_vel_coeff_;
   Vector<3> goal_linear_vel_;
@@ -211,6 +212,7 @@ class VisionEnv final : public EnvBase {
   Vector<visionenv::kNObs> pi_obs_;
   Vector<visionenv::kNAct> pi_act_;
   Vector<visionenv::kNAct> old_pi_act_;
+  Vector<visionenv::kNAct> accumulate_pi_act_;
 
   // action and observation normalization (for learning)
   Vector<visionenv::kNAct> act_mean_;
