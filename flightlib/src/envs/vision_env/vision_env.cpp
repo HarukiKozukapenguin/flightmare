@@ -92,6 +92,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   quad_old_state_.setZero();
   pi_act_.setZero();
   old_pi_act_.setZero();
+  accumulate_pi_act_.setZero();
   is_collision_ = false;
   is_threshold_collision_ = false;
 
@@ -728,7 +729,9 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   Scalar attitude_penalty = attitude_coeff_ * std::pow(tilt, 2);
 
   Scalar command_penalty = 0;
-  Vector<visionenv::kNAct> pi_act_diff_ = pi_act_ - old_pi_act_;
+  accumulate_pi_act_ *= command_accum_diff_;
+  accumulate_pi_act_ += old_pi_act_;
+  Vector<visionenv::kNAct> pi_act_diff_ = pi_act_ - accumulate_pi_act_*(1-command_accum_diff_);
   for (int i = 0; i < visionenv::kNAct; i++) {
     command_penalty += command_coeff_[i] * std::pow(pi_act_diff_[i], 2);
   }
@@ -952,6 +955,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     world_box_coeff_ =
       cfg["rewards"]["world_box_coeff"].as<std::vector<Scalar>>();
     attitude_coeff_ = cfg["rewards"]["attitude_coeff"].as<Scalar>();
+    command_accum_diff_ = cfg["rewards"]["command_accum_diff"].as<Scalar>();
     command_coeff_ = cfg["rewards"]["command_coeff"].as<std::vector<Scalar>>();
     attitude_vel_coeff_ = cfg["rewards"]["attitude_vel_coeff"].as<Scalar>();
     when_collision_coeff_ =
