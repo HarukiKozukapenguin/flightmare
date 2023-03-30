@@ -129,7 +129,7 @@ def test_policy(env, model, render=False):
             vel_list = []
             path = (
                 os.environ["FLIGHTMARE_PATH"]
-                + "/flightpy/configs/vision/real_tree_medium/environment_"
+                + "/flightpy/configs/vision/real_tree_random_8/environment_"
                 + "0"
                 + "/"
             )
