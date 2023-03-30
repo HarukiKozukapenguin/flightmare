@@ -106,13 +106,14 @@ def plot3d_traj(ax3d, pos, vel):
 def test_policy(env, model, render=False):
     max_ep_length = env.max_episode_steps
     num_rollouts = 100
+    act_dim: int = env.action_space.shape[0]
     frame_id = 0
     final_x_list = []
     ave_vel_list = []
-    act_diff_sum = np.zeros(2)
+    act_diff_sum = np.zeros(act_dim)
     # print(act_diff_sum.shape)
-    act = np.zeros(2)
-    past_act = np.zeros(2)
+    act = np.zeros(act_dim)
+    past_act = np.zeros(act_dim)
     step_num = 0
     tilt = 0
     if render:
@@ -149,7 +150,7 @@ def test_policy(env, model, render=False):
             past_act = act
             act, lstm_states = model.predict(obs, state=lstm_states, deterministic=True)
             # https://sb3-contrib.readthedocs.io/en/master/modules/ppo_recurrent.html#sb3_contrib.ppo_recurrent.RecurrentPPO
-            act = act.reshape(2)
+            act = act.reshape(act_dim)
             # print(act.shape)
             # print(past_act.shape)
             # print(act_diff_sum.shape)
