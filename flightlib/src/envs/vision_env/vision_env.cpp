@@ -412,8 +412,12 @@ bool VisionEnv::getObstacleState(
   // std::cout << "getsphericalboxel is being called" << std::endl;
   sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
 
+  // vel_obs_distance_: [0,10.0] [m]
   vel_obs_distance_ =
     get_vel_sphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
+  for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
+    vel_obs_distance_[i] -= quad_size_;
+  }
 
   return true;
 }
@@ -679,7 +683,9 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   }
   Scalar when_collision_penlty = 0;
   Scalar vel_collision_penalty = 0;
-
+  Scalar beta = vel_transition_fraction_;
+  Scalar a = -1/(beta*beta);
+  Scalar b = 2/beta;
   if (is_collision_ && (quad_state_.v).norm() < max_collide_vel_){
     when_collision_penlty = when_collision_coeff_ * std::max((quad_state_.v).squaredNorm(),0.01);
   }
@@ -691,10 +697,16 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
       Scalar angle_discount_factor = std::sqrt(std::pow(p, 2) + std::pow(t, 2)) /
                                     ((visionenv::RewardCuts - 1) / 2) *
                                     vel_collision_angle_max_;
+      Scalar dist_factor;
+      if (vel_obs_dist<vel_transition_fraction_){
+        dist_factor = a*vel_obs_dist+b;
+      }
+      else{
+        dist_factor = 1/vel_obs_dist;
+      }
       vel_collision_penalty += vel_collision_coeff_ *
                               (quad_state_.v).squaredNorm() *
-                              std::exp(-collision_exp_coeff_ * vel_obs_dist) *
-                              std::exp(-angle_discount_factor);
+                              dist_factor * std::exp(-angle_discount_factor);
     }
   }
 
@@ -925,6 +937,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     theta_list_ = cfg["environment"]["theta_list"].as<std::vector<Scalar>>();
     max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();
     linear_transition_log_ = cfg["environment"]["linear_transition_log"].as<Scalar>();
+    vel_transition_fraction_ = cfg["environment"]["vel_transition_fraction"].as<Scalar>();
     // phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
   }
 

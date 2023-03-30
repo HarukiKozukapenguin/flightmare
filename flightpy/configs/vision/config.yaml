@@ -18,6 +18,7 @@ environment:
   # phi_list: [5, 15] #[deg] size should be Phi_Cuts/2
   max_collide_vel: 2.0
   linear_transition_log: 0.002
+  vel_transition_fraction: 0.01
 # three difficulty level [easy, medium, hard](list when they learn)
 # configurations for dynamic and static obstacles, environment_(0~100)
 # Bounding box applied during training, exiting this box terminates the episode. [xmin, xmax, ymin, ymax, zmin, zmax]
