@@ -576,7 +576,7 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.v[0] = pi_act_(2);
     cmd_.v[1] = pi_act_(3);
     cmd_.v[2] = 0.0;
-    cmd_.yaw = pi_act_(2);
+    cmd_.yaw = 0.0;
 
   } else if (momentum_bool_) {
     cmd_.p[0] =
@@ -587,7 +587,7 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.v[0] = pi_act_(2);
     cmd_.v[1] = pi_act_(3);
     cmd_.v[2] = 0.0;
-    cmd_.yaw = (1 - momentum_) * (pi_act_(2) + euler[2]) + momentum_ * cmd_.yaw;
+    cmd_.yaw = 0.0;
     // std::cout << "momentum now" << std::endl;
   }
 
