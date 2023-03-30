@@ -5,12 +5,7 @@ real_tree_easy/*
 real_tree_medium/*
 real_tree_hard/*
 real_tree_random/*
-real_tree_random_2/*
-real_tree_random_3/*
-real_tree_random_4/*
-real_tree_random_5/*
-real_tree_random_6/*
-real_tree_random_7/*
+real_tree_random*
 *.py
 
 HYDRUS_tree*
