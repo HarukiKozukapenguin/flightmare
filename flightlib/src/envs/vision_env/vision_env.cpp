@@ -787,7 +787,10 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
       !z_valid || quad_state_.p(QS::POSX) > goal_) {
     if (is_collision_ && max_collide_vel_< vel) {
       reward = -100.0;
-      // std::cout << "terminate by collision" << std::endl;
+      if (fly_result_){
+        std::cout << "terminate by collision" << std::endl;
+      }
+
       // return true;
       // std::cout << "t is " << cmd_.t << std::endl;]
       Scalar init_t = 0;
@@ -801,7 +804,9 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
     // simulation time out
     if (cmd_.t >= max_t_ - sim_dt_) {
       reward = -20;
-      // std::cout << "terminate by time" << std::endl;
+      if (fly_result_){
+      std::cout << "terminate by time" << std::endl;
+      }
       // return true;
       time_num += 1;
     }
@@ -814,14 +819,18 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
       if (quad_state_.p(QS::POSX) < world_box_[0] + safty_threshold) {
         reward = -200.0;
       }
-      // std::cout << "terminate by box" << std::endl;
+      if (fly_result_){
+        std::cout << "terminate by box" << std::endl;
+      }
       // return true;
       bound_num += 1;
     }
 
     if (quad_state_.p(QS::POSX) > goal_) {
       reward = 100 * move_coeff_;
-      // std::cout << "terminate by reaching the goal" << std::endl;
+      if (fly_result_){
+        std::cout << "terminate by reaching the goal" << std::endl;
+      }
       // return true;
       goal_num += 1;
     }
