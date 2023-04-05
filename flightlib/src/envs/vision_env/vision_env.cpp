@@ -255,7 +255,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     quad_state_.v[0],quad_state_.v[1], ori, quad_state_.w,
     world_box_[2] - quad_state_.x(QS::POSY),
     world_box_[3] - quad_state_.x(QS::POSY), quad_size_,
-    logsphericalboxel;
+    logsphericalboxel, acc_distance_;
   // std::cout << "obs is called" << std::endl;
   return true;
 }
@@ -411,6 +411,7 @@ bool VisionEnv::getObstacleState(
   // std::cout << "obstacle_num is " << obstacle_num << std::endl;
   // std::cout << "getsphericalboxel is being called" << std::endl;
   sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
+  acc_distance_ = get_vel_acc_boxel(pos_b_list, obs_radius_list, poll_v, R_T);
 
   // vel_obs_distance_: [0,10.0] [m]
   vel_obs_distance_ =
@@ -436,7 +437,7 @@ Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
 
   Vector<visionenv::Theta_Cuts> obstacle_obs;
   for (int t = -visionenv::Theta_Cuts / 2; t < visionenv::Theta_Cuts / 2; ++t) {
-    Scalar theta = (t >= 0) ? theta_list_[t] : -theta_list_[(-t) - 1];  //[deg]
+    Scalar theta = (t >= 0) ? dist_theta_list_[t] : -dist_theta_list_[(-t) - 1];  //[deg]
     Scalar tcell = theta * (PI / 180);
     obstacle_obs[(t + visionenv::Theta_Cuts / 2)] =
       getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, 0);
@@ -494,6 +495,36 @@ Vector<3> VisionEnv::cross_product(const Vector<3> &a,
       a[(i + 1) % 3] * b[(i + 2) % 3] - a[(i + 2) % 3] * b[(i + 1) % 3];
   }
   return cross_product;
+}
+
+Vector<visionenv::Vel_Theta_Cuts>
+VisionEnv::get_vel_acc_boxel(
+  const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+  const Matrix<3, 3> &R_T) const {
+  Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
+  Vector<3> body_vel = R_T * vel_2d;
+  Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
+  Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2) +
+                                                     std::pow(body_vel[1], 2)));
+  Vector<visionenv::Vel_Theta_Cuts> acc_distance;
+  // angle of the velocity direction in 2D map
+  for (int t = -visionenv::Vel_Theta_Cuts / 2;
+       t < visionenv::Vel_Theta_Cuts / 2; ++t) {
+      Scalar theta = (t >= 0) ? acc_theta_list_[t] : -acc_theta_list_[(-t) - 1];  //[deg]
+      theta = theta * (PI / 180); //[rad]
+      Scalar tcell = theta + vel_theta;
+      Scalar pcell = vel_phi;
+      Scalar dist =  getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, pcell) *
+        max_detection_range_;
+      acc_distance[t + (visionenv::Vel_Theta_Cuts) / 2] = calc_dist_to_acc(dist,theta);
+  }
+  return acc_distance;
+}
+
+Scalar VisionEnv::calc_dist_to_acc(Scalar dist, Scalar theta) const {
+  Scalar squared_vel = quad_state_.v.squaredNorm();
+  return 2*std::sin(theta)*squared_vel/(dist*std::pow(std::cos(theta),2));
 }
 
 Vector<visionenv::RewardCuts * visionenv::RewardCuts>
@@ -943,7 +974,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
     momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
-    theta_list_ = cfg["environment"]["theta_list"].as<std::vector<Scalar>>();
+    dist_theta_list_ = cfg["environment"]["dist_theta"].as<std::vector<Scalar>>();
+    acc_theta_list_ = cfg["environment"]["acc_theta"].as<std::vector<Scalar>>();
     max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();
     linear_transition_log_ = cfg["environment"]["linear_transition_log"].as<Scalar>();
     vel_transition_fraction_ = cfg["environment"]["vel_transition_fraction"].as<Scalar>();
