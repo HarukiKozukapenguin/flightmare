@@ -14,8 +14,8 @@ environment:
   control_feedthrough: false
   momentum_bool: false
   momentum: 0.9
-  dist_theta: [5, 15, 25, 35, 45, 60, 75, 90, 105, 120, 135] #[deg] size should be Theta_Cuts/2
-  acc_theta: [1,4]
+  dist_theta: [5, 15, 25, 35, 45, 60, 75, 90, 105] #[deg] size should be Theta_Cuts/2
+  acc_theta: [1,4,7,10]
   # phi_list: [5, 15] #[deg] size should be Phi_Cuts/2
   max_collide_vel: 2.0
   linear_transition_log: 0.002
