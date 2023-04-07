@@ -619,8 +619,8 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.p[1] =
       (1 - momentum_) * (pi_act_(1) + quad_state_.p[1]) + momentum_ * cmd_.p[1];
     cmd_.p[2] = 1.0;
-    cmd_.v[0] = pi_act_(2);
-    cmd_.v[1] = pi_act_(3);
+    cmd_.v[0] = (1 - momentum_) * (pi_act_(2) + quad_state_.v[0]) + momentum_ * cmd_.v[0];
+    cmd_.v[1] = (1 - momentum_) * (pi_act_(3) + quad_state_.v[1]) + momentum_ * cmd_.v[1];
     cmd_.v[2] = 0.0;
     cmd_.yaw = 0.0;
     // std::cout << "momentum now" << std::endl;
@@ -630,8 +630,8 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.p[0] = pi_act_(0) + quad_state_.p[0];
     cmd_.p[1] = pi_act_(1) + quad_state_.p[1];
     cmd_.p[2] = 1.0;
-    cmd_.v[0] = pi_act_(2);
-    cmd_.v[1] = pi_act_(3);
+    cmd_.v[0] = pi_act_(2) + quad_state_.v[0];
+    cmd_.v[1] = pi_act_(3) + quad_state_.v[1];
     cmd_.v[2] = 0.0;
     // std::cout << "cmd_.v" << std::endl;
     // std::cout << cmd_.v << std::endl;
