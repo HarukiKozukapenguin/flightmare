@@ -7,7 +7,7 @@ environment:
   y_lim: [1,10]
   z_lim: [2,10]
   # tree_size_range: [0.25, 0.5]
-  goal_vel: [5.0, 0.0, 0.0]
+  goal_vel: [10.0, 0.0, 0.0]
   max_detection_range: 10.0
   goal: 60
   fly_result: false
@@ -29,7 +29,7 @@ environment:
 rewards:
   move_coeff: 1
   move_back_coeff: 5
-  vel_coeff: -0.01
+  vel_coeff: -0.2
   collision_coeff: -5
   vel_collision_coeff: -2.0
   vel_collision_angle_max: 25 # expressed in [deg]
