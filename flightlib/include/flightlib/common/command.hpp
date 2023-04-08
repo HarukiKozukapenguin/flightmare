@@ -53,6 +53,9 @@ class Command {
   /// goal velocity v
   Vector<3> v;
 
+  /// goal acceleration a
+  Vector<3> a;
+
   Scalar yaw;
 
 

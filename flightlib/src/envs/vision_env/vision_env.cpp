@@ -74,8 +74,8 @@ void VisionEnv::init() {
   // act_mean_ << (max_force / quad_ptr_->getMass()) / 2, 0.0, 0.0, 0.0;
   // act_std_ << (max_force / quad_ptr_->getMass()) / 2, max_omega.x(),
   //   max_omega.y(), max_omega.z();
-  act_mean_ << 0, 0, 0, 0;
-  act_std_ << 0.6, 0.6, 1.0, 1.0;  // set by my experience (cmd difference)
+  act_mean_ << 0, 0;
+  act_std_ << 10.0, 10.0;  // set by my experience (cmd difference)
 
   collide_num = 0;
   time_num = 0;
@@ -604,7 +604,19 @@ bool VisionEnv::step(const Ref<Vector<>> act, Ref<Vector<>> obs,
   quaternionToEuler(quaternion, euler);
 
 
-  if (control_feedthrough_) {
+  if (acc_control_){
+    cmd_.p[0] = quad_state_.p[0];
+    cmd_.p[1] = quad_state_.p[1];
+    cmd_.p[2] = 1.0;
+    cmd_.v[0] = quad_state_.v[0];
+    cmd_.v[1] = quad_state_.v[1];
+    cmd_.v[2] = 0.0;
+    cmd_.a[0] = pi_act_(0);
+    cmd_.a[1] = pi_act_(1);
+    cmd_.a[2] = 0.0;
+    cmd_.yaw = 0.0;
+  }
+  else if (control_feedthrough_) {
     cmd_.p[0] = pi_act_(0);
     cmd_.p[1] = pi_act_(1);
     cmd_.p[2] = 1.0;
@@ -975,6 +987,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     control_feedthrough_ = cfg["environment"]["control_feedthrough"].as<bool>();
     momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
+    acc_control_ = cfg["environment"]["acc_control"].as<bool>();
     dist_theta_list_ = cfg["environment"]["dist_theta"].as<std::vector<Scalar>>();
     acc_theta_list_ = cfg["environment"]["acc_theta"].as<std::vector<Scalar>>();
     max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();

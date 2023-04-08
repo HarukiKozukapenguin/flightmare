@@ -124,7 +124,7 @@ bool Quadrotor::updatePositionControl(const QuadState &state, Command &cmd) {
   Vector<3> pos_error = clip(
     cmd.p - state.p, dynamics_.p_err_max_);  // set clipping for stable flight
   Vector<3> vel_error = clip(cmd.v - state.v, dynamics_.v_err_max_);
-  Vector<3> acc_setpoint = {0, 0, 0};  // set 0
+  Vector<3> acc_setpoint = cmd.a;
   Vector<3> acc_cmd = dynamics_.kpacc_.cwiseProduct(pos_error) +
                       dynamics_.kdacc_.cwiseProduct(vel_error) + acc_setpoint -
                       GVEC;

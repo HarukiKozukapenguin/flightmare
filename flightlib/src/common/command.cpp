@@ -10,6 +10,7 @@ Command::Command()
     omega(0.0, 0.0, 0.0),
     p(0.0, 0.0, 0.0),
     v(0.0, 0.0, 0.0),
+    a(0.0, 0.0, 0.0),
     cmd_mode(1),
     need_position_control_(false) {}
 
@@ -30,7 +31,7 @@ void Command::setPostionControl(const bool flag) {
 bool Command::valid() const {
   return std::isfinite(t) &&
          (
-          (p.allFinite() && v.allFinite() && std::isfinite(yaw) && need_position_control_) ||
+          (p.allFinite() && v.allFinite() && a.allFinite() && std::isfinite(yaw) && need_position_control_) ||
           (std::isfinite(collective_thrust) && R.allFinite() &&
            (cmd_mode == quadcmd::THRUSTATT)) ||
           (std::isfinite(collective_thrust) && omega.allFinite() &&
@@ -65,6 +66,7 @@ void Command::setZeros() {
   R = Matrix<3, 3>::Zero();
   p = Vector<3>::Zero();
   v = Vector<3>::Zero();
+  a = Vector<3>::Zero();
   thrusts = Vector<4>::Zero();
   omega = Vector<3>::Zero();
 

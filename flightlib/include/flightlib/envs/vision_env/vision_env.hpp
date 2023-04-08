@@ -45,7 +45,7 @@ enum Vision : int {
 
   // control actions
   kAct = 0,
-  kNAct = 4,
+  kNAct = 2,
 
   // observations
   kObs = 0,
@@ -194,6 +194,7 @@ class VisionEnv final : public EnvBase {
   bool fly_result_;
   bool control_feedthrough_;
   bool momentum_bool_;
+  bool acc_control_;
   Scalar momentum_;
   std::vector<Scalar> relative_pos_norm_;
   std::vector<Scalar> relative_2d_pos_norm_;
