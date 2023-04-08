@@ -1007,8 +1007,16 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     survive_rew_ = cfg["rewards"]["survive_rew"].as<Scalar>();
     world_box_coeff_ =
       cfg["rewards"]["world_box_coeff"].as<std::vector<Scalar>>();
+    if ((int)world_box_coeff_.size() != 2) {
+      logger_.error("world_box_coeff_ size is not equal to 2");
+      return false;
+    }
     attitude_coeff_ = cfg["rewards"]["attitude_coeff"].as<Scalar>();
     command_coeff_ = cfg["rewards"]["command_coeff"].as<std::vector<Scalar>>();
+    if ((int)command_coeff_.size() != act_dim_) {
+      logger_.error("command_coeff_ size is not equal to act_dim_");
+      return false;
+    }
     attitude_vel_coeff_ = cfg["rewards"]["attitude_vel_coeff"].as<Scalar>();
     when_collision_coeff_ =
       cfg["rewards"]["when_collision_coeff"].as<Scalar>();
