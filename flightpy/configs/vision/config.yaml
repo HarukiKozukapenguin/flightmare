@@ -102,6 +102,9 @@ quadrotor_dynamics:
   quad_size: 0.25 # [m]
   quad_size_fix: false
   quad_size_threshold_dev: 0.05 # [m]
+  range_time_constant: [0.3, 1.2]
+  init_time_constant: 0.3
+  time_constant_fix: false
 
 Control:
   cmd_mode:                     2 # please check flightmare/flightlib/include/flightlib/common/command.hpp#9-13

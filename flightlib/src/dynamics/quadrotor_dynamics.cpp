@@ -287,6 +287,10 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   cd3_ = Map<Vector<3>>(body_drag_3.data());
 
   cdz_h_ = params["quadrotor_dynamics"]["body_drag_h"].as<Scalar>();
+  range_time_constant_ = Map<Vector<2>>(params["quadrotor_dynamics"]["range_time_constant"].as<std::vector<Scalar>>().data());
+  init_time_constant_ = params["quadrotor_dynamics"]["init_time_constant"].as<Scalar>();
+  time_constant_fix_ =
+    params["quadrotor_dynamics"]["time_constant_fix"].as<bool>();
 
   // load from Control
   drag_compensation_ = params["Control"]["drag_compensation"].as<bool>();
