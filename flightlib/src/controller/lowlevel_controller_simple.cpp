@@ -15,10 +15,23 @@ bool LowLevelControllerSimple::updateQuadDynamics(
   Kp_rate_ = quad.kprate_.asDiagonal();
   Kd_rate_ = quad.kdrate_.asDiagonal();
   Kp_euler_ = quad.kpeuler_.asDiagonal();
+  small_time_constant_ = quad.range_time_constant_(0);
+  large_time_constant_ = quad.range_time_constant_(1);
+  init_time_constant_ = quad.init_time_constant_;
+  init_kpeuler_ = quad.kpeuler_(0);
+
 
   // std::cout << "Kp_euler_: \n" << Kp_euler_ << std::endl;
   // std::cout << "Kd_rate_: \n" << Kd_rate_ << std::endl;
 
+  return true;
+}
+
+bool LowLevelControllerSimple::randomizeKpeuler() {
+  time_constant_ = small_time_constant_ + uniform_dist_one_direction_(random_gen_) * (large_time_constant_ - small_time_constant_);
+  Scalar kp_euler_xy = init_time_constant_ / time_constant_*init_kpeuler_;
+  Kp_euler_(0,0) = kp_euler_xy;
+  Kp_euler_(1,1) = kp_euler_xy;
   return true;
 }
 

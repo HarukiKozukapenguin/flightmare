@@ -82,6 +82,9 @@ class QuadrotorDynamics : DynamicsBase {
   Vector<3> v_err_max_;
   Scalar filter_sampling_frequency_;
   Scalar filter_cutoff_frequency_;
+  bool time_constant_fix_;
+  Vector<2> range_time_constant_;
+  Scalar init_time_constant_;
 
  private:
   bool updateInertiaMarix();

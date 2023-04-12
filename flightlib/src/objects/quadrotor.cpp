@@ -187,6 +187,7 @@ bool Quadrotor::reset() {
   state_.setZero();
   motor_omega_.setZero();
   motor_thrusts_.setZero();
+  if (!dynamics_.time_constant_fix_) ctrl_.randomizeKpeuler();
   return true;
 }
 
@@ -196,6 +197,7 @@ bool Quadrotor::reset(const QuadState &state) {
   state_ = state;
   motor_omega_.setZero();
   motor_thrusts_.setZero();
+  if (!dynamics_.time_constant_fix_) ctrl_.randomizeKpeuler();
   // std::cout << "reset in Quadrotor is finished" << std::endl;
   return true;
 }

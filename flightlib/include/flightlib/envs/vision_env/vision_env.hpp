@@ -49,7 +49,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = kNAct + 2 + 2 + 9 + 3 + 2 + 1 + Theta_Cuts + Vel_Theta_Cuts,
+  kNObs = kNAct + 2 + 2 + 9 + 3 + 2 + 1 + 1 + Theta_Cuts + Vel_Theta_Cuts,
 
 };
 }  // namespace visionenv
@@ -269,6 +269,8 @@ class VisionEnv final : public EnvBase {
   Scalar init_motor_omega_min_;
   Scalar init_motor_omega_max_;
   std::vector<Scalar> init_thrust_map_;
+
+  Scalar time_constant_;
 
 };
 

@@ -123,6 +123,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     is_collision_ = false;
     is_threshold_collision_ = false;
     quad_ptr_->reset(quad_state_);
+    time_constant_ = quad_ptr_->getTime_constant();
 
     init_isCollision();  // change is_collision depending on initial position
 
@@ -157,6 +158,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
       if (fly_result_){
     std::cout << "quad size is " << quad_size_ << std::endl;
     std::cout << "quad size threshold is " << quad_size_threshold_ << std::endl;
+    std::cout << "quad time_constant is " << time_constant_ << std::endl;
     }
 
   // obtain observations
@@ -254,7 +256,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   obs << act_, quad_state_.p[0], quad_state_.p[1],
     quad_state_.v[0],quad_state_.v[1], ori, quad_state_.w,
     world_box_[2] - quad_state_.x(QS::POSY),
-    world_box_[3] - quad_state_.x(QS::POSY), quad_size_,
+    world_box_[3] - quad_state_.x(QS::POSY), quad_size_, time_constant_,
     logsphericalboxel, acc_distance_;
   // std::cout << "obs is called" << std::endl;
   return true;
