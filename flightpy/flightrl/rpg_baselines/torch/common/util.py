@@ -128,6 +128,8 @@ def test_policy(env, model, render=False):
             x_list = []
             y_list = []
             vel_list = []
+            a_x_list = []
+            t_list = []
             path = (
                 os.environ["FLIGHTMARE_PATH"]
                 + "/flightpy/configs/vision/real_tree_random_8/environment_"
@@ -149,8 +151,9 @@ def test_policy(env, model, render=False):
             # print(obs)
             past_act = act
             act, lstm_states = model.predict(obs, state=lstm_states, deterministic=True)
+            dummy_act = np.array([[0.3, 0.0]])
             # https://sb3-contrib.readthedocs.io/en/master/modules/ppo_recurrent.html#sb3_contrib.ppo_recurrent.RecurrentPPO
-            act = act.reshape(act_dim)
+            act = dummy_act.reshape(act_dim)
             # print(act.shape)
             # print(past_act.shape)
             # print(act_diff_sum.shape)
@@ -199,6 +202,8 @@ def test_policy(env, model, render=False):
                         env.getQuadState()[0][9] ** 2 + env.getQuadState()[0][10] ** 2
                     )
                 )
+                a_x_list.append(env.getQuadState()[0][15])
+                t_list.append(env.getQuadState()[0][0])
 
             if done:
                 if final_x == 0:
@@ -221,6 +226,11 @@ def test_policy(env, model, render=False):
                     )
                     ax = plt.colorbar()
                     ax.set_label("vel [m/s]")
+                    plt.show()
+                    t_list, a_x_list = t_list[:-1], a_x_list[:-1]
+                    plt.plot(t_list, a_x_list)
+                    plt.minorticks_on()
+                    plt.grid(which="both", axis="both", linestyle="--")
                     plt.show()
                     # https://villageofsound.hatenadiary.jp/entry/2015/09/13/010352
             else:
