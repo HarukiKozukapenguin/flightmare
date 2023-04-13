@@ -105,6 +105,7 @@ quadrotor_dynamics:
   range_time_constant: [0.3, 1.2]
   init_time_constant: 0.3
   time_constant_fix: false
+  fix_time_constant: 0.3
 
 Control:
   cmd_mode:                     2 # please check flightmare/flightlib/include/flightlib/common/command.hpp#9-13

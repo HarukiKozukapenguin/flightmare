@@ -17,6 +17,7 @@ class LowLevelControllerSimple {
   Vector<4> run(const QuadState& state);
   bool updateQuadDynamics(const QuadrotorDynamics& quad_dynamics);
   bool randomizeKpeuler();
+  bool setTimeConstant(Scalar time_constant);
   inline Scalar getTime_constant(void) const { return time_constant_;}
 
  private:

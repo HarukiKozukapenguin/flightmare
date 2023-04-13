@@ -181,6 +181,9 @@ void Quadrotor::init() {
   // reset
   updateDynamics(dynamics_);
   reset();
+  if (dynamics_.time_constant_fix_) {
+    ctrl_.setTimeConstant(dynamics_.fix_time_constant_);
+    }
 }
 
 bool Quadrotor::reset() {

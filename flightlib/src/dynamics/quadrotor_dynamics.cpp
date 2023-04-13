@@ -291,6 +291,7 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   init_time_constant_ = params["quadrotor_dynamics"]["init_time_constant"].as<Scalar>();
   time_constant_fix_ =
     params["quadrotor_dynamics"]["time_constant_fix"].as<bool>();
+  fix_time_constant_ = params["quadrotor_dynamics"]["fix_time_constant"].as<Scalar>();
 
   // load from Control
   drag_compensation_ = params["Control"]["drag_compensation"].as<bool>();

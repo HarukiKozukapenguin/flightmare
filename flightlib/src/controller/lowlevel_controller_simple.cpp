@@ -35,6 +35,14 @@ bool LowLevelControllerSimple::randomizeKpeuler() {
   return true;
 }
 
+bool LowLevelControllerSimple::setTimeConstant(Scalar time_constant) {
+  time_constant_ = time_constant;
+  Scalar kp_euler_xy = init_time_constant_ / time_constant_*init_kpeuler_;
+  Kp_euler_(0,0) = kp_euler_xy;
+  Kp_euler_(1,1) = kp_euler_xy;
+  return true;
+}
+
 bool LowLevelControllerSimple::setCommand(const Command& cmd) {
   if (!cmd.valid()) return false;
   cmd_ = cmd;
