@@ -39,12 +39,11 @@ void VisionEnv::init() {
   cmd_.setZeros();
 
   // create quadrotors
-  quad_ptr_ = std::make_shared<Quadrotor>();
 
   // update dynamics
   QuadrotorDynamics dynamics;
   dynamics.updateParams(cfg_);
-  quad_ptr_->updateDynamics(dynamics);
+  quad_ptr_ = std::make_shared<Quadrotor>(dynamics);
 
 
   // define input and output dimension for the environment

@@ -85,6 +85,7 @@ class QuadrotorDynamics : DynamicsBase {
   bool time_constant_fix_;
   Vector<2> range_time_constant_;
   Scalar init_time_constant_;
+  Scalar fix_time_constant_;
 
  private:
   bool updateInertiaMarix();
