@@ -112,9 +112,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   while (true) {
     quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 10 + 10;
     quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * world_box_[2] * 0.2;
-    quad_state_.x(QS::POSZ) =
-      uniform_dist_(random_gen_) * (world_box_[5] - world_box_[4]) * 0.4 +
-      (world_box_[4] + world_box_[5]) / 2;
+    quad_state_.x(QS::POSZ) = 1.0;
 
     // quad_state_.x(QS::POSX) = 52.9;
     // quad_state_.x(QS::POSY) = 7.4;
