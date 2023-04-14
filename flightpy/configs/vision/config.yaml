@@ -112,7 +112,7 @@ Control:
   kpatt_z:                      2
   kpatt_xy:                     10
   kprate:                       [20.0, 20.0, 40.0]
-  kpeuler:                      [50.0, 50.0, 100.0]
+  kpeuler:                      [25.0, 25.0, 100.0]
   kdrate:                       [20.0, 20.0, 40.0]
   p_err_max:                    [0.6, 0.6, 0.3]
   v_err_max:                    [1.0, 1.0, 1.0]
