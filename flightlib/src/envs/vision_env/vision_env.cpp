@@ -355,7 +355,8 @@ bool VisionEnv::getObstacleState(
   std::vector<Scalar> obs_radius_list;
   Matrix<3, 3> R = quad_state_.R();
   Matrix<3, 3> R_T = R.transpose();
-  Vector<3> poll_v(R_T(0, 2), R_T(1, 2), R_T(2, 2));
+  Vector<3> poll_y(R_T(0, 1), R_T(1, 1), R_T(2, 1));
+  Vector<3> poll_z(R_T(0, 2), R_T(1, 2), R_T(2, 2));
 
   // std::vector<Vector<3>> converted_positions;
   // for (const auto &tree_pos : relative_pos) {
@@ -411,12 +412,12 @@ bool VisionEnv::getObstacleState(
 
   // std::cout << "obstacle_num is " << obstacle_num << std::endl;
   // std::cout << "getsphericalboxel is being called" << std::endl;
-  sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
-  acc_distance_ = get_vel_acc_boxel(pos_b_list, obs_radius_list, poll_v, R_T);
+  sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_y, poll_z, R_T);
+  acc_distance_ = get_vel_acc_boxel(pos_b_list, obs_radius_list, poll_y, poll_z, R_T);
 
   // vel_obs_distance_: [0,10.0] [m]
   vel_obs_distance_ =
-    get_vel_sphericalboxel(pos_b_list, obs_radius_list, poll_v, R_T);
+    get_vel_sphericalboxel(pos_b_list, obs_radius_list, poll_y, poll_z, R_T);
   for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
     vel_obs_distance_[i] -= quad_size_;
   }
@@ -426,7 +427,7 @@ bool VisionEnv::getObstacleState(
 
 Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
-  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
   const Matrix<3, 3> &R_T) {
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
   // Vector<3> body_vel = R_T * vel_2d;
@@ -441,22 +442,24 @@ Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
     Scalar theta = (t >= 0) ? dist_theta_list_[t] : -dist_theta_list_[(-t) - 1];  //[deg]
     Scalar tcell = theta * (PI / 180);
     obstacle_obs[(t + visionenv::Theta_Cuts / 2)] =
-      getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, 0);
+      getClosestDistance(pos_b_list, obs_radius_list, poll_y, poll_z, tcell, 0);
   }
   return obstacle_obs;
 }
 
 Scalar VisionEnv::getClosestDistance(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
-  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
   const Scalar &tcell, const Scalar &fcell) const {
   Vector<3> Cell = getCartesianFromAng(tcell, fcell);
-  Scalar rmin = max_detection_range_;
+  Scalar y_p = calc_dist_from_wall(1, Cell, poll_y);
+  Scalar y_n = calc_dist_from_wall(-1, Cell, poll_y);
+  Scalar rmin = std::min(std::min(y_p, y_n), max_detection_range_);
   for (size_t i = 0; i < obstacle_num_; ++i) {
     Vector<3> pos = pos_b_list[i];
     Scalar radius = obs_radius_list[i];
-    Eigen::Vector3d alpha = cross_product(Cell, poll_v);
-    Eigen::Vector3d beta = cross_product(pos, poll_v);
+    Eigen::Vector3d alpha = cross_product(Cell, poll_z);
+    Eigen::Vector3d beta = cross_product(pos, poll_z);
     Scalar a = std::pow(alpha.norm(), 2);
     if (a == 0) continue;
     Scalar b = inner_product(alpha, beta);
@@ -471,6 +474,12 @@ Scalar VisionEnv::getClosestDistance(
   }
 
   return rmin / max_detection_range_;
+}
+Scalar VisionEnv::calc_dist_from_wall(Scalar sign, const Vector<3>& Cell, const Vector<3> &poll_y) const {
+  Scalar y_d= (sign*wall_pos_ - quad_state_.p[1])*sign;
+  Scalar cos_theta = inner_product(Cell,poll_y);
+  if (cos_theta <= 0) return max_detection_range_;
+  else return y_d/cos_theta;
 }
 
 Vector<3> VisionEnv::getCartesianFromAng(const Scalar &theta,
@@ -501,7 +510,7 @@ Vector<3> VisionEnv::cross_product(const Vector<3> &a,
 Vector<visionenv::Vel_Theta_Cuts>
 VisionEnv::get_vel_acc_boxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
-  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
   const Matrix<3, 3> &R_T) const {
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
   Vector<3> body_vel = R_T * vel_2d;
@@ -516,7 +525,7 @@ VisionEnv::get_vel_acc_boxel(
       theta = theta * (PI / 180); //[rad]
       Scalar tcell = theta + vel_theta;
       Scalar pcell = vel_phi;
-      Scalar dist =  getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, pcell) *
+      Scalar dist =  getClosestDistance(pos_b_list, obs_radius_list, poll_y, poll_z, tcell, pcell) *
         max_detection_range_;
       acc_distance[t + (visionenv::Vel_Theta_Cuts) / 2] = calc_dist_to_acc(dist,theta);
   }
@@ -531,7 +540,7 @@ Scalar VisionEnv::calc_dist_to_acc(Scalar dist, Scalar theta) const {
 Vector<visionenv::RewardCuts * visionenv::RewardCuts>
 VisionEnv::get_vel_sphericalboxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
-  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
   const Matrix<3, 3> &R_T) const {
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
   Vector<3> body_vel = R_T * vel_2d;
@@ -554,7 +563,7 @@ VisionEnv::get_vel_sphericalboxel(
       vel_obstacle_obs[(t + (visionenv::RewardCuts - 1) / 2) *
                          visionenv::RewardCuts +
                        (p + (visionenv::RewardCuts - 1) / 2)] =
-        getClosestDistance(pos_b_list, obs_radius_list, poll_v, tcell, pcell) *
+        getClosestDistance(pos_b_list, obs_radius_list, poll_y, poll_z, tcell, pcell) *
         max_detection_range_;
     }
   }
@@ -973,6 +982,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     world_box_center_.push_back((world_box_[4] + world_box_[5]) / 2);
     y_lim_ = cfg["environment"]["y_lim"].as<std::vector<Scalar>>();
     z_lim_ = cfg["environment"]["z_lim"].as<std::vector<Scalar>>();
+    wall_pos_ = cfg["environment"]["wall_pos"].as<Scalar>();
     tree_size_ = cfg["environment"]["tree_size"].as<Scalar>();
     // tree_size_range_ =
     //   cfg["environment"]["tree_size_range"].as<std::vector<Scalar>>();

@@ -85,13 +85,13 @@ class VisionEnv final : public EnvBase {
   Vector<visionenv::Theta_Cuts> getsphericalboxel(
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
       &pos_b_list,
-    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
     const Matrix<3, 3> &R_T);
 
   Scalar getClosestDistance(
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
       &pos_b_list,
-    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
     const Scalar &tcell, const Scalar &fcell) const;
   Vector<3> getCartesianFromAng(const Scalar &theta, const Scalar &phi) const;
   Scalar inner_product(const Vector<3> &a, const Vector<3> &b) const;
@@ -99,14 +99,15 @@ class VisionEnv final : public EnvBase {
   // void comp(Scalar &rmin, Scalar r);
   Vector<visionenv::Vel_Theta_Cuts> get_vel_acc_boxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
-  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+  const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
   const Matrix<3, 3> &R_T) const;
   Scalar calc_dist_to_acc(Scalar dist, Scalar theta) const;
   Vector<visionenv::RewardCuts * visionenv::RewardCuts> get_vel_sphericalboxel(
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
       &pos_b_list,
-    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_v,
+    const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
     const Matrix<3, 3> &R_T) const;
+  Scalar calc_dist_from_wall(Scalar sign, const Vector<3>& Cell, const Vector<3> &poll_y) const;
 
   // get quadrotor states
   bool getQuadAct(Ref<Vector<>> act) const;
@@ -211,6 +212,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> world_box_center_;
   std::vector<Scalar> y_lim_;
   std::vector<Scalar> z_lim_;
+  Scalar wall_pos_;
   // std::vector<Scalar> tree_size_range_;
   // quad_size (meter)
   Scalar quad_size_, quad_size_threshold_dev_, quad_size_threshold_;

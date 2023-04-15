@@ -3,6 +3,7 @@ environment:
   beginning_env_folder: 0 # beginning of env
   env_folder: 0 # (no meaning...)
   world_box: [-0.3, 70, -1.5, 1.5, 0.2, 2]
+  wall_pos: 1.75
   tree_size: 0.15
   y_lim: [1,10]
   z_lim: [2,10]
