@@ -314,6 +314,14 @@ bool VisionEnv::getObstacleState(
 
   is_collision_ = false;
   is_threshold_collision_ = false;
+  Scalar y_pos = quad_state_.x(QS::POSY);
+  Scalar wall_2d_dist = std::min(wall_pos_ - y_pos, wall_pos_ + y_pos);
+  if (wall_2d_dist < quad_size_) {
+      is_collision_ = true;
+    }
+  if (wall_2d_dist < quad_size_threshold_) {
+      is_threshold_collision_ = true;
+    }
   // compute relatiev distance to static obstacles
   for (int i = 0; i < (int)static_objects_.size(); i++) {
     // compute relative position vector
