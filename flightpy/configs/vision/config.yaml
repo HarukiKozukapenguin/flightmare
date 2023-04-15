@@ -102,7 +102,7 @@ quadrotor_dynamics:
   quad_size: 0.25 # [m]
   quad_size_fix: false
   quad_size_threshold_dev: 0.05 # [m]
-  range_time_constant: [0.3, 1.2]
+  range_time_constant: [0.2, 1.2]
   init_time_constant: 0.3
   time_constant_fix: false
   fix_time_constant: 0.3
