@@ -742,6 +742,18 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     }
     idx += 1;
   }
+  {
+    Scalar wall_dist;
+    wall_dist = (quad_state_.p[1] - wall_pos_) - quad_size_;
+    if (wall_dist <= dist_margin_){
+      collision_penalty += collision_coeff_ * std::exp(-collision_exp_coeff_ * wall_dist);
+    }
+    wall_dist = (quad_state_.p[1] + wall_pos_) - quad_size_;
+    if (wall_dist <= dist_margin_){
+      collision_penalty += collision_coeff_ * std::exp(-collision_exp_coeff_ * wall_dist);
+    }
+  }
+
   Scalar when_collision_penlty = 0;
   Scalar vel_collision_penalty = 0;
   Scalar beta = vel_transition_fraction_;
