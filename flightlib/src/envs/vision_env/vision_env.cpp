@@ -522,6 +522,9 @@ VisionEnv::get_vel_acc_boxel(
   const Matrix<3, 3> &R_T) const {
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
   Vector<3> body_vel = R_T * vel_2d;
+  if (body_vel[0] == 0 && body_vel[1] == 0) {
+    body_vel[0] = 0.0001;
+  }
   Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
   Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2) +
                                                      std::pow(body_vel[1], 2)));
@@ -552,6 +555,9 @@ VisionEnv::get_vel_sphericalboxel(
   const Matrix<3, 3> &R_T) const {
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
   Vector<3> body_vel = R_T * vel_2d;
+  if (body_vel[0] == 0 && body_vel[1] == 0) {
+    body_vel[0] = 0.0001;
+  }
   Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
   Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2) +
                                                      std::pow(body_vel[1], 2)));
