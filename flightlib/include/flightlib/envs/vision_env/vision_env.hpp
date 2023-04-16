@@ -153,6 +153,8 @@ class VisionEnv final : public EnvBase {
 
   std::unordered_map<std::string, float> extra_info_;
 
+  void randomize_size();
+
  private:
   bool computeReward(Ref<Vector<>> reward);
   void init();
