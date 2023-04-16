@@ -108,6 +108,9 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   //                                                        tree_size_range_[1]};
   // tree_size_ = tree_range_dist(random_gen_);
   // changeLevel();
+  if (!quad_size_fix_){
+    randomize_size();
+  }
   while (true) {
     quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 10 + 10;
     quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * world_box_[2] * 0.2;
@@ -144,16 +147,6 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   cmd_.p[0] = quad_state_.x(QS::POSX);
   cmd_.p[1] = quad_state_.x(QS::POSY);
 
-  if (!quad_size_fix_){
-    // reset quadrotor size
-    // size: the size of the quadrotor, 0.25 ~ 0.5[m]
-    // Scalar size_div = std::min((0.50-0.25)*(500-env_id_)/250 ,0.25);
-    Scalar size_div = 0.50;
-    Scalar size = uniform_dist_one_direction_(random_gen_)*size_div + 0.25;
-    quad_size_ = size;
-    quad_size_threshold_ = quad_size_ - quad_size_threshold_dev_ * uniform_dist_one_direction_(random_gen_);
-    // resetSize(size);
-  }
       if (fly_result_){
     std::cout << "quad size is " << quad_size_ << std::endl;
     std::cout << "quad size threshold is " << quad_size_threshold_ << std::endl;
@@ -164,6 +157,18 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   getObs(obs);
   return true;
 }
+
+void VisionEnv::randomize_size(){
+  // reset quadrotor size
+  // size: the size of the quadrotor, 0.25 ~ 0.5[m]
+  // Scalar size_div = std::min((0.50-0.25)*(500-env_id_)/250 ,0.25);
+  Scalar size_div = 0.50;
+  Scalar size_r = uniform_dist_one_direction_(random_gen_)*size_div + 0.25;
+  quad_size_ = size_r;
+  quad_size_threshold_ = quad_size_ - quad_size_threshold_dev_ * uniform_dist_one_direction_(random_gen_);
+  // resetSize(size);
+}
+
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
 
 void VisionEnv::resetSize(Scalar size) {
