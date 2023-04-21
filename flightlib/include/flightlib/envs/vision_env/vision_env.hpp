@@ -183,7 +183,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> command_coeff_;
   Scalar attitude_vel_coeff_;
   Vector<3> goal_linear_vel_;
-  bool is_collision_, is_threshold_collision_;
+  bool is_collision_, is_threshold_collision_, is_wall_collision_;
   Vector<visionenv::Vel_Theta_Cuts> acc_distance_;
   Vector<visionenv::RewardCuts * visionenv::RewardCuts> vel_obs_distance_;
 
@@ -257,13 +257,14 @@ class VisionEnv final : public EnvBase {
   int num_static_objects_;
 
   int collide_num;
+  int wall_collide_num;
   int time_num;
   int bound_num;
   int goal_num;
   int iter;
 
   Scalar max_collide_vel_;
-  Scalar when_collision_coeff_;
+  Scalar when_collision_coeff_, when_wall_collision_coeff_;
 
   Scalar init_size_;
   Scalar init_mass_;

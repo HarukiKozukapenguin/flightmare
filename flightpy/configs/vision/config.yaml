@@ -44,6 +44,7 @@ rewards:
   command_coeff: [-0.000000005, -0.000000025]
   attitude_vel_coeff: -5.0
   when_collision_coeff: -1.0
+  when_wall_collision_coeff: -3.0
 
   names:
     [

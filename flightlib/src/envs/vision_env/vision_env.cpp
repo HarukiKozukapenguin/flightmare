@@ -77,6 +77,7 @@ void VisionEnv::init() {
   act_std_ << 10.0, 10.0;  // set by my experience (cmd difference)
 
   collide_num = 0;
+  wall_collide_num = 0;
   time_num = 0;
   bound_num = 0;
   goal_num = 0;
@@ -319,10 +320,11 @@ bool VisionEnv::getObstacleState(
 
   is_collision_ = false;
   is_threshold_collision_ = false;
+  is_wall_collision_ = false;
   Scalar y_pos = quad_state_.x(QS::POSY);
   Scalar wall_2d_dist = std::min(wall_pos_ - y_pos, wall_pos_ + y_pos);
   if (wall_2d_dist < quad_size_) {
-      is_collision_ = true;
+      is_wall_collision_ = true;
     }
   if (wall_2d_dist < quad_size_threshold_) {
       is_threshold_collision_ = true;
@@ -773,6 +775,9 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   if (is_collision_ && (quad_state_.v).norm() < max_collide_vel_){
     when_collision_penlty = when_collision_coeff_ * std::max((quad_state_.v).squaredNorm(),0.01);
   }
+  if (is_wall_collision_ && (quad_state_.v).norm() < max_collide_vel_){
+    when_collision_penlty = when_wall_collision_coeff_ * std::max((quad_state_.v).squaredNorm(),0.01);
+  }
   else{
     for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
       Scalar vel_obs_dist = vel_obs_distance_[i];
@@ -868,7 +873,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
   Scalar vel = quad_state_.v.norm();
 
 
-  if ((is_collision_ && max_collide_vel_< vel )|| cmd_.t >= max_t_ - sim_dt_ || !x_valid || !y_valid ||
+  if (((is_collision_ || is_wall_collision_ )&& max_collide_vel_< vel )|| cmd_.t >= max_t_ - sim_dt_ || !x_valid || !y_valid ||
       !z_valid || quad_state_.p(QS::POSX) > goal_) {
     if (is_collision_ && max_collide_vel_< vel) {
       reward = -100.0;
@@ -885,6 +890,21 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
       }
       collide_num += 1;
     }
+    if (is_wall_collision_ && max_collide_vel_< vel) {
+      reward = -200.0;
+      if (fly_result_){
+        std::cout << "terminate by wall collision" << std::endl;
+      }
+
+      // return true;
+      // std::cout << "t is " << cmd_.t << std::endl;]
+      Scalar init_t = 0;
+      if (cmd_.t == init_t) {
+        // std::cout << "initial state" << std::endl;
+        return true;
+      }
+      wall_collide_num += 1;
+    }
 
     // simulation time out
     if (cmd_.t >= max_t_ - sim_dt_) {
@@ -899,10 +919,10 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
     // world boundling box check
     // - x, y, and z
     if (!x_valid || !y_valid || !z_valid) {
-      reward = -50;
+      reward = -200;
 
       if (quad_state_.p(QS::POSX) < world_box_[0] + safty_threshold) {
-        reward = -200.0;
+        reward = -400.0;
       }
       if (fly_result_){
         std::cout << "terminate by box" << std::endl;
@@ -1075,6 +1095,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     attitude_vel_coeff_ = cfg["rewards"]["attitude_vel_coeff"].as<Scalar>();
     when_collision_coeff_ =
       cfg["rewards"]["when_collision_coeff"].as<Scalar>();
+    when_wall_collision_coeff_ =
+      cfg["rewards"]["when_wall_collision_coeff"].as<Scalar>();
 
     // std::cout << dist_margin_ << std::endl;
 
