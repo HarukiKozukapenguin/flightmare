@@ -260,8 +260,8 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
 
   obs << act_, quad_state_.p[0], quad_state_.p[1],
     quad_state_.v[0],quad_state_.v[1], ori, quad_state_.w,
-    world_box_[2] - quad_state_.x(QS::POSY),
-    world_box_[3] - quad_state_.x(QS::POSY), quad_size_, time_constant_,
+    (wall_pos_ - quad_size_) - quad_state_.x(QS::POSY),
+    (wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), quad_size_, time_constant_,
     logsphericalboxel, acc_distance_;
   // std::cout << "obs is called" << std::endl;
   return true;
