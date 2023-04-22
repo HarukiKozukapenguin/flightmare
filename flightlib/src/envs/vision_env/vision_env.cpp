@@ -540,12 +540,18 @@ VisionEnv::get_vel_acc_boxel(
   const Matrix<3, 3> &R_T) const {
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
   Vector<3> body_vel = R_T * vel_2d;
-  if (body_vel[0] == 0 && body_vel[1] == 0) {
-    body_vel[0] = 0.0001;
+  Scalar vel_theta, vel_phi;
+  Scalar vel = quad_state_.v.norm();
+  if (vel < vel_acc_cal_threshold_) {
+    vel_theta = 0;
+    vel_phi = 0;
   }
-  Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
-  Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2) +
+  else{
+    vel_theta = std::atan2(body_vel[1], body_vel[0]);
+    vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2) +
                                                      std::pow(body_vel[1], 2)));
+  }
+
   Vector<visionenv::Vel_Theta_Cuts> acc_distance;
   // angle of the velocity direction in 2D map
   for (int t = -visionenv::Vel_Theta_Cuts / 2;
@@ -1066,6 +1072,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();
     linear_transition_log_ = cfg["environment"]["linear_transition_log"].as<Scalar>();
     vel_transition_fraction_ = cfg["environment"]["vel_transition_fraction"].as<Scalar>();
+    vel_acc_cal_threshold_ = cfg["environment"]["vel_acc_cal_threshold"].as<Scalar>();
     // phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
   }
 
