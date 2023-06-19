@@ -84,6 +84,10 @@ simulation:
   max_t: 60.0
   num_envs: 500
   num_threads: 20
+  act_delay: 0.010 #[s]
+  act_delay_width: 0.005
+  obs_delay: 0.010 #[s]
+  obs_delay_width: 0.025
 
 quadrotor_dynamics:
   mass: 0.752

@@ -68,7 +68,7 @@ class VisionEnv final : public EnvBase {
 
   void init_isCollision(void);
 
-  bool step(const Ref<Vector<>> act, Ref<Vector<>> obs,
+  bool step(Ref<Vector<>> act, Ref<Vector<>> obs,
             Ref<Vector<>> reward) override;
 
   // - public set functions
@@ -161,6 +161,11 @@ class VisionEnv final : public EnvBase {
   void init();
   void resetSize(Scalar size);
   bool resetCollision();
+
+  void effect_act_delay(Ref<Vector<>> act);
+  void effect_obs_delay(Ref<Vector<>> obs);
+  void reset_delay_buffer();
+
   int env_id_;
   // quadrotor
   std::shared_ptr<Quadrotor> quad_ptr_;
@@ -278,6 +283,12 @@ class VisionEnv final : public EnvBase {
 
   Scalar time_constant_;
 
+  Scalar act_delay_, act_delay_width_, obs_delay_, obs_delay_width_;
+  size_t act_buffer_size_, obs_buffer_size_;
+
+  std::deque<Vector<>> act_buffer_, obs_buffer_;
+
+  Scalar act_past_delay_, obs_past_delay_;
 };
 
 }  // namespace flightlib
