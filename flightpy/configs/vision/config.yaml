@@ -80,7 +80,7 @@ unity:
 
 simulation:
   seed: 1
-  sim_dt: 0.02
+  sim_dt: 0.025
   max_t: 60.0
   num_envs: 500
   num_threads: 20
