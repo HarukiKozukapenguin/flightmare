@@ -1434,14 +1434,14 @@ void VisionEnv::disconnectUnity(void) {
 int VisionEnv::getNumDetectedObstacles(void) { return num_detected_obstacles_; }
 
 void VisionEnv::effect_act_delay(Ref<Vector<>> act){
-    act_buffer_.push_back(act); //std::deque<Vector<>> act_buffer_;
+    act_buffer_.push_front(act); //std::deque<Vector<>> act_buffer_;
 
     Scalar act_time_delay = uniform_dist_one_direction_(random_gen_)*act_delay_width_ + act_delay_;
     if (act_past_delay_ - sim_dt_/4 < act_time_delay - sim_dt_){
       act_time_delay = act_past_delay_ - sim_dt_/4 + sim_dt_;
     }
     Scalar act_time_step = act_time_delay/sim_dt_;
-    int act_time_idx = std::floor(act_time_step);
+    size_t act_time_idx = static_cast<size_t>(std::floor(act_time_step));
     Scalar act_time_frac = act_time_step - act_time_idx;
 
     act = act_buffer_[act_time_idx] * (1-act_time_frac) + act_buffer_[act_time_idx + 1] * act_time_frac;
@@ -1453,14 +1453,14 @@ void VisionEnv::effect_act_delay(Ref<Vector<>> act){
 }
 
 void VisionEnv::effect_obs_delay(Ref<Vector<>> obs){
-    obs_buffer_.push_back(obs); //std::deque<Vector<>> obs_buffer_;
+    obs_buffer_.push_front(obs); //std::deque<Vector<>> obs_buffer_;
 
     Scalar obs_time_delay = uniform_dist_one_direction_(random_gen_)*obs_delay_width_ + obs_delay_;
     if (obs_past_delay_ - sim_dt_/4 < obs_time_delay - sim_dt_){
       obs_time_delay = obs_past_delay_ - sim_dt_/4 + sim_dt_;
     }
     Scalar obs_time_step = obs_time_delay/sim_dt_;
-    int obs_time_idx = std::floor(obs_time_step);
+    size_t obs_time_idx = static_cast<size_t>(std::floor(obs_time_step));
     Scalar obs_time_frac = obs_time_step - obs_time_idx;
 
     obs = obs_buffer_[obs_time_idx] * (1-obs_time_frac) + obs_buffer_[obs_time_idx + 1] * obs_time_frac;
