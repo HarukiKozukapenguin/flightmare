@@ -199,6 +199,7 @@ class VisionEnv final : public EnvBase {
   Scalar max_detection_range_;
   Scalar linear_transition_log_;
   Scalar vel_transition_fraction_;
+  Scalar vel_acc_cal_threshold_;
   Scalar goal_;
   bool fly_result_;
   bool control_feedthrough_;
