@@ -381,6 +381,10 @@ bool VisionEnv::getObstacleState(
   std::vector<Scalar> pos_norm_list;
   std::vector<Scalar> obs_radius_list;
   Matrix<3, 3> R = quad_state_.R();
+  Vector<3> euler = R.eulerAngles(0, 1, 2);
+  R = Eigen::AngleAxis<Scalar>(euler[0], Vector<3>::UnitX()) *
+        Eigen::AngleAxis<Scalar>(euler[1], Vector<3>::UnitY()) *
+        Eigen::AngleAxis<Scalar>(0, Vector<3>::UnitZ());
   Matrix<3, 3> R_T = R.transpose();
   Vector<3> poll_y(R_T(0, 1), R_T(1, 1), R_T(2, 1));
   Vector<3> poll_z(R_T(0, 2), R_T(1, 2), R_T(2, 2));
