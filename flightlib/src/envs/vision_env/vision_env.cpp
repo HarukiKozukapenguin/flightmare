@@ -218,7 +218,9 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
 
   // std::cout << "getObs is called" << std::endl;
   // compute rotation matrix
-  Vector<9> ori = Map<Vector<>>(quad_state_.R().data(), quad_state_.R().size());
+  // Vector<9> ori = Map<Vector<>>(quad_state_.R().data(), quad_state_.R().size());
+  Matrix<3, 3> R = quad_state_.R();
+  Vector<2> body_tilt = Vector<2>(R(0,2), R(1,2));
   // std::cout << "ori is called" << std::endl;
 
   // get N most closest obstacles as the observation
@@ -260,7 +262,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << act_, quad_state_.p[0], quad_state_.p[1],
-    quad_state_.v[0],quad_state_.v[1], ori, quad_state_.w,
+    quad_state_.v[0],quad_state_.v[1], body_tilt, quad_state_.w,
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
     toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta), quad_size_, time_constant_,
     logsphericalboxel, acc_distance_;
