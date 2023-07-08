@@ -164,7 +164,7 @@ void VisionEnv::randomize_size(){
   // reset quadrotor size
   // size: the size of the quadrotor, 0.25 ~ 0.5[m]
   // Scalar size_div = std::min((0.50-0.25)*(500-env_id_)/250 ,0.25);
-  Scalar size_div = 0.25;
+  Scalar size_div = 0.30;
   Scalar size_r = uniform_dist_one_direction_(random_gen_)*size_div + 0.25;
   quad_size_ = size_r;
   quad_size_threshold_ = quad_size_ - quad_size_threshold_dev_ * uniform_dist_one_direction_(random_gen_);
