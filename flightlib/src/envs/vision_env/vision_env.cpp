@@ -262,7 +262,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << act_, quad_state_.p[0], quad_state_.p[1],
-    quad_state_.v[0],quad_state_.v[1], body_tilt, quad_state_.w,
+    quad_state_.v[0],quad_state_.v[1], body_tilt, quad_state_.w[0], quad_state_.w[1],
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
     toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta), quad_size_, time_constant_,
     logsphericalboxel, acc_distance_;
