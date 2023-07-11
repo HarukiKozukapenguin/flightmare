@@ -33,7 +33,7 @@ rewards:
   move_coeff: 1
   move_back_coeff: 5
   vel_coeff: -0.2
-  collision_coeff: -10
+  collision_coeff: -20
   vel_collision_coeff: -2.0
   vel_collision_angle_max: 25 # expressed in [deg]
   collision_exp_coeff: 1
@@ -44,7 +44,7 @@ rewards:
   attitude_coeff: 0
   command_coeff: [-0.000000005, -0.000000025]
   attitude_vel_coeff: -5.0
-  when_collision_coeff: -1.0
+  when_collision_coeff: -2.0
   when_wall_collision_coeff: -3.0
 
   names:
@@ -83,7 +83,7 @@ simulation:
   seed: 1
   sim_dt: 0.025
   max_t: 60.0
-  num_envs: 500
+  num_envs: 400
   num_threads: 20
   act_delay: 0.020 #[s]
   act_delay_width: 0.040
