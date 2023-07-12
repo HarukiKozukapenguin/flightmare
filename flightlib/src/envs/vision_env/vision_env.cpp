@@ -130,6 +130,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     is_threshold_collision_ = false;
     quad_ptr_->reset(quad_state_);
     time_constant_ = quad_ptr_->getTime_constant();
+    time_constant_ /= vel_compensation_;
 
     init_isCollision();  // change is_collision depending on initial position
 
@@ -177,6 +178,7 @@ void VisionEnv::randomize_gain(){
   // reset acc_max when reset
   max_gain_ = uniform_dist_one_direction_(random_gen_)*(range_max_gain_[1] - range_max_gain_[0]) + range_max_gain_[0];
   act_std_ << max_gain_, max_gain_;
+  vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
 }
 
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
@@ -270,9 +272,9 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << act_, quad_state_.p[0], quad_state_.p[1],
-    quad_state_.v[0],quad_state_.v[1], body_tilt, quad_state_.w[0], quad_state_.w[1],
+    quad_state_.v[0]*vel_compensation_ ,quad_state_.v[1], body_tilt, quad_state_.w[0], quad_state_.w[1],
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
-    toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta), quad_size_, time_constant_,
+    toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta), quad_size_, time_constant_, max_gain_,
     logsphericalboxel, acc_distance_;
   // std::cout << "obs is called" << std::endl;
   return true;
@@ -1115,6 +1117,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
 
   if (cfg["quadrotor_dynamics"]){
     range_max_gain_ = Map<Vector<2>>(cfg["quadrotor_dynamics"]["range_max_gain"].as<std::vector<Scalar>>().data());
+    learn_max_gain_ = range_max_gain_[1];
     max_gain_fix_ =
       cfg["quadrotor_dynamics"]["max_gain_fix"].as<bool>();
     max_gain_ = cfg["quadrotor_dynamics"]["fix_max_gain"].as<Scalar>();

@@ -49,7 +49,7 @@ enum Vision : int {
 
   // observations
   kObs = 0,
-  kNObs = kNAct + 2 + 2 + 2 + 3 + 2 + 1 + 1 + Theta_Cuts + Vel_Theta_Cuts,
+  kNObs = kNAct + 2 + 2 + 2 + 3 + 2 + 1 + 1 + 1 + Theta_Cuts + Vel_Theta_Cuts,
 
 };
 }  // namespace visionenv
@@ -295,6 +295,8 @@ class VisionEnv final : public EnvBase {
   Scalar max_gain_;
   bool max_gain_fix_;
   Vector<2> range_max_gain_;
+  Scalar vel_compensation_;
+  Scalar learn_max_gain_;
 };
 
 }  // namespace flightlib
