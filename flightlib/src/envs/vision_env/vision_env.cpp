@@ -115,6 +115,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   if (!max_gain_fix_){
     randomize_gain();
   }
+  vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
   while (true) {
     quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 10 + 10;
     quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * world_box_[2] * 0.2;
@@ -178,7 +179,6 @@ void VisionEnv::randomize_gain(){
   // reset acc_max when reset
   max_gain_ = uniform_dist_one_direction_(random_gen_)*(range_max_gain_[1] - range_max_gain_[0]) + range_max_gain_[0];
   act_std_ << max_gain_, max_gain_;
-  vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
 }
 
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
@@ -1121,6 +1121,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     max_gain_fix_ =
       cfg["quadrotor_dynamics"]["max_gain_fix"].as<bool>();
     max_gain_ = cfg["quadrotor_dynamics"]["fix_max_gain"].as<Scalar>();
+    vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
     act_std_ << max_gain_, max_gain_;
   }
 
