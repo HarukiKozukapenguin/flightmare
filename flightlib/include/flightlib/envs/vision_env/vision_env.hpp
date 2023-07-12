@@ -155,6 +155,7 @@ class VisionEnv final : public EnvBase {
 
   void randomize_size();
   Scalar toLog(Scalar x, Scalar beta);
+  void randomize_gain();
 
  private:
   bool computeReward(Ref<Vector<>> reward);
@@ -290,6 +291,10 @@ class VisionEnv final : public EnvBase {
   std::deque<Vector<>> act_buffer_, obs_buffer_;
 
   Scalar act_past_delay_, obs_past_delay_;
+
+  Scalar max_gain_;
+  bool max_gain_fix_;
+  Vector<2> range_max_gain_;
 };
 
 }  // namespace flightlib

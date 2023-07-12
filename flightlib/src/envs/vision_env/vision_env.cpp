@@ -74,7 +74,7 @@ void VisionEnv::init() {
   // act_std_ << (max_force / quad_ptr_->getMass()) / 2, max_omega.x(),
   //   max_omega.y(), max_omega.z();
   act_mean_ << 0, 0;
-  act_std_ << 10.0, 10.0;  // set by my experience (cmd difference)
+  act_std_ << max_gain_, max_gain_;  // set by my experience (cmd difference)
 
   collide_num = 0;
   wall_collide_num = 0;
@@ -111,6 +111,9 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   // changeLevel();
   if (!quad_size_fix_){
     randomize_size();
+  }
+  if (!max_gain_fix_){
+    randomize_gain();
   }
   while (true) {
     quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 10 + 10;
@@ -169,6 +172,11 @@ void VisionEnv::randomize_size(){
   quad_size_ = size_r;
   quad_size_threshold_ = quad_size_ - quad_size_threshold_dev_ * uniform_dist_one_direction_(random_gen_);
   // resetSize(size);
+}
+void VisionEnv::randomize_gain(){
+  // reset acc_max when reset
+  max_gain_ = uniform_dist_one_direction_(random_gen_)*(range_max_gain_[1] - range_max_gain_[0]) + range_max_gain_[0];
+  act_std_ << max_gain_, max_gain_;
 }
 
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
@@ -1103,6 +1111,14 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
   } else {
     logger_.error("Cannot load [quadrotor_env] parameters");
     return false;
+  }
+
+  if (cfg["quadrotor_dynamics"]){
+    range_max_gain_ = Map<Vector<2>>(cfg["quadrotor_dynamics"]["range_max_gain"].as<std::vector<Scalar>>().data());
+    max_gain_fix_ =
+      cfg["quadrotor_dynamics"]["max_gain_fix"].as<bool>();
+    max_gain_ = cfg["quadrotor_dynamics"]["fix_max_gain"].as<Scalar>();
+    act_std_ << max_gain_, max_gain_;
   }
 
   if (cfg["rewards"]) {
