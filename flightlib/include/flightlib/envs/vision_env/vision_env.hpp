@@ -166,6 +166,7 @@ class VisionEnv final : public EnvBase {
   void effect_act_delay(Ref<Vector<>> act);
   void effect_obs_delay(Ref<Vector<>> obs);
   void reset_delay_buffer();
+  bool set_current_max_collide_vel();
 
   int env_id_;
   // quadrotor
@@ -271,7 +272,7 @@ class VisionEnv final : public EnvBase {
   int goal_num;
   int iter;
 
-  Scalar max_collide_vel_;
+  Scalar init_max_collide_vel_, max_collide_vel_;
   Scalar when_collision_coeff_, when_wall_collision_coeff_;
 
   Scalar init_size_;
@@ -284,6 +285,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> init_thrust_map_;
 
   Scalar time_constant_;
+  int num_envs_, num_each_env_steps_, current_env_steps_;
 
   Scalar act_delay_, act_delay_width_, obs_delay_, obs_delay_width_;
   size_t act_buffer_size_, obs_buffer_size_;

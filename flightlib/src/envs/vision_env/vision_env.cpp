@@ -82,6 +82,7 @@ void VisionEnv::init() {
   bound_num = 0;
   goal_num = 0;
   iter = 0;
+  current_env_steps_ = 0;
 }
 
 VisionEnv::~VisionEnv() {}
@@ -642,6 +643,8 @@ VisionEnv::get_vel_sphericalboxel(
 
 bool VisionEnv::step(Ref<Vector<>> act, Ref<Vector<>> obs,
                      Ref<Vector<>> reward) {
+  current_env_steps_++;
+  set_current_max_collide_vel();
   if (is_threshold_collision_){
     resetCollision();
   }
@@ -1092,7 +1095,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     acc_control_ = cfg["environment"]["acc_control"].as<bool>();
     dist_theta_list_ = cfg["environment"]["dist_theta"].as<std::vector<Scalar>>();
     acc_theta_list_ = cfg["environment"]["acc_theta"].as<std::vector<Scalar>>();
-    max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();
+    init_max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();
     linear_transition_log_ = cfg["environment"]["linear_transition_log"].as<Scalar>();
     vel_transition_fraction_ = cfg["environment"]["vel_transition_fraction"].as<Scalar>();
     vel_acc_cal_threshold_ = cfg["environment"]["vel_acc_cal_threshold"].as<Scalar>();
@@ -1102,6 +1105,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
   if (cfg["simulation"]) {
     sim_dt_ = cfg["simulation"]["sim_dt"].as<Scalar>();
     max_t_ = cfg["simulation"]["max_t"].as<Scalar>();
+    num_envs_ = cfg["simulation"]["num_envs"].as<int>();
+    num_each_env_steps_ = (int)(1E8/num_envs_);
     act_delay_ = cfg["simulation"]["act_delay"].as<Scalar>();
     act_delay_width_ = cfg["simulation"]["act_delay_width"].as<Scalar>();
     obs_delay_ = cfg["simulation"]["obs_delay"].as<Scalar>();
@@ -1516,6 +1521,15 @@ void VisionEnv::reset_delay_buffer(){
   act_past_delay_ = 0;
   obs_past_delay_ = 0;
 }
+
+bool VisionEnv::set_current_max_collide_vel(){
+  max_collide_vel_ = init_max_collide_vel_ * (1 - current_env_steps_/num_each_env_steps_);
+  // for debug
+  if (max_collide_vel_ < 0) {
+    max_collide_vel_ = 0;
+  }
+  return true;
+  }
 
 std::ostream &operator<<(std::ostream &os, const VisionEnv &vision_env) {
   os.precision(3);
