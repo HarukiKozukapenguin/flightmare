@@ -231,7 +231,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // compute rotation matrix
   // Vector<9> ori = Map<Vector<>>(quad_state_.R().data(), quad_state_.R().size());
   Matrix<3, 3> R = quad_state_.R();
-  Vector<2> body_tilt = Vector<2>(R(0,2), R(1,2));
+  Vector<2> body_tilt = Vector<2>(R(0,2), R(1,2)) + Vector<2>(att_noise_*uniform_dist_(random_gen_),att_noise_*uniform_dist_(random_gen_));
   // std::cout << "ori is called" << std::endl;
 
   // get N most closest obstacles as the observation
@@ -273,7 +273,8 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   // Observations
 
   obs << quad_size_, time_constant_, max_gain_, act_, quad_state_.p[0], quad_state_.p[1],
-    quad_state_.v[0]*vel_compensation_ ,quad_state_.v[1], body_tilt, quad_state_.w[0], quad_state_.w[1],
+    quad_state_.v[0]*vel_compensation_ ,quad_state_.v[1], body_tilt,
+    quad_state_.w[0] + omega_noise_*uniform_dist_(random_gen_), quad_state_.w[1] + omega_noise_*uniform_dist_(random_gen_),
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
     toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta),
     logsphericalboxel, acc_distance_;
@@ -1099,6 +1100,9 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     linear_transition_log_ = cfg["environment"]["linear_transition_log"].as<Scalar>();
     vel_transition_fraction_ = cfg["environment"]["vel_transition_fraction"].as<Scalar>();
     vel_acc_cal_threshold_ = cfg["environment"]["vel_acc_cal_threshold"].as<Scalar>();
+
+    att_noise_ = cfg["environment"]["att_noise"].as<Scalar>() * M_PI / 180; //deg2rad
+    omega_noise_ = cfg["environment"]["omega_noise"].as<Scalar>();
     // phi_list_ = cfg["environment"]["phi_list"].as<std::vector<Scalar>>();
   }
 
