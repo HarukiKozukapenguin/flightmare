@@ -246,7 +246,6 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
 
   Vector<visionenv::Theta_Cuts> logsphericalboxel;
   for (int i = 0; i < visionenv::Theta_Cuts; i++) {
-    sphericalboxel[i] -= quad_size_/max_detection_range_; // 0~1
     if (sphericalboxel[i]> linear_transition_log_){
     logsphericalboxel[i] = -log(sphericalboxel[i]);
     }
@@ -466,9 +465,6 @@ bool VisionEnv::getObstacleState(
   // vel_obs_distance_: [0,10.0] [m]
   vel_obs_distance_ =
     get_vel_sphericalboxel(pos_b_list, obs_radius_list, poll_y, poll_z, R_T);
-  for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
-    vel_obs_distance_[i] -= quad_size_;
-  }
 
   return true;
 }
@@ -505,7 +501,8 @@ Scalar VisionEnv::getClosestDistance(
   Scalar rmin = std::min(std::min(y_p, y_n), max_detection_range_);
   for (size_t i = 0; i < obstacle_num_; ++i) {
     Vector<3> pos = pos_b_list[i];
-    Scalar radius = obs_radius_list[i];
+    // make large radius depending on quad size for avoidance direction
+    Scalar radius = obs_radius_list[i] + quad_size_;
     Eigen::Vector3d alpha = cross_product(Cell, poll_z);
     Eigen::Vector3d beta = cross_product(pos, poll_z);
     Scalar a = std::pow(alpha.norm(), 2);
