@@ -97,11 +97,11 @@ class VisionEnv final : public EnvBase {
   Scalar inner_product(const Vector<3> &a, const Vector<3> &b) const;
   Vector<3> cross_product(const Vector<3> &a, const Vector<3> &b) const;
   // void comp(Scalar &rmin, Scalar r);
-  Vector<visionenv::Vel_Theta_Cuts> get_vel_acc_boxel(
+  Vector<visionenv::Vel_Theta_Cuts> get_vel_act_boxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
   const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
   const Matrix<3, 3> &R_T) const;
-  Scalar calc_dist_to_acc(Scalar dist, Scalar theta) const;
+  Scalar calc_dist_to_gain_normalized_act(Scalar dist, Scalar theta) const;
   Vector<visionenv::RewardCuts * visionenv::RewardCuts> get_vel_sphericalboxel(
     const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>>
       &pos_b_list,
@@ -192,7 +192,7 @@ class VisionEnv final : public EnvBase {
   Scalar attitude_vel_coeff_;
   Vector<3> goal_linear_vel_;
   bool is_collision_, is_threshold_collision_, is_wall_collision_;
-  Vector<visionenv::Vel_Theta_Cuts> acc_distance_;
+  Vector<visionenv::Vel_Theta_Cuts> gain_normalized_act_distance_;
   Vector<visionenv::RewardCuts * visionenv::RewardCuts> vel_obs_distance_;
 
   size_t obstacle_num_;

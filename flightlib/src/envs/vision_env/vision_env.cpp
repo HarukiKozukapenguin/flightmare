@@ -276,7 +276,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     quad_state_.w[0] + omega_noise_*uniform_dist_(random_gen_), quad_state_.w[1] + omega_noise_*uniform_dist_(random_gen_),
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
     toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta),
-    logsphericalboxel, acc_distance_;
+    logsphericalboxel, gain_normalized_act_distance_;
   // std::cout << "obs is called" << std::endl;
   return true;
 }
@@ -460,7 +460,7 @@ bool VisionEnv::getObstacleState(
   // std::cout << "obstacle_num is " << obstacle_num << std::endl;
   // std::cout << "getsphericalboxel is being called" << std::endl;
   sphericalboxel = getsphericalboxel(pos_b_list, obs_radius_list, poll_y, poll_z, R_T);
-  acc_distance_ = get_vel_acc_boxel(pos_b_list, obs_radius_list, poll_y, poll_z, R_T);
+  gain_normalized_act_distance_ = get_vel_act_boxel(pos_b_list, obs_radius_list, poll_y, poll_z, R_T);
 
   // vel_obs_distance_: [0,10.0] [m]
   vel_obs_distance_ =
@@ -553,7 +553,7 @@ Vector<3> VisionEnv::cross_product(const Vector<3> &a,
 }
 
 Vector<visionenv::Vel_Theta_Cuts>
-VisionEnv::get_vel_acc_boxel(
+VisionEnv::get_vel_act_boxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
   const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
   const Matrix<3, 3> &R_T) const {
@@ -571,7 +571,7 @@ VisionEnv::get_vel_acc_boxel(
                                                      std::pow(body_vel[1], 2)));
   }
 
-  Vector<visionenv::Vel_Theta_Cuts> acc_distance;
+  Vector<visionenv::Vel_Theta_Cuts> act_distance;
   // angle of the velocity direction in 2D map
   for (int t = -visionenv::Vel_Theta_Cuts / 2;
        t < visionenv::Vel_Theta_Cuts / 2; ++t) {
@@ -581,14 +581,14 @@ VisionEnv::get_vel_acc_boxel(
       Scalar pcell = vel_phi;
       Scalar dist =  getClosestDistance(pos_b_list, obs_radius_list, poll_y, poll_z, tcell, pcell) *
         max_detection_range_;
-      acc_distance[t + (visionenv::Vel_Theta_Cuts) / 2] = calc_dist_to_acc(dist,theta);
+      act_distance[t + (visionenv::Vel_Theta_Cuts) / 2] = calc_dist_to_gain_normalized_act(dist,theta);
   }
-  return acc_distance;
+  return act_distance;
 }
 
-Scalar VisionEnv::calc_dist_to_acc(Scalar dist, Scalar theta) const {
-  Scalar squared_vel = quad_state_.v.squaredNorm();
-  return 2*std::sin(theta)*squared_vel/(dist*std::pow(std::cos(theta),2));
+Scalar VisionEnv::calc_dist_to_gain_normalized_act(Scalar dist, Scalar theta) const {
+  Scalar squared_vel_normalized_by_gain = quad_state_.v.squaredNorm()*std::pow(vel_compensation_,2);
+  return 2*std::sin(theta)*squared_vel_normalized_by_gain/(dist*std::pow(std::cos(theta),2));
 }
 
 Vector<visionenv::RewardCuts * visionenv::RewardCuts>
