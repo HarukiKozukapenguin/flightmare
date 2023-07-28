@@ -473,7 +473,7 @@ Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
   const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
   const Matrix<3, 3> &R_T) {
-  Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
+  // Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
   // Vector<3> body_vel = R_T * vel_2d;
   // Scalar vel_theta = std::atan2(body_vel[1], body_vel[0]);
   // Scalar vel_phi = std::atan(body_vel[2] / std::sqrt(std::pow(body_vel[0], 2)
@@ -560,7 +560,7 @@ VisionEnv::get_vel_act_boxel(
   Vector<3> vel_2d = {quad_state_.v[0], quad_state_.v[1], 0};
   Vector<3> body_vel = R_T * vel_2d;
   Scalar vel_theta, vel_phi;
-  Scalar vel = quad_state_.v.norm();
+  Scalar vel = quad_state_.v.norm() * vel_compensation_;
   if (vel < vel_acc_cal_threshold_) {
     vel_theta = 0;
     vel_phi = 0;
@@ -813,11 +813,11 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   Scalar beta = vel_transition_fraction_;
   Scalar a = -1/(beta*beta);
   Scalar b = 2/beta;
-  if (is_collision_ && (quad_state_.v).norm() < max_collide_vel_){
-    when_collision_penlty = when_collision_coeff_ * std::max((quad_state_.v).squaredNorm(),0.01);
+  if (is_collision_ && (quad_state_.v).norm() * vel_compensation_ < max_collide_vel_){
+    when_collision_penlty = when_collision_coeff_ * std::max((quad_state_.v).squaredNorm()*std::pow(vel_compensation_,2),0.01);
   }
-  if (is_wall_collision_ && (quad_state_.v).norm() < max_collide_vel_){
-    when_collision_penlty = when_wall_collision_coeff_ * std::max((quad_state_.v).squaredNorm(),0.01);
+  if (is_wall_collision_ && (quad_state_.v).norm() * vel_compensation_ < max_collide_vel_){
+    when_collision_penlty = when_wall_collision_coeff_ * std::max((quad_state_.v).squaredNorm()*std::pow(vel_compensation_,2),0.01);
   }
   else{
     for (size_t i = 0; i < visionenv::RewardCuts * visionenv::RewardCuts; i++) {
@@ -835,7 +835,7 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
         dist_factor = 1/vel_obs_dist;
       }
       vel_collision_penalty += vel_collision_coeff_ *
-                              (quad_state_.v).squaredNorm() *
+                              (quad_state_.v).squaredNorm() * std::pow(vel_compensation_,2) *
                               dist_factor * std::exp(-angle_discount_factor);
     }
   }
@@ -853,8 +853,15 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   }
     // - tracking a constant linear velocity
   Scalar lin_vel_reward = 0;
-  if ((quad_state_.v).norm() > goal_linear_vel_(0)){
-    lin_vel_reward = vel_coeff_ * (quad_state_.v - goal_linear_vel_).norm();
+  if ((quad_state_.v).norm() * vel_compensation_ > goal_linear_vel_(0)){
+    Vector<3> compensate_vel;
+    if (quad_state_.v[0]*vel_compensation_ > goal_linear_vel_(0)){
+      compensate_vel = {quad_state_.v[0]*vel_compensation_, quad_state_.v[1], 0.0};
+    }
+    else{
+      compensate_vel = {goal_linear_vel_(0), quad_state_.v[1], 0.0};
+    }
+    lin_vel_reward = vel_coeff_ * (compensate_vel - goal_linear_vel_).norm();
   }
 
   // - angular velocity penalty, to avoid oscillations
@@ -911,7 +918,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
                  quad_state_.p(QS::POSY) <= wall_pos_- quad_size_;
   bool z_valid = quad_state_.x(QS::POSZ) >= world_box_[4] + safty_threshold &&
                  quad_state_.x(QS::POSZ) <= world_box_[5] - safty_threshold;
-  Scalar vel = quad_state_.v.norm();
+  Scalar vel = quad_state_.v.norm() * std::pow(vel_compensation_,2);
 
 
   if (((is_collision_ || is_wall_collision_ )&& max_collide_vel_< vel )|| cmd_.t >= max_t_ - sim_dt_ || !x_valid || !y_valid ||
