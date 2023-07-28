@@ -521,7 +521,7 @@ Scalar VisionEnv::getClosestDistance(
   return rmin / max_detection_range_;
 }
 Scalar VisionEnv::calc_dist_from_wall(Scalar sign, const Vector<3>& Cell, const Vector<3> &poll_y) const {
-  Scalar y_d= (sign*wall_pos_ - quad_state_.p[1]);
+  Scalar y_d= (sign*(wall_pos_- quad_size_) - quad_state_.p[1]);
   Scalar cos_theta = inner_product(Cell,poll_y);
   if (cos_theta*y_d <= 0) return max_detection_range_;
   else return y_d/cos_theta;
