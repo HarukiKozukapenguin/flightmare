@@ -118,8 +118,8 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   }
   vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
   while (true) {
-    quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 10 + 10;
-    quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * world_box_[2] * 0.2;
+    quad_state_.x(QS::POSX) = 0.0;
+    quad_state_.x(QS::POSY) = 0.0;
     quad_state_.x(QS::POSZ) =
       uniform_dist_(random_gen_) * (world_box_[5] - world_box_[4]) * 0.4 +
       (world_box_[4] + world_box_[5]) / 2;
@@ -681,8 +681,8 @@ bool VisionEnv::step(Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.v[0] = quad_state_.v[0];
     cmd_.v[1] = quad_state_.v[1];
     cmd_.v[2] = 0.0;
-    cmd_.a[0] = pi_act_(0);
-    cmd_.a[1] = pi_act_(1);
+    cmd_.a[0] = 0.0;
+    cmd_.a[1] = 0.0;
     cmd_.a[2] = 0.0;
     cmd_.yaw = 0.0;
   }
@@ -737,6 +737,9 @@ bool VisionEnv::step(Ref<Vector<>> act, Ref<Vector<>> obs,
 
   // update observations
   getObs(obs);
+  for (long int i = 0; i < obs.size(); i++) {
+    std::cout << obs[i] << std::endl;
+  }
   // time delay
   effect_obs_delay(obs);
 
