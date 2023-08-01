@@ -1114,7 +1114,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     sim_dt_ = cfg["simulation"]["sim_dt"].as<Scalar>();
     max_t_ = cfg["simulation"]["max_t"].as<Scalar>();
     num_envs_ = cfg["simulation"]["num_envs"].as<int>();
-    num_each_env_steps_ = (int)(1E8/num_envs_);
+    num_each_env_steps_ = (int)(5E7/num_envs_);
     act_delay_ = cfg["simulation"]["act_delay"].as<Scalar>();
     act_delay_width_ = cfg["simulation"]["act_delay_width"].as<Scalar>();
     obs_delay_ = cfg["simulation"]["obs_delay"].as<Scalar>();
