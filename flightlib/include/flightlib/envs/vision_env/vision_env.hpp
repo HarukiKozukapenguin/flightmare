@@ -285,7 +285,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> init_thrust_map_;
 
   Scalar time_constant_;
-  int num_envs_, num_each_env_steps_, current_env_steps_;
+  int num_envs_, allow_collision_steps_, num_each_env_steps_, current_env_steps_;
 
   Scalar act_delay_, act_delay_width_, obs_delay_, obs_delay_width_;
   size_t act_buffer_size_, obs_buffer_size_;

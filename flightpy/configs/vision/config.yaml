@@ -87,6 +87,7 @@ simulation:
   sim_dt: 0.025
   max_t: 60.0
   num_envs: 400
+  allow_collision_steps: 50000000
   num_threads: 20
   act_delay: 0.020 #[s]
   act_delay_width: 0.040
