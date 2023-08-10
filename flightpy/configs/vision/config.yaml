@@ -111,14 +111,14 @@ quadrotor_dynamics:
   body_drag_3: [0.00, 0.00, 0.00]
   body_drag_h: 0.00
   quad_size: 0.25 # [m]
-  quad_size_fix: false
+  quad_size_fix: true
   quad_size_threshold_dev: 0.025 # [m]
-  range_time_constant: [0.2, 1.2]
+  range_time_constant: [0.3, 0.3]
   init_time_constant: 0.3
   time_constant_fix: false
   fix_time_constant: 0.3
 
-  range_max_gain: [2.0, 10.0]
+  range_max_gain: [3.0, 3.0]
   max_gain_fix: false
   fix_max_gain: 3.0
 
