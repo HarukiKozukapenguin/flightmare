@@ -74,7 +74,11 @@ void VisionEnv::init() {
   // act_std_ << (max_force / quad_ptr_->getMass()) / 2, max_omega.x(),
   //   max_omega.y(), max_omega.z();
   act_mean_ << 0, 0;
-  act_std_ << max_gain_, max_gain_;  // set by my experience (cmd difference)
+  if (act_std_from_max_gain_){
+    act_std_ << max_gain_, max_gain_;
+  } else {
+    act_std_ << act_std_max_gain_, act_std_max_gain_;
+  }
 
   collide_num = 0;
   wall_collide_num = 0;
@@ -179,7 +183,11 @@ void VisionEnv::randomize_size(){
 void VisionEnv::randomize_gain(){
   // reset acc_max when reset
   max_gain_ = uniform_dist_one_direction_(random_gen_)*(range_max_gain_[1] - range_max_gain_[0]) + range_max_gain_[0];
-  act_std_ << max_gain_, max_gain_;
+  if (act_std_from_max_gain_){
+    act_std_ << max_gain_, max_gain_;
+  } else {
+    act_std_ << act_std_max_gain_, act_std_max_gain_;
+  }
 }
 
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
@@ -1136,7 +1144,14 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
       cfg["quadrotor_dynamics"]["max_gain_fix"].as<bool>();
     max_gain_ = cfg["quadrotor_dynamics"]["fix_max_gain"].as<Scalar>();
     vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
-    act_std_ << max_gain_, max_gain_;
+    act_std_from_max_gain_ = cfg["quadrotor_dynamics"]["act_std_from_max_gain"].as<bool>();
+    if (act_std_from_max_gain_){
+      act_std_ << max_gain_, max_gain_;
+    }
+    else{
+      act_std_max_gain_ = cfg["quadrotor_dynamics"]["exec_max_gain"].as<Scalar>();
+      act_std_ << act_std_max_gain_, act_std_max_gain_;
+    }
   }
 
   if (cfg["rewards"]) {

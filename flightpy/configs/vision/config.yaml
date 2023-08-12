@@ -117,10 +117,13 @@ quadrotor_dynamics:
   init_time_constant: 0.3
   time_constant_fix: true
   fix_time_constant: 0.3
-
+# policy gain
   range_max_gain: [2.0, 10.0]
   max_gain_fix: true
   fix_max_gain: 10.0
+# exec gain
+  act_std_from_max_gain: true
+  exec_max_gain: 3.0
 
 Control:
   cmd_mode:                     2 # please check flightmare/flightlib/include/flightlib/common/command.hpp#9-13

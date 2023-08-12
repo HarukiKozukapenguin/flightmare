@@ -300,6 +300,8 @@ class VisionEnv final : public EnvBase {
   Scalar vel_compensation_;
   Scalar learn_max_gain_;
   Scalar att_noise_, omega_noise_;
+  bool act_std_from_max_gain_;
+  Scalar act_std_max_gain_;
 };
 
 }  // namespace flightlib
