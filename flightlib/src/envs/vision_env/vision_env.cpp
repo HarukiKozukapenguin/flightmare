@@ -579,9 +579,8 @@ VisionEnv::get_vel_act_boxel(
       theta = theta * (PI / 180); //[rad]
       Scalar tcell = theta + vel_theta;
       Scalar pcell = vel_phi;
-      Scalar dist =  getClosestDistance(pos_b_list, obs_radius_list, poll_y, poll_z, tcell, pcell) *
-        max_detection_range_;
-      act_distance[t + (visionenv::Vel_Theta_Cuts) / 2] = calc_dist_to_gain_normalized_act(dist,theta);
+      Scalar dist =  getClosestDistance(pos_b_list, obs_radius_list, poll_y, poll_z, tcell, pcell);
+      act_distance[t + (visionenv::Vel_Theta_Cuts) / 2] = dist;
   }
   return act_distance;
 }
