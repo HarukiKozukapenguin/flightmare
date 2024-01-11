@@ -296,6 +296,7 @@ class VisionEnv final : public EnvBase {
 
   Scalar max_gain_;
   bool max_gain_fix_;
+  bool exec_vel_compensation_;
   Vector<2> range_max_gain_;
   Scalar vel_compensation_;
   Scalar learn_max_gain_;

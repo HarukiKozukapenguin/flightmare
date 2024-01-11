@@ -120,6 +120,7 @@ quadrotor_dynamics:
   range_max_gain: [2.0, 10.0]
   max_gain_fix: false
   fix_max_gain: 3.0
+  exec_vel_compensation: true
 
 Control:
   cmd_mode:                     2 # please check flightmare/flightlib/include/flightlib/common/command.hpp#9-13
