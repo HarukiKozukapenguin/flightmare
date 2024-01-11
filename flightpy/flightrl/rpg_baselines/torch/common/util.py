@@ -105,7 +105,7 @@ def plot3d_traj(ax3d, pos, vel):
 
 def test_policy(env, model, render=False):
     max_ep_length = env.max_episode_steps
-    num_rollouts = 100
+    num_rollouts = 120
     act_dim: int = env.action_space.shape[0]
     frame_id = 0
     final_x_list = []
@@ -123,11 +123,11 @@ def test_policy(env, model, render=False):
         final_x = 0
         final_t = 0
         lstm_states = None
+        vel_list = []
 
         if render:
             x_list = []
             y_list = []
-            vel_list = []
             path = (
                 os.environ["FLIGHTMARE_PATH"]
                 + "/flightpy/configs/vision/real_tree_random_8/environment_"
@@ -191,14 +191,10 @@ def test_policy(env, model, render=False):
             # print(yaw)
 
             #
+            vel_list.append(np.sqrt(env.getQuadState()[0][9] ** 2 + env.getQuadState()[0][10] ** 2))
             if render:
                 x_list.append(env.getQuadState()[0][1])
                 y_list.append(env.getQuadState()[0][2])
-                vel_list.append(
-                    np.sqrt(
-                        env.getQuadState()[0][9] ** 2 + env.getQuadState()[0][10] ** 2
-                    )
-                )
 
             if done:
                 if final_x == 0:
@@ -212,8 +208,8 @@ def test_policy(env, model, render=False):
                 final_x_list.append(final_x)
                 # print("n_roll: ",n_roll)
                 print("final x: {}".format(final_x))
-                ave_vel_list.append(final_x / final_t)
-                print("ave vel: {}".format(final_x / final_t))
+                ave_vel_list.append(sum(vel_list) / len(vel_list))
+                print("ave vel: {}".format(sum(vel_list) / len(vel_list)))
                 if render:
                     plt.xlim(right=final_x + 5)
                     plt.scatter(
