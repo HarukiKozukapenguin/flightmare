@@ -230,8 +230,8 @@ def test_policy(env, model, render=False):
     print("standard deviation x: {}".format(statistics.pstdev(final_x_list)))
     plt.hist(final_x_list)
     plt.show()
-    print("average vel: {}".format(sum(ave_vel_list) / num_rollouts))
-    print("standard deviation vel: {}".format(statistics.pstdev(ave_vel_list)))
+    print("average vel final: {}".format(sum(ave_vel_list) / num_rollouts))
+    print("standard deviation vel final: {}".format(statistics.pstdev(ave_vel_list)))
 
     print(
         "action difference: {}".format(
