@@ -135,7 +135,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     is_collision_ = false;
     is_threshold_collision_ = false;
     quad_ptr_->reset(quad_state_);
-    time_constant_ = quad_ptr_->getTime_constant();
+    time_constant_ = quad_ptr_->getPolicyTimeConstant();
     time_constant_ /= vel_compensation_;
 
     init_isCollision();  // change is_collision depending on initial position
@@ -1144,7 +1144,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
       cfg["quadrotor_dynamics"]["max_gain_fix"].as<bool>();
     max_gain_ = cfg["quadrotor_dynamics"]["fix_max_gain"].as<Scalar>();
     vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
-    act_std_from_max_gain_ = cfg["quadrotor_dynamics"]["act_std_from_max_gain"].as<bool>();
+    act_std_from_max_gain_ = cfg["quadrotor_dynamics"]["act_std_from_state_gain"].as<bool>();
     if (act_std_from_max_gain_){
       act_std_ << max_gain_, max_gain_;
     }

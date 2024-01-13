@@ -113,16 +113,21 @@ quadrotor_dynamics:
   quad_size: 0.25 # [m]
   quad_size_fix: true
   quad_size_threshold_dev: 0.025 # [m]
+# state time_constant
   range_time_constant: [0.2, 1.2]
   init_time_constant: 0.3
   time_constant_fix: true
-  fix_time_constant: 0.3
-# policy gain
+  policy_time_constant: 0.3
+# dynamics time constant
+  time_constant_from_state: false
+  dynamics_time_constant: 1.0
+
+# state gain
   range_max_gain: [2.0, 10.0]
   max_gain_fix: true
   fix_max_gain: 10.0
-# exec gain
-  act_std_from_max_gain: true
+# dynamics gain
+  act_std_from_state_gain: false
   exec_max_gain: 3.0
 
 Control:
