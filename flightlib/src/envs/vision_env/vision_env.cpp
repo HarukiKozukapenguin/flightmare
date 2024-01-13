@@ -999,7 +999,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
     iter += 1;
     // std::cout << iter << std::endl;
     // std::cout << "iter is " << iter << std::endl;
-    if (iter == 80 && fly_result_) {
+    if (iter == 100 && fly_result_) {
       std::cout << "collide_num is " << collide_num << std::endl;
       std::cout << "time_num is " << time_num << std::endl;
       std::cout << "bound_num is " << bound_num << std::endl;
