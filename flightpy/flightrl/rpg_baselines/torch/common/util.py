@@ -228,8 +228,6 @@ def test_policy(env, model, render=False):
 
     print("average final x: {}".format(sum(final_x_list) / num_rollouts))
     print("standard deviation x: {}".format(statistics.pstdev(final_x_list)))
-    plt.hist(final_x_list)
-    plt.show()
     print("average vel final: {}".format(sum(ave_vel_list) / num_rollouts))
     print("standard deviation vel final: {}".format(statistics.pstdev(ave_vel_list)))
 
@@ -239,5 +237,8 @@ def test_policy(env, model, render=False):
         )
     )
     print("tilt: {}".format(np.round(tilt / step_num, decimals=2)))
+
+    plt.hist(final_x_list)
+    plt.show()
     if render:
         env.disconnectUnity()
