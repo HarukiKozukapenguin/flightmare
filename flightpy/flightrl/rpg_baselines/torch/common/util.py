@@ -130,11 +130,12 @@ def test_policy(env, model, render=False):
             y_list = []
             path = (
                 os.environ["FLIGHTMARE_PATH"]
-                + "/flightpy/configs/vision/real_tree_random_8/environment_"
-                + "0"
+                + "/flightpy/configs/vision/real_tree_random_9/environment_"
+                + "120"
                 + "/"
             )
-            figure, axes = plt.subplots()
+            figure, axes = plt.subplots(figsize=(20, 4), layout="tight")
+            # plt.subplots_adjust(wspace=0)
             with open(path + "static_obstacles.csv") as f:
                 reader = csv.reader(f)
                 for row in reader:
@@ -143,7 +144,7 @@ def test_policy(env, model, render=False):
                     r = float(row[8])  # +body_size
                     draw_circle = plt.Circle((x, y), r)
                     axes.add_artist(draw_circle)
-            plt.ylim([-1.5, 1.5])
+            plt.ylim([-1.75, 1.75])
 
         while not (done or (ep_len >= max_ep_length)):
             # print(obs)
@@ -211,12 +212,17 @@ def test_policy(env, model, render=False):
                 ave_vel_list.append(sum(vel_list) / len(vel_list))
                 print("ave vel: {}".format(sum(vel_list) / len(vel_list)))
                 if render:
-                    plt.xlim(right=final_x + 5)
+                    plt.xlabel("x [m]", fontsize=20)
+                    plt.ylabel("y [m]", fontsize=20)
+                    plt.tick_params(labelsize=20)
+                    plt.xlim(right=final_x + 2)
                     plt.scatter(
-                        x_list, y_list, c=vel_list, cmap=cm.jet, marker=".", lw=0
+                        x_list, y_list, c=vel_list, cmap=cm.jet, marker=".", lw=0, vmin=0, vmax=10
                     )
-                    ax = plt.colorbar()
-                    ax.set_label("vel [m/s]")
+                    cbar = plt.colorbar(pad=0.01)
+                    cbar.ax.tick_params(labelsize=15)
+                    cbar.set_label("vel [m/s]", fontsize=15)
+                    # plt.tight_layout()
                     plt.show()
                     # https://villageofsound.hatenadiary.jp/entry/2015/09/13/010352
             else:
