@@ -156,6 +156,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
 
       if (fly_result_){
     std::cout << "quad size is " << quad_size_ << std::endl;
+    std::cout << "exec_quad_size is " << exec_quad_size_ << std::endl;
     std::cout << "quad size threshold is " << quad_size_threshold_ << std::endl;
     std::cout << "quad time_constant is " << time_constant_ << std::endl;
     }
@@ -274,8 +275,8 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
   obs << quad_size_, time_constant_, max_gain_, act_, quad_state_.p[0], quad_state_.p[1],
     quad_state_.v[0]*vel_compensation_ ,quad_state_.v[1], body_tilt,
     quad_state_.w[0] + omega_noise_*uniform_dist_(random_gen_), quad_state_.w[1] + omega_noise_*uniform_dist_(random_gen_),
-    toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
-    toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta),
+    toLog((wall_pos_ - exec_quad_size_) - quad_state_.x(QS::POSY), beta),
+    toLog((wall_pos_ - exec_quad_size_) + quad_state_.x(QS::POSY), beta),
     logsphericalboxel, gain_normalized_act_distance_;
   // std::cout << "obs is called" << std::endl;
   return true;
@@ -336,7 +337,7 @@ bool VisionEnv::getObstacleState(
   //   obstacle_radius_.push_back(obs_radius);
 
   //   //
-  //   if (obstacle_2d_dist < obs_radius + quad_size_) {
+  //   if (obstacle_2d_dist < obs_radius + exec_quad_size) {
   //     is_collision_ = true;
   //   }
   // }
@@ -348,7 +349,7 @@ bool VisionEnv::getObstacleState(
   is_wall_collision_ = false;
   Scalar y_pos = quad_state_.x(QS::POSY);
   Scalar wall_2d_dist = std::min(wall_pos_ - y_pos, wall_pos_ + y_pos);
-  if (wall_2d_dist < quad_size_) {
+  if (wall_2d_dist < exec_quad_size_) {
       is_wall_collision_ = true;
     }
   if (wall_2d_dist < quad_size_threshold_) {
@@ -377,7 +378,7 @@ bool VisionEnv::getObstacleState(
 
     obstacle_radius_.push_back(obs_radius);
 
-    if (obstacle_2d_dist < obs_radius + quad_size_) {
+    if (obstacle_2d_dist < obs_radius + exec_quad_size_) {
       is_collision_ = true;
     }
     if (obstacle_2d_dist < obs_radius + quad_size_threshold_) {
@@ -502,7 +503,7 @@ Scalar VisionEnv::getClosestDistance(
   for (size_t i = 0; i < obstacle_num_; ++i) {
     Vector<3> pos = pos_b_list[i];
     // make large radius depending on quad size for avoidance direction
-    Scalar radius = obs_radius_list[i] + quad_size_;
+    Scalar radius = obs_radius_list[i] + exec_quad_size_;
     Eigen::Vector3d alpha = cross_product(Cell, poll_z);
     Eigen::Vector3d beta = cross_product(pos, poll_z);
     Scalar a = std::pow(alpha.norm(), 2);
@@ -521,7 +522,7 @@ Scalar VisionEnv::getClosestDistance(
   return rmin / max_detection_range_;
 }
 Scalar VisionEnv::calc_dist_from_wall(Scalar sign, const Vector<3>& Cell, const Vector<3> &poll_y) const {
-  Scalar y_d= (sign*(wall_pos_- quad_size_) - quad_state_.p[1]);
+  Scalar y_d= (sign*(wall_pos_- exec_quad_size_) - quad_state_.p[1]);
   Scalar cos_theta = inner_product(Cell,poll_y);
   if (cos_theta*y_d <= 0) return max_detection_range_;
   else return y_d/cos_theta;
@@ -786,11 +787,11 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 
     // const Scalar dist_margin_ = 2;
     if (relative_2d_pos_norm_[sort_idx] - obstacle_radius_[sort_idx] -
-          quad_size_ <=
+          exec_quad_size_ <=
         dist_margin_) {
       // compute distance penalty
       Scalar collision_distance = relative_2d_pos_norm_[sort_idx] -
-                                  obstacle_radius_[sort_idx] - quad_size_;
+                                  obstacle_radius_[sort_idx] - exec_quad_size_;
       collision_penalty +=
         collision_coeff_ * std::exp(-collision_exp_coeff_ * collision_distance);
     }
@@ -798,11 +799,11 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   }
   {
     Scalar wall_dist;
-    wall_dist = (quad_state_.p[1] - wall_pos_) - quad_size_;
+    wall_dist = (quad_state_.p[1] - wall_pos_) - exec_quad_size_;
     if (wall_dist <= dist_margin_){
       collision_penalty += collision_coeff_ * std::exp(-collision_exp_coeff_ * wall_dist);
     }
-    wall_dist = (quad_state_.p[1] + wall_pos_) - quad_size_;
+    wall_dist = (quad_state_.p[1] + wall_pos_) - exec_quad_size_;
     if (wall_dist <= dist_margin_){
       collision_penalty += collision_coeff_ * std::exp(-collision_exp_coeff_ * wall_dist);
     }
@@ -914,8 +915,8 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
   const Scalar safty_threshold = 0.1;
   bool x_valid = quad_state_.p(QS::POSX) >= world_box_[0] + safty_threshold &&
                  quad_state_.p(QS::POSX) <= world_box_[1] - safty_threshold;
-  bool y_valid = quad_state_.p(QS::POSY) >= -wall_pos_+ quad_size_ &&
-                 quad_state_.p(QS::POSY) <= wall_pos_- quad_size_;
+  bool y_valid = quad_state_.p(QS::POSY) >= -wall_pos_+ exec_quad_size_ &&
+                 quad_state_.p(QS::POSY) <= wall_pos_- exec_quad_size_;
   bool z_valid = quad_state_.x(QS::POSZ) >= world_box_[4] + safty_threshold &&
                  quad_state_.x(QS::POSZ) <= world_box_[5] - safty_threshold;
   Scalar vel = quad_state_.v.norm() * std::pow(vel_compensation_,2);
@@ -1188,10 +1189,17 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
 
   if (cfg["quadrotor_dynamics"]) {
     quad_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
+    quad_size_from_policy_ = cfg["quadrotor_dynamics"]["quad_size_from_policy"].as<bool>();
+    if (quad_size_from_policy_){
+      exec_quad_size_ = quad_size_;
+    }
+    else{
+      exec_quad_size_ = cfg["quadrotor_dynamics"]["exec_quad_size"].as<Scalar>();
+    }
     quad_size_fix_ = cfg["quadrotor_dynamics"]["quad_size_fix"].as<bool>();
     quad_size_threshold_dev_ =
       cfg["quadrotor_dynamics"]["quad_size_threshold_dev"].as<Scalar>();
-    quad_size_threshold_ = quad_size_ - quad_size_threshold_dev_ * uniform_dist_one_direction_(random_gen_);
+    quad_size_threshold_ = exec_quad_size_ - quad_size_threshold_dev_ * uniform_dist_one_direction_(random_gen_);
     // init_size_ = cfg["quadrotor_dynamics"]["quad_size"].as<Scalar>();
     // init_mass_ = cfg["quadrotor_dynamics"]["mass"].as<Scalar>();
     // init_inertia_ = cfg["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>();

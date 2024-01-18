@@ -226,8 +226,8 @@ class VisionEnv final : public EnvBase {
   Scalar wall_pos_;
   // std::vector<Scalar> tree_size_range_;
   // quad_size (meter)
-  Scalar quad_size_, quad_size_threshold_dev_, quad_size_threshold_;
-  bool quad_size_fix_;
+  Scalar quad_size_, quad_size_threshold_dev_, quad_size_threshold_, exec_quad_size_;
+  bool quad_size_fix_, quad_size_from_policy_;
 
   // observations and actions (for RL)
   Vector<visionenv::kNObs> pi_obs_;
