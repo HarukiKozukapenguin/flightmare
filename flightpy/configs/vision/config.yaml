@@ -109,9 +109,13 @@ quadrotor_dynamics:
   body_drag_1: [0.00, 0.00, 0.00]
   body_drag_3: [0.00, 0.00, 0.00]
   body_drag_h: 0.00
+  # policy's quadrotor size
   quad_size: 0.25 # [m]
   quad_size_fix: true
   quad_size_threshold_dev: 0.025 # [m]
+  # exec's quadrotor size
+  quad_size_from_policy: false
+  exec_quad_size: 0.50 # [m]
   range_time_constant: [0.2, 1.2]
   init_time_constant: 0.3
   time_constant_fix: true
