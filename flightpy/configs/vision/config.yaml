@@ -1,6 +1,6 @@
 environment:
   level: ["real_tree_random_9"]
-  beginning_env_folder: 115 # beginning of env
+  beginning_env_folder: 0 # beginning of env
   env_folder: 0 # (no meaning...)
   world_box: [-0.3, 70, -1.5, 1.5, 0.2, 2]
   wall_pos: 1.75
@@ -86,7 +86,7 @@ simulation:
   seed: 1
   sim_dt: 0.025
   max_t: 60.0
-  num_envs: 10
+  num_envs: 150
   num_threads: 20
   act_delay: 0.020 #[s]
   act_delay_width: 0.040
