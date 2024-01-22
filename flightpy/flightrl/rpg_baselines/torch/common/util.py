@@ -212,16 +212,16 @@ def test_policy(env, model, render=False):
                 ave_vel_list.append(sum(vel_list) / len(vel_list))
                 print("ave vel: {}".format(sum(vel_list) / len(vel_list)))
                 if render:
-                    plt.xlabel("x [m]", fontsize=20)
-                    plt.ylabel("y [m]", fontsize=20)
-                    plt.tick_params(labelsize=20)
+                    plt.xlabel("x [m]", fontsize=40)
+                    plt.ylabel("y [m]", fontsize=40)
+                    plt.tick_params(labelsize=40)
                     plt.xlim(right=final_x + 2)
                     plt.scatter(
-                        x_list, y_list, c=vel_list, cmap=cm.jet, marker=".", lw=0, vmin=0, vmax=10
+                        x_list, y_list, c=vel_list, cmap=cm.jet, marker=".", lw=0, vmin=0, vmax=10, s=400
                     )
                     cbar = plt.colorbar(pad=0.01)
-                    cbar.ax.tick_params(labelsize=15)
-                    cbar.set_label("vel [m/s]", fontsize=15)
+                    cbar.ax.tick_params(labelsize=40)
+                    cbar.set_label("vel [m/s]", fontsize=40)
                     # plt.tight_layout()
                     plt.show()
                     # https://villageofsound.hatenadiary.jp/entry/2015/09/13/010352
