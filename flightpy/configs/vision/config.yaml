@@ -1,10 +1,10 @@
 environment:
-  level: ["real_tree_random_9"]
-  beginning_env_folder: 0 # beginning of env
+  level: ["real_tree_random_10"]
+  beginning_env_folder: 300 # beginning of env
   env_folder: 0 # (no meaning...)
   world_box: [-0.3, 70, -1.5, 1.5, 0.2, 2]
   wall_pos: 1.75
-  tree_size: 0.15
+  tree_size: 1.0
   y_lim: [1,10]
   z_lim: [2,10]
   # tree_size_range: [0.25, 0.5]
