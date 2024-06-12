@@ -1082,7 +1082,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     y_lim_ = cfg["environment"]["y_lim"].as<std::vector<Scalar>>();
     z_lim_ = cfg["environment"]["z_lim"].as<std::vector<Scalar>>();
     wall_pos_ = cfg["environment"]["wall_pos"].as<Scalar>();
-    tree_size_ = cfg["environment"]["tree_size"].as<Scalar>();
+    // tree_size_ = cfg["environment"]["tree_size"].as<Scalar>();
     // tree_size_range_ =
     //   cfg["environment"]["tree_size_range"].as<std::vector<Scalar>>();
     std::vector<Scalar> goal_vel_vec =
@@ -1294,7 +1294,7 @@ bool VisionEnv::configDynamicObjects(const std::string &yaml_file) {
     // actual size in meters
     obj->setSize(Vector<3>(1.0, 1.0, 1.0));
     // scale of the original size
-    obj->setScale(Vector<3>(scalevec.data()) * tree_size_);
+    obj->setScale(Vector<3>(scalevec.data()));
 
     std::string csv_name = cfg_node[object_id]["csvtraj"].as<std::string>();
     std::string csv_file = obstacle_cfg_path_ + std::string("/csvtrajs/") +
