@@ -1531,11 +1531,20 @@ void VisionEnv::reset_delay_buffer(){
 }
 
 bool VisionEnv::set_current_max_collide_vel(){
-  max_collide_vel_ = init_max_collide_vel_ * (1 - current_env_steps_/num_each_env_steps_);
-  // for debug
-  if (max_collide_vel_ < 0) {
-    max_collide_vel_ = 0;
+  Scalar step_ratio = current_env_steps_/num_each_env_steps_;
+  if (step_ratio < 0.9){
+  max_collide_vel_ = init_max_collide_vel_ * (1 - step_ratio);
   }
+  else if (step_ratio < 1.4){
+  max_collide_vel_ = init_max_collide_vel_ * (0.9/5 + 0.1 - step_ratio/5);
+  }
+  else{
+  max_collide_vel_ = 0;
+  }
+  // for debug
+  // if (max_collide_vel_ < 0) {
+  //   max_collide_vel_ = 0;
+  // }
   return true;
   }
 
