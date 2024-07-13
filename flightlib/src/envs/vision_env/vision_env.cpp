@@ -587,8 +587,18 @@ VisionEnv::get_vel_act_boxel(
 }
 
 Scalar VisionEnv::calc_dist_to_gain_normalized_act(Scalar dist, Scalar theta) const {
+  Scalar beta = linear_transition_log_;
+  Scalar a = -1/(beta*beta);
+  Scalar b = 2/beta;
+  Scalar reciprocal_dist;
+  if (dist < beta){
+    reciprocal_dist = a*dist*b;
+  }
+  else{
+    reciprocal_dist = 1/dist;
+  }
   Scalar squared_vel_normalized_by_gain = quad_state_.v.squaredNorm()*std::pow(vel_compensation_,2);
-  return 2*std::sin(theta)*squared_vel_normalized_by_gain/(dist*std::pow(std::cos(theta),2));
+  return 2*std::sin(theta)*squared_vel_normalized_by_gain*reciprocal_dist/(std::pow(std::cos(theta),2));
 }
 
 Vector<visionenv::RewardCuts * visionenv::RewardCuts>
