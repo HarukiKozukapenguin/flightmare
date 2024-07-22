@@ -49,6 +49,7 @@ void VisionEnv::init() {
   // define input and output dimension for the environment
   obs_dim_ = visionenv::kNObs;
   act_dim_ = visionenv::kNAct;
+  obstacle_dim_ = visionenv::Theta_Cuts + visionenv::Vel_Theta_Cuts;
   rew_dim_ = 0;
   num_detected_obstacles_ = visionenv::kNObstacles;
 
@@ -269,6 +270,9 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     normalized_p[i] = (quad_state_.p[i] - world_box_[i * 2]) /
                       (world_box_[i * 2 + 1] - world_box_[i * 2]);
   }
+  Vector<visionenv::Theta_Cuts + visionenv::Vel_Theta_Cuts> obstacles;
+  obstacles << logsphericalboxel, gain_normalized_act_distance_;
+  effect_obstacle_delay(obstacles);
   // Observations
 
   obs << quad_size_, time_constant_, max_gain_, act_, quad_state_.p[0], quad_state_.p[1],
@@ -276,7 +280,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     quad_state_.w[0] + omega_noise_*uniform_dist_(random_gen_), quad_state_.w[1] + omega_noise_*uniform_dist_(random_gen_),
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
     toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta),
-    logsphericalboxel, gain_normalized_act_distance_;
+    obstacles;
   // std::cout << "obs is called" << std::endl;
   return true;
 }
@@ -332,7 +336,7 @@ bool VisionEnv::getObstacleState(
     Scalar obs_radius = dynamic_objects_[i]->getScale()[0];
     // due to think quadsize, change obs_radius to more smaller to
     // move forword
-    obs_radius = obs_radius / 4;
+    // obs_radius = obs_radius / 4;
     obstacle_radius_.push_back(obs_radius);
 
     //
@@ -1129,9 +1133,12 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     act_delay_width_ = cfg["simulation"]["act_delay_width"].as<Scalar>();
     obs_delay_ = cfg["simulation"]["obs_delay"].as<Scalar>();
     obs_delay_width_ = cfg["simulation"]["obs_delay_width"].as<Scalar>();
+    obstacle_delay_ = cfg["simulation"]["obstacle_delay"].as<Scalar>();
+    obstacle_delay_width_ = cfg["simulation"]["obstacle_delay_width"].as<Scalar>();
 
     act_buffer_size_ = ceil((act_delay_ + act_delay_width_) / sim_dt_);
     obs_buffer_size_ = ceil((obs_delay_ + obs_delay_width_) / sim_dt_);
+    obstacle_buffer_size_ = ceil((obstacle_delay_ + obstacle_delay_width_) / sim_dt_);
 
   } else {
     logger_.error("Cannot load [quadrotor_env] parameters");
@@ -1530,14 +1537,36 @@ void VisionEnv::effect_obs_delay(Ref<Vector<>> obs){
     obs_past_delay_ = obs_time_delay;
 }
 
+void VisionEnv::effect_obstacle_delay(Ref<Vector<>> obstacle){
+    obstacle_buffer_.push_front(obstacle); //std::deque<Vector<>> obs_buffer_;
+
+    Scalar obstacle_time_delay = uniform_dist_one_direction_(random_gen_)*obstacle_delay_width_ + obstacle_delay_;
+    if (obstacle_past_delay_ - sim_dt_/4 < obstacle_time_delay - sim_dt_){
+      obstacle_time_delay = obstacle_past_delay_ - sim_dt_/4 + sim_dt_;
+    }
+    Scalar obstacle_time_step = obstacle_time_delay/sim_dt_;
+    size_t obstacle_time_idx = static_cast<size_t>(std::floor(obstacle_time_step));
+    Scalar obstacle_time_frac = obstacle_time_step - obstacle_time_idx;
+
+    obstacle = obstacle_buffer_[obstacle_time_idx] * (1-obstacle_time_frac) + obstacle_buffer_[obstacle_time_idx + 1] * obstacle_time_frac;
+
+    if (obstacle_buffer_.size() > obstacle_buffer_size_){
+      obstacle_buffer_.pop_back();
+    }
+    obstacle_past_delay_ = obstacle_time_delay;
+}
+
 void VisionEnv::reset_delay_buffer(){
   act_buffer_.clear();
   obs_buffer_.clear();
+  obstacle_buffer_.clear();
 
   act_buffer_.insert(act_buffer_.begin(), act_buffer_size_, Vector<>::Zero(act_dim_));
   obs_buffer_.insert(obs_buffer_.begin(), obs_buffer_size_, Vector<>::Zero(obs_dim_));
+  obstacle_buffer_.insert(obstacle_buffer_.begin(), obstacle_buffer_size_, Vector<>::Zero(obstacle_dim_));;
   act_past_delay_ = 0;
   obs_past_delay_ = 0;
+  obstacle_past_delay_ = 0;
 }
 
 bool VisionEnv::set_current_max_collide_vel(){

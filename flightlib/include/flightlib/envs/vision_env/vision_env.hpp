@@ -165,6 +165,7 @@ class VisionEnv final : public EnvBase {
 
   void effect_act_delay(Ref<Vector<>> act);
   void effect_obs_delay(Ref<Vector<>> obs);
+  void effect_obstacle_delay(Ref<Vector<>> obstacle);
   void reset_delay_buffer();
   bool set_current_max_collide_vel();
 
@@ -287,12 +288,12 @@ class VisionEnv final : public EnvBase {
   Scalar time_constant_;
   int num_envs_, num_each_env_steps_, current_env_steps_;
 
-  Scalar act_delay_, act_delay_width_, obs_delay_, obs_delay_width_;
-  size_t act_buffer_size_, obs_buffer_size_;
+  Scalar act_delay_, act_delay_width_, obs_delay_, obs_delay_width_, obstacle_delay_, obstacle_delay_width_;
+  size_t act_buffer_size_, obs_buffer_size_, obstacle_buffer_size_;
 
-  std::deque<Vector<>> act_buffer_, obs_buffer_;
+  std::deque<Vector<>> act_buffer_, obs_buffer_, obstacle_buffer_;
 
-  Scalar act_past_delay_, obs_past_delay_;
+  Scalar act_past_delay_, obs_past_delay_, obstacle_past_delay_;
 
   Scalar max_gain_;
   bool max_gain_fix_;
@@ -300,6 +301,7 @@ class VisionEnv final : public EnvBase {
   Scalar vel_compensation_;
   Scalar learn_max_gain_;
   Scalar att_noise_, omega_noise_;
+  int obstacle_dim_;
 };
 
 }  // namespace flightlib

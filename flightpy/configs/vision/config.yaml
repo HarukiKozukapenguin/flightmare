@@ -92,6 +92,8 @@ simulation:
   act_delay_width: 0.050
   obs_delay: 0.020 #[s]
   obs_delay_width: 0.100
+  obstacle_delay: 0.020 #[s]
+  obstacle_delay_width: 0.030 #[s]
 
 quadrotor_dynamics:
   mass: 0.752
