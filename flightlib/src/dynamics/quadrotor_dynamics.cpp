@@ -218,11 +218,117 @@ bool QuadrotorDynamics::setMotortauInv(const Scalar tau_inv) {
   return true;
 }
 
+bool QuadrotorDynamics::randomizeMassThrustRatio() {
+  mass_thrust_ratio_= mass_thrust_ratio_range[0] + uniform_dist_one_direction_(random_gen_) * (mass_thrust_ratio_range[1] - mass_thrust_ratio_range[0]);
+  mass_ = mass_thrust_ratio_*(4*thrust_max_);
+  collective_thrust_min_ = 4.0 * thrust_min_ / mass_;
+  collective_thrust_max_ = 4.0 * thrust_max_ / mass_;
+  return true;
+}
+
+bool QuadrotorDynamics::setMassThrustRatio(Scalar mass_thrust_ratio) {
+  mass_thrust_ratio_= mass_thrust_ratio;
+  mass_ = mass_thrust_ratio_*(4*thrust_max_);
+  collective_thrust_min_ = 4.0 * thrust_min_ / mass_;
+  collective_thrust_max_ = 4.0 * thrust_max_ / mass_;
+  return true;
+}
+
+bool QuadrotorDynamics::randomizeInertiaRatio() {
+  inertia_ratio_= inertia_ratio_range[0] + uniform_dist_one_direction_(random_gen_) * (inertia_ratio_range[1] - inertia_ratio_range[0]);
+  std::vector<Scalar> inertia_vec;
+  inertia_vec =
+    params["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>() * inartia_ratio_;
+  J_ = Map<Vector<3>>(inertia_vec.data()).asDiagonal();
+  J_inv_ = J_.inverse();
+  return true;
+}
+
+bool QuadrotorDynamics::setInertiaRatio(Scalar inertia_ratio) {
+  inertia_ratio_= inertia_ratio;
+  std::vector<Scalar> inertia_vec;
+  inertia_vec =
+    params["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>() * inartia_ratio_;
+  J_ = Map<Vector<3>>(inertia_vec.data()).asDiagonal();
+  J_inv_ = J_.inverse();
+  return true;
+}
+
+bool QuadrotorDynamics::randomizePropellarPosRatio(){
+  propellar_pos_ratio_= propeller_pos_ratio_range[0] + uniform_dist_one_direction_(random_gen_) * (propeller_pos_ratio_range[1] - propeller_pos_ratio_range[0]);
+
+  t_BM = original_t_BM*propellar_pos_ratio_;
+    B_allocation_ =
+    (Matrix<4, 4>() << Vector<4>::Ones().transpose(), t_BM_.row(1),
+      -t_BM_.row(0), kappa_ * Vector<4>(-1.0, -1.0, 1.0, 1.0).transpose())
+      .finished();
+
+  force_torque_min_(0) = 0.0;
+  force_torque_max_(0) = thrust_max_ * 4;
+  // torque x
+  force_torque_min_(1) =
+    B_allocation_.row(1) *
+    (Vector<4>() << thrust_max_, 0.0, thrust_max_, 0.0).finished();
+  force_torque_max_(1) =
+    B_allocation_.row(1) *
+    (Vector<4>() << 0.0, thrust_max_, 0.0, thrust_max_).finished();
+  // torque y
+  force_torque_min_(2) =
+    B_allocation_.row(2) *
+    (Vector<4>() << thrust_max_, 0.0, 0.0, thrust_max_).finished();
+  force_torque_max_(2) =
+    B_allocation_.row(2) *
+    (Vector<4>() << 0.0, thrust_max_, thrust_max_, 0.0).finished();
+  // torque z
+  force_torque_min_(3) =
+    B_allocation_.row(3) *
+    (Vector<4>() << thrust_max_, thrust_max_, 0.0, 0.0).finished();
+  force_torque_max_(3) =
+    B_allocation_.row(3) *
+    (Vector<4>() << 0.0, 0.0, thrust_max_, thrust_max_).finished();
+  return valid();
+}
+
+bool QuadrotorDynamics::setPropellarPosRatio(Scalar propellar_pos_ratio){
+  propellar_pos_ratio_= propellar_pos_ratio;
+
+  t_BM = original_t_BM*propellar_pos_ratio_;
+    B_allocation_ =
+    (Matrix<4, 4>() << Vector<4>::Ones().transpose(), t_BM_.row(1),
+      -t_BM_.row(0), kappa_ * Vector<4>(-1.0, -1.0, 1.0, 1.0).transpose())
+      .finished();
+
+  force_torque_min_(0) = 0.0;
+  force_torque_max_(0) = thrust_max_ * 4;
+  // torque x
+  force_torque_min_(1) =
+    B_allocation_.row(1) *
+    (Vector<4>() << thrust_max_, 0.0, thrust_max_, 0.0).finished();
+  force_torque_max_(1) =
+    B_allocation_.row(1) *
+    (Vector<4>() << 0.0, thrust_max_, 0.0, thrust_max_).finished();
+  // torque y
+  force_torque_min_(2) =
+    B_allocation_.row(2) *
+    (Vector<4>() << thrust_max_, 0.0, 0.0, thrust_max_).finished();
+  force_torque_max_(2) =
+    B_allocation_.row(2) *
+    (Vector<4>() << 0.0, thrust_max_, thrust_max_, 0.0).finished();
+  // torque z
+  force_torque_min_(3) =
+    B_allocation_.row(3) *
+    (Vector<4>() << thrust_max_, thrust_max_, 0.0, 0.0).finished();
+  force_torque_max_(3) =
+    B_allocation_.row(3) *
+    (Vector<4>() << 0.0, 0.0, thrust_max_, thrust_max_).finished();
+  return valid();
+}
+
+
 
 bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   // if (params["quadrotor_dynamics"]) {
     // load parameters from a yaml configuration file
-  mass_ = params["quadrotor_dynamics"]["mass"].as<Scalar>();
   kappa_ = params["quadrotor_dynamics"]["kappa"].as<Scalar>();
 
   motor_omega_min_ =
@@ -242,6 +348,7 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   thrust_min_ = 0.0;
   thrust_max_ = motor_omega_max_ * motor_omega_max_ * thrust_map_(0) +
                 motor_omega_max_ * thrust_map_(1) + thrust_map_(2);
+  mass_ = params["quadrotor_dynamics"]["mass_thrust_ratio"].as<Scalar>()*(4*thrust_max_);
 
   //
   collective_thrust_min_ = 4.0 * thrust_min_ / mass_;
@@ -275,6 +382,10 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   t_BM_.row(1) << tbm_fr[1], tbm_bl[1], tbm_br[1], tbm_fl[1];
   t_BM_.row(2) << tbm_fr[2], tbm_bl[2], tbm_br[2], tbm_fl[2];
 
+  original_t_BM_.row(0) << tbm_fr[0], tbm_bl[0], tbm_br[0], tbm_fl[0];
+  original_t_BM_.row(1) << tbm_fr[1], tbm_bl[1], tbm_br[1], tbm_fl[1];
+  original_t_BM_.row(2) << tbm_fr[2], tbm_bl[2], tbm_br[2], tbm_fl[2];
+
   // body drag coefficients
   std::vector<Scalar> body_drag_1;
   body_drag_1 =
@@ -292,6 +403,18 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   time_constant_fix_ =
     params["quadrotor_dynamics"]["time_constant_fix"].as<bool>();
   fix_time_constant_ = params["quadrotor_dynamics"]["fix_time_constant"].as<Scalar>();
+
+  fix_mass_thrust_ratio_ = params["quadrotor_dynamics"]["fix_mass_thrust_ratio"].as<bool>();
+  mass_thrust_ratio_range_ = Map<Vector<3>>(params["quadrotor_dynamics"]["mass_thrust_ratio_range"].as<std::vector<Scalar>>().data());
+  fixed_mass_thrust_ratio_ = params["quadrotor_dynamics"]["fixed_mass_thrust_ratio"].as<Scalar>();
+
+  fix_inertia_ratio_ = params["quadrotor_dynamics"]["fix_inertia_ratio"].as<bool>();
+  inertia_ratio_range_ = Map<Vector<3>>(params["quadrotor_dynamics"]["inertia_ratio_range"].as<std::vector<Scalar>>().data());
+  fixed_inertia_ratio_ = params["quadrotor_dynamics"]["fixed_inertia_ratio"].as<Scalar>();
+
+  fix_propeller_pos_ratio_ = params["quadrotor_dynamics"]["fix_propeller_pos_ratio"].as<bool>();
+  propeller_pos_ratio_range_ = Map<Vector<3>>(params["quadrotor_dynamics"]["propeller_pos_ratio_range"].as<std::vector<Scalar>>().data());
+  fixed_propeller_pos_ratio_ = params["quadrotor_dynamics"]["fixed_propeller_pos_ratio"].as<Scalar>();
 
   // load from Control
   drag_compensation_ = params["Control"]["drag_compensation"].as<bool>();

@@ -94,7 +94,19 @@ simulation:
   obs_delay_width: 0.100
 
 quadrotor_dynamics:
-  mass: 0.752
+  # mass: 0.752
+  fix_mass_thrust_ratio: true
+  mass_thrust_ratio_range: [0.2,0.7]
+  fixed_mass_thrust_ratio: 0.8
+
+  fix_inertia_ratio: true
+  inertia_ratio_range: [0.5,2.0]
+  fixed_inertia_ratio: 1.0
+
+  fix_propeller_pos_ratio: true
+  propeller_pos_ratio_range: [0.5,2.0]
+  fixed_propeller_pos_ratio: 1.0
+
   tbm_fr: [0.075, -0.10, 0.0] # [m]
   tbm_bl: [-0.075, 0.10, 0.0] # [m]
   tbm_br: [-0.075, -0.10, 0.0] # [m]

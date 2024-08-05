@@ -191,6 +191,9 @@ bool Quadrotor::reset() {
   motor_omega_.setZero();
   motor_thrusts_.setZero();
   if (!dynamics_.time_constant_fix_) ctrl_.randomizeKpeuler();
+  if (!dynamics_.fix_mass_thrust_ratio_) dynamics_.randomizeMassThrustRatio();
+  if (!dynamics_.fix_inertia_ratio_) dynamics_.randomizeInertiaRatio();
+  if (!dynamics_.fix_propeller_pos_ratio_) dynamics_.randomizePropellarPosRatio();
   return true;
 }
 

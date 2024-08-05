@@ -9,6 +9,7 @@
 #include "flightlib/common/math.hpp"
 #include "flightlib/common/quad_state.hpp"
 #include "flightlib/dynamics/dynamics_base.hpp"
+#include <random>
 
 namespace flightlib {
 
@@ -66,8 +67,20 @@ class QuadrotorDynamics : DynamicsBase {
   bool setMass(const Scalar mass);
   bool setMotortauInv(const Scalar tau_inv);
 
+  bool randomizeMassThrustRatio();
+  bool setMassThrustRatio(Scalar mass_thrust_ratio);
+  bool randomizeInertiaRatio();
+  bool setInertiaRatio(Scalar inertia_ratio);
+  bool randomizePropellarPosRatio();
+  bool setPropellarPosRatio(Scalar propellar_pos_ratio);
+
   friend std::ostream& operator<<(std::ostream& os,
                                   const QuadrotorDynamics& quad_dymaics);
+
+  std::uniform_real_distribution<Scalar> uniform_dist_one_direction_{0.0, 1.0};
+  std::random_device rd_;
+  std::mt19937 random_gen_{rd_()};
+
 
   // Controller
   bool drag_compensation_;
@@ -90,7 +103,7 @@ class QuadrotorDynamics : DynamicsBase {
  private:
   bool updateInertiaMarix();
   Scalar mass_;
-  Matrix<3, 4> t_BM_;
+  Matrix<3, 4> t_BM_, original_t_BM;
   Matrix<4, 4> B_allocation_;
   Matrix<3, 3> J_;
   Matrix<3, 3> J_inv_;
@@ -118,6 +131,11 @@ class QuadrotorDynamics : DynamicsBase {
 
   // Quadrotor limits
   Vector<3> omega_max_;
+
+  Scalar mass_thrust_ratio_, inertia_ratio_, propellar_pos_ratio_;
+  bool fix_mass_thrust_ratio, fix_inertia_ratio, fix_propellar_pos_ratio;
+  Vector<2> mass_thrust_ratio_range_, inertia_ratio_range_, propeller_pos_ratio_range_;
+  Scalar fixed_mass_thrust_ratio_, fixed_inertia_ratio_, fixed_propeller_pos_ratio_;
 
 };
 

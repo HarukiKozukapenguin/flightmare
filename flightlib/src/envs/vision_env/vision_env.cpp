@@ -184,33 +184,33 @@ void VisionEnv::randomize_gain(){
 
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
 
-void VisionEnv::resetSize(Scalar size) {
-  cfg_["quadrotor_dynamics"]["quad_size"] = size;
-  cfg_["quadrotor_dynamics"]["mass"] = std::pow(size/init_size_,3)*init_mass_;
-  for (size_t i; i < init_inertia_.size(); i++) {
-    cfg_["quadrotor_dynamics"]["inertia"][i] = std::pow(size/init_size_,5)*init_inertia_[i];
-  }
-  Scalar tbm_x_length = size/init_size_*init_tbm_x_length_;
-  Scalar tbm_y_length = size/init_size_*init_tbm_y_length_;
-  std::vector<Scalar> tbm_fr{tbm_x_length, -tbm_y_length, 0.0};
-  cfg_["quadrotor_dynamics"]["tbm_fr"] = tbm_fr;
-  std::vector<Scalar> tbm_bl{-tbm_x_length, tbm_y_length, 0.0};
-  cfg_["quadrotor_dynamics"]["tbm_bl"] = tbm_bl;
-  std::vector<Scalar> tbm_br{-tbm_x_length, -tbm_y_length, 0.0};
-  cfg_["quadrotor_dynamics"]["tbm_br"] = tbm_br;
-  std::vector<Scalar> tbm_fl{tbm_x_length, tbm_y_length, 0.0};
-  cfg_["quadrotor_dynamics"]["tbm_fl"] = tbm_fl;
+// void VisionEnv::resetSize(Scalar size) {
+//   cfg_["quadrotor_dynamics"]["quad_size"] = size;
+//   cfg_["quadrotor_dynamics"]["mass"] = std::pow(size/init_size_,3)*init_mass_;
+//   for (size_t i; i < init_inertia_.size(); i++) {
+//     cfg_["quadrotor_dynamics"]["inertia"][i] = std::pow(size/init_size_,5)*init_inertia_[i];
+//   }
+//   Scalar tbm_x_length = size/init_size_*init_tbm_x_length_;
+//   Scalar tbm_y_length = size/init_size_*init_tbm_y_length_;
+//   std::vector<Scalar> tbm_fr{tbm_x_length, -tbm_y_length, 0.0};
+//   cfg_["quadrotor_dynamics"]["tbm_fr"] = tbm_fr;
+//   std::vector<Scalar> tbm_bl{-tbm_x_length, tbm_y_length, 0.0};
+//   cfg_["quadrotor_dynamics"]["tbm_bl"] = tbm_bl;
+//   std::vector<Scalar> tbm_br{-tbm_x_length, -tbm_y_length, 0.0};
+//   cfg_["quadrotor_dynamics"]["tbm_br"] = tbm_br;
+//   std::vector<Scalar> tbm_fl{tbm_x_length, tbm_y_length, 0.0};
+//   cfg_["quadrotor_dynamics"]["tbm_fl"] = tbm_fl;
 
-  cfg_["quadrotor_dynamics"]["motor_omega_min"] = std::pow(size/init_size_,-1/2)*init_motor_omega_min_;
-  cfg_["quadrotor_dynamics"]["motor_omega_max"] = std::pow(size/init_size_,-1/2)*init_motor_omega_max_;
-  for (size_t i; i < init_thrust_map_.size(); i++) {
-    cfg_["quadrotor_dynamics"]["thrust_map"][i] = std::pow(size/init_size_,4)*init_thrust_map_[i];
-  }
-  quad_size_ = size;
-  QuadrotorDynamics dynamics;
-  dynamics.updateParams(cfg_);
-  quad_ptr_->updateDynamics(dynamics);
-}
+//   cfg_["quadrotor_dynamics"]["motor_omega_min"] = std::pow(size/init_size_,-1/2)*init_motor_omega_min_;
+//   cfg_["quadrotor_dynamics"]["motor_omega_max"] = std::pow(size/init_size_,-1/2)*init_motor_omega_max_;
+//   for (size_t i; i < init_thrust_map_.size(); i++) {
+//     cfg_["quadrotor_dynamics"]["thrust_map"][i] = std::pow(size/init_size_,4)*init_thrust_map_[i];
+//   }
+//   quad_size_ = size;
+//   QuadrotorDynamics dynamics;
+//   dynamics.updateParams(cfg_);
+//   quad_ptr_->updateDynamics(dynamics);
+// }
 
 
 void VisionEnv::init_isCollision(void) {
