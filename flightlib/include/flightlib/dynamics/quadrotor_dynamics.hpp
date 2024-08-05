@@ -67,6 +67,7 @@ class QuadrotorDynamics : DynamicsBase {
   bool setMass(const Scalar mass);
   bool setMotortauInv(const Scalar tau_inv);
 
+  Scalar generateRandomValue();
   bool randomizeMassThrustRatio();
   bool setMassThrustRatio(Scalar mass_thrust_ratio);
   bool randomizeInertiaRatio();
@@ -76,11 +77,6 @@ class QuadrotorDynamics : DynamicsBase {
 
   friend std::ostream& operator<<(std::ostream& os,
                                   const QuadrotorDynamics& quad_dymaics);
-
-  std::uniform_real_distribution<Scalar> uniform_dist_one_direction_{0.0, 1.0};
-  std::random_device rd_;
-  std::mt19937 random_gen_{rd_()};
-
 
   // Controller
   bool drag_compensation_;

@@ -218,8 +218,15 @@ bool QuadrotorDynamics::setMotortauInv(const Scalar tau_inv) {
   return true;
 }
 
+Scalar QuadrotorDynamics::generateRandomValue(){
+  std::random_device rd;
+  std::mt19937 gen(rd());  // Mersenne Twister engine
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+  return dis(gen);
+  }
+
 bool QuadrotorDynamics::randomizeMassThrustRatio() {
-  mass_thrust_ratio_= mass_thrust_ratio_range[0] + uniform_dist_one_direction_(random_gen_) * (mass_thrust_ratio_range[1] - mass_thrust_ratio_range[0]);
+  mass_thrust_ratio_= mass_thrust_ratio_range[0] + generateRandomValue() * (mass_thrust_ratio_range[1] - mass_thrust_ratio_range[0]);
   mass_ = mass_thrust_ratio_*(4*thrust_max_);
   collective_thrust_min_ = 4.0 * thrust_min_ / mass_;
   collective_thrust_max_ = 4.0 * thrust_max_ / mass_;
@@ -235,7 +242,7 @@ bool QuadrotorDynamics::setMassThrustRatio(Scalar mass_thrust_ratio) {
 }
 
 bool QuadrotorDynamics::randomizeInertiaRatio() {
-  inertia_ratio_= inertia_ratio_range[0] + uniform_dist_one_direction_(random_gen_) * (inertia_ratio_range[1] - inertia_ratio_range[0]);
+  inertia_ratio_= inertia_ratio_range[0] + generateRandomValue() * (inertia_ratio_range[1] - inertia_ratio_range[0]);
   std::vector<Scalar> inertia_vec;
   inertia_vec =
     params["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>() * inartia_ratio_;
@@ -252,7 +259,7 @@ bool QuadrotorDynamics::setInertiaRatio(Scalar inertia_ratio) {
 }
 
 bool QuadrotorDynamics::randomizePropellarPosRatio(){
-  propellar_pos_ratio_= propeller_pos_ratio_range[0] + uniform_dist_one_direction_(random_gen_) * (propeller_pos_ratio_range[1] - propeller_pos_ratio_range[0]);
+  propellar_pos_ratio_= propeller_pos_ratio_range[0] + generateRandomValue() * (propeller_pos_ratio_range[1] - propeller_pos_ratio_range[0]);
 
   t_BM = original_t_BM*propellar_pos_ratio_;
     B_allocation_ =
