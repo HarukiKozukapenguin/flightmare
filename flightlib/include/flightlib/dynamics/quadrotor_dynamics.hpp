@@ -95,6 +95,7 @@ class QuadrotorDynamics : DynamicsBase {
   Vector<2> range_time_constant_;
   Scalar init_time_constant_;
   Scalar fix_time_constant_;
+  bool fix_mass_thrust_ratio_, fix_inertia_ratio_, fix_propeller_pos_ratio_;
 
  private:
   bool updateInertiaMarix();
@@ -129,7 +130,6 @@ class QuadrotorDynamics : DynamicsBase {
   Vector<3> omega_max_;
 
   Scalar mass_thrust_ratio_, inertia_ratio_, propellar_pos_ratio_;
-  bool fix_mass_thrust_ratio_, fix_inertia_ratio_, fix_propeller_pos_ratio_;
   Vector<2> mass_thrust_ratio_range_, inertia_ratio_range_, propeller_pos_ratio_range_;
   Scalar fixed_mass_thrust_ratio_, fixed_inertia_ratio_, fixed_propeller_pos_ratio_;
 
