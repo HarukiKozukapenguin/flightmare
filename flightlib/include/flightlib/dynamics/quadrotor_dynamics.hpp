@@ -105,7 +105,7 @@ class QuadrotorDynamics : DynamicsBase {
   Scalar mass_;
   Matrix<3, 4> t_BM_, original_t_BM;
   Matrix<4, 4> B_allocation_;
-  Matrix<3, 3> J_;
+  Matrix<3, 3> J_, original_J_;
   Matrix<3, 3> J_inv_;
 
   // motors

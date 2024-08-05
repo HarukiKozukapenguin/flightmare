@@ -246,10 +246,7 @@ bool QuadrotorDynamics::randomizeInertiaRatio() {
 
 bool QuadrotorDynamics::setInertiaRatio(Scalar inertia_ratio) {
   inertia_ratio_= inertia_ratio;
-  std::vector<Scalar> inertia_vec;
-  inertia_vec =
-    params["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>() * inartia_ratio_;
-  J_ = Map<Vector<3>>(inertia_vec.data()).asDiagonal();
+  J_ =  original_J_ * inertia_ratio;
   J_inv_ = J_.inverse();
   return true;
 }
@@ -365,7 +362,8 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   std::vector<Scalar> inertia_vec;
   inertia_vec =
     params["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>();
-  J_ = Map<Vector<3>>(inertia_vec.data()).asDiagonal();
+  original_J_ = Map<Vector<3>>(inertia_vec.data()).asDiagonal();
+  J_ = original_J;
   J_inv_ = J_.inverse();
 
 
