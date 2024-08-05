@@ -103,7 +103,7 @@ class QuadrotorDynamics : DynamicsBase {
  private:
   bool updateInertiaMarix();
   Scalar mass_;
-  Matrix<3, 4> t_BM_, original_t_BM;
+  Matrix<3, 4> t_BM_, original_t_BM_;
   Matrix<4, 4> B_allocation_;
   Matrix<3, 3> J_, original_J_;
   Matrix<3, 3> J_inv_;
@@ -133,7 +133,7 @@ class QuadrotorDynamics : DynamicsBase {
   Vector<3> omega_max_;
 
   Scalar mass_thrust_ratio_, inertia_ratio_, propellar_pos_ratio_;
-  bool fix_mass_thrust_ratio, fix_inertia_ratio, fix_propellar_pos_ratio;
+  bool fix_mass_thrust_ratio_, fix_inertia_ratio_, fix_propeller_pos_ratio_;
   Vector<2> mass_thrust_ratio_range_, inertia_ratio_range_, propeller_pos_ratio_range_;
   Scalar fixed_mass_thrust_ratio_, fixed_inertia_ratio_, fixed_propeller_pos_ratio_;
 
