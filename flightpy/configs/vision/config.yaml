@@ -95,15 +95,15 @@ simulation:
 
 quadrotor_dynamics:
   # mass: 0.752
-  fix_mass_thrust_ratio: true
+  fix_mass_thrust_ratio: false
   mass_thrust_ratio_range: [0.02,0.2]
-  fixed_mass_thrust_ratio: 0.1
+  fixed_mass_thrust_ratio: 0.2
 
-  fix_inertia_ratio: true
+  fix_inertia_ratio: false
   inertia_ratio_range: [0.5,2.0]
   fixed_inertia_ratio: 1.0
 
-  fix_propeller_pos_ratio: true
+  fix_propeller_pos_ratio: false
   propeller_pos_ratio_range: [0.5,2.0]
   fixed_propeller_pos_ratio: 1.0
 
