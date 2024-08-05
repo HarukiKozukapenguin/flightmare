@@ -225,9 +225,9 @@ Scalar QuadrotorDynamics::generateRandomValue(){
   }
 
 bool QuadrotorDynamics::randomizeKdacc() {
-  Scalar xy_kdacc = range_vel_gain_[0] + generateRandomValue() * (range_vel_gain_[1] - range_vel_gain_[0]);
-  kdacc_[0] = xy_kdacc;
-  kdacc_[1] = xy_kdacc;
+  xy_kdacc_ = range_vel_gain_[0] + generateRandomValue() * (range_vel_gain_[1] - range_vel_gain_[0]);
+  kdacc_[0] = xy_kdacc_;
+  kdacc_[1] = xy_kdacc_;
   return true;
 }
 

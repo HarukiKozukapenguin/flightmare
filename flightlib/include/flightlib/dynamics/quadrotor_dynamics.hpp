@@ -63,6 +63,7 @@ class QuadrotorDynamics : DynamicsBase {
   };
   inline Scalar getSingleThrustMax(void) const { return thrust_max_; };
   inline Scalar getForceMax(void) const { return force_torque_max_(0); };
+  inline Scalar getKdacc(void) const { return xy_kdacc_; };
 
   bool setMass(const Scalar mass);
   bool setMotortauInv(const Scalar tau_inv);
@@ -77,6 +78,7 @@ class QuadrotorDynamics : DynamicsBase {
   bool drag_compensation_;
   Vector<3> kpacc_;
   Vector<3> kdacc_;
+  Scalar xy_kdacc_;
   Scalar kpatt_z_;
   Scalar kpatt_xy_;
   Vector<3> kpeuler_;

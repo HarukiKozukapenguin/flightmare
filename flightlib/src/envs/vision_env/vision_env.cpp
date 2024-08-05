@@ -270,8 +270,9 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
                       (world_box_[i * 2 + 1] - world_box_[i * 2]);
   }
   // Observations
+  Scalar kdacc = quad_ptr_->getKdacc();
 
-  obs << quad_size_, time_constant_, max_gain_, act_, quad_state_.p[0], quad_state_.p[1],
+  obs << quad_size_, time_constant_, max_gain_, kdacc, act_, quad_state_.p[0], quad_state_.p[1],
     quad_state_.v[0]*vel_compensation_ ,quad_state_.v[1], body_tilt,
     quad_state_.w[0] + omega_noise_*uniform_dist_(random_gen_), quad_state_.w[1] + omega_noise_*uniform_dist_(random_gen_),
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
