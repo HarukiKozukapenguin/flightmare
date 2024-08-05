@@ -226,7 +226,7 @@ Scalar QuadrotorDynamics::generateRandomValue(){
   }
 
 bool QuadrotorDynamics::randomizeMassThrustRatio() {
-  mass_thrust_ratio_= mass_thrust_ratio_range[0] + generateRandomValue() * (mass_thrust_ratio_range[1] - mass_thrust_ratio_range[0]);
+  mass_thrust_ratio_= mass_thrust_ratio_range_[0] + generateRandomValue() * (mass_thrust_ratio_range_[1] - mass_thrust_ratio_range_[0]);
   mass_ = mass_thrust_ratio_*(4*thrust_max_);
   collective_thrust_min_ = 4.0 * thrust_min_ / mass_;
   collective_thrust_max_ = 4.0 * thrust_max_ / mass_;
@@ -242,13 +242,11 @@ bool QuadrotorDynamics::setMassThrustRatio(Scalar mass_thrust_ratio) {
 }
 
 bool QuadrotorDynamics::randomizeInertiaRatio() {
-  inertia_ratio_= inertia_ratio_range[0] + generateRandomValue() * (inertia_ratio_range[1] - inertia_ratio_range[0]);
-  std::vector<Scalar> inertia_vec;
-  inertia_vec =
-    params["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>() * inartia_ratio_;
-  J_ = Map<Vector<3>>(inertia_vec.data()).asDiagonal();
+  inertia_ratio_= inertia_ratio_range_[0] + generateRandomValue() * (inertia_ratio_range_[1] - inertia_ratio_range_[0]);
+  J_ =  original_J_ * inertia_ratio_;
   J_inv_ = J_.inverse();
   return true;
+
 }
 
 bool QuadrotorDynamics::setInertiaRatio(Scalar inertia_ratio) {
@@ -259,9 +257,9 @@ bool QuadrotorDynamics::setInertiaRatio(Scalar inertia_ratio) {
 }
 
 bool QuadrotorDynamics::randomizePropellarPosRatio(){
-  propellar_pos_ratio_= propeller_pos_ratio_range[0] + generateRandomValue() * (propeller_pos_ratio_range[1] - propeller_pos_ratio_range[0]);
+  propellar_pos_ratio_= propeller_pos_ratio_range_[0] + generateRandomValue() * (propeller_pos_ratio_range_[1] - propeller_pos_ratio_range_[0]);
 
-  t_BM = original_t_BM*propellar_pos_ratio_;
+  t_BM_ = original_t_BM_*propellar_pos_ratio_;
     B_allocation_ =
     (Matrix<4, 4>() << Vector<4>::Ones().transpose(), t_BM_.row(1),
       -t_BM_.row(0), kappa_ * Vector<4>(-1.0, -1.0, 1.0, 1.0).transpose())
@@ -296,7 +294,7 @@ bool QuadrotorDynamics::randomizePropellarPosRatio(){
 bool QuadrotorDynamics::setPropellarPosRatio(Scalar propellar_pos_ratio){
   propellar_pos_ratio_= propellar_pos_ratio;
 
-  t_BM = original_t_BM*propellar_pos_ratio_;
+  t_BM_ = original_t_BM_*propellar_pos_ratio_;
     B_allocation_ =
     (Matrix<4, 4>() << Vector<4>::Ones().transpose(), t_BM_.row(1),
       -t_BM_.row(0), kappa_ * Vector<4>(-1.0, -1.0, 1.0, 1.0).transpose())
@@ -370,7 +368,7 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   inertia_vec =
     params["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>();
   original_J_ = Map<Vector<3>>(inertia_vec.data()).asDiagonal();
-  J_ = original_J;
+  J_ = original_J_;
   J_inv_ = J_.inverse();
 
 
