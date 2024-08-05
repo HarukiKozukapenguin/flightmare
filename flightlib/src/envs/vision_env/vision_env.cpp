@@ -696,6 +696,18 @@ bool VisionEnv::step(Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.a[2] = 0.0;
     cmd_.yaw = 0.0;
   }
+  else if (vel_control_){
+    cmd_.p[0] = quad_state_.p[0];
+    cmd_.p[1] = quad_state_.p[1];
+    cmd_.p[2] = 1.0;
+    cmd_.v[0] = pi_act_(0);
+    cmd_.v[1] = pi_act_(1);
+    cmd_.v[2] = 0.0;
+    cmd_.a[0] = 0.0;
+    cmd_.a[1] = 0.0;
+    cmd_.a[2] = 0.0;
+    cmd_.yaw = 0.0;
+    }
   else if (control_feedthrough_) {
     cmd_.p[0] = pi_act_(0);
     cmd_.p[1] = pi_act_(1);
@@ -1108,6 +1120,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
     acc_control_ = cfg["environment"]["acc_control"].as<bool>();
+    vel_control_ = cfg["environment"]["vel_control"].as<bool>();
     dist_theta_list_ = cfg["environment"]["dist_theta"].as<std::vector<Scalar>>();
     acc_theta_list_ = cfg["environment"]["acc_theta"].as<std::vector<Scalar>>();
     init_max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();

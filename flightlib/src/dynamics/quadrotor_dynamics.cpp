@@ -217,7 +217,17 @@ bool QuadrotorDynamics::setMotortauInv(const Scalar tau_inv) {
   motor_tau_inv_ = tau_inv;
   return true;
 }
+Scalar QuadrotorDynamics::generateRandomValue(){
+  std::random_device rd;
+  std::mt19937 gen(rd());  // Mersenne Twister engine
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+  return dis(gen);
+  }
 
+bool QuadrotorDynamics::randomizeKdacc() {
+  kdacc_ = range_vel_gain_[0] + generateRandomValue() * (range_vel_gain_[1] - range_vel_gain_[0]);
+  return true;
+}
 
 bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   // if (params["quadrotor_dynamics"]) {
@@ -308,6 +318,9 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
     params["Control"]["filter_sampling_frequency"].as<Scalar>();
   filter_cutoff_frequency_ = 
     params["Control"]["filter_cutoff_frequency"].as<Scalar>();
+  fix_vel_gain_ = params["Control"]["fix_vel_gain"].as<bool>();
+  range_vel_gain_ = Map<Vector<2>>(params["Control"]["range_vel_gain"].as<std::vector<Scalar>>().data());
+  fixed_vel_gain_ = params["Control"]["fix_vel_gain"].as<Scalar>();
 
   // allocation matrix
   // compute column-wise cross product
