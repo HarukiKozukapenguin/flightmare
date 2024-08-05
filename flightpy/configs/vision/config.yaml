@@ -137,7 +137,6 @@ Control:
   v_err_max:                    [1.0, 1.0, 1.0]
   filter_sampling_frequency:     300   # filter frequency, same as control frequency (Hz)
   filter_cutoff_frequency:       6    # outer loop filter cut-off frequency (Hz)
-
   fix_vel_gain: false
-  range_vel_gain_: [2.0,6.0]
+  range_vel_gain: [2.0,6.0]
   fixed_vel_gain: 4.0
