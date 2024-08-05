@@ -54,6 +54,9 @@ class Quadrotor : ObjectBase {
   int getNumCamera() const;
   bool getCollision() const;
   Vector<> clip(const Vector<>& v, const Vector<>& bound);
+  Scalar getMass() const;
+  Scalar getInertiaRatio() const;
+  Scalar getPropellarPosRatio() const;
 
   // public set functions
   bool setState(const QuadState& state);

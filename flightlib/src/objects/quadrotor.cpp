@@ -376,6 +376,10 @@ bool Quadrotor::getCollision() const { return collision_; }
 
 int Quadrotor::getNumCamera() const { return rgb_cameras_.size(); }
 
+Scalar Quadrotor::getMass() const { return dynamics_.getMass(); }
+Scalar Quadrotor::getInertiaRatio() const { return dynamics_.getInertiaRatio(); }
+Scalar Quadrotor::getPropellarPosRatio() const { return dynamics_.getPropellarPosRatio(); }
+
 Vector<> Quadrotor::clip(const Vector<> &v, const Vector<> &bound) {
   return v.cwiseMin(bound).cwiseMax(-bound);
 }

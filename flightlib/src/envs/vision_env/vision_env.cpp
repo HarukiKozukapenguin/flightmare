@@ -269,6 +269,10 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     normalized_p[i] = (quad_state_.p[i] - world_box_[i * 2]) /
                       (world_box_[i * 2 + 1] - world_box_[i * 2]);
   }
+  Scalar mass = quad_ptr_->getMass();
+  Scalar inertia_ratio = quad_ptr_->getInertiaRatio();
+  Scalar propellar_pos_ratio = quad_ptr_->getPropellarPosRatio();
+
   // Observations
 
   obs << quad_size_, time_constant_, max_gain_, act_, quad_state_.p[0], quad_state_.p[1],
@@ -276,7 +280,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     quad_state_.w[0] + omega_noise_*uniform_dist_(random_gen_), quad_state_.w[1] + omega_noise_*uniform_dist_(random_gen_),
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
     toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta),
-    logsphericalboxel, gain_normalized_act_distance_;
+    logsphericalboxel, gain_normalized_act_distance_, mass, inertia_ratio, propellar_pos_ratio;
   // std::cout << "obs is called" << std::endl;
   return true;
 }

@@ -54,6 +54,8 @@ class QuadrotorDynamics : DynamicsBase {
 
   //
   inline Scalar getMass(void) const { return mass_; };
+  inline Scalar getInertiaRatio(void) const {return inertia_ratio_;};
+  inline Scalar getPropellarPosRatio(void) const {return propellar_pos_ratio_;};
   inline Scalar getMotorTauInv() const { return motor_tau_inv_; };
   inline Matrix<3, 3> getJ(void) const { return J_; };
   inline Matrix<3, 3> getJInv(void) const { return J_inv_; };
