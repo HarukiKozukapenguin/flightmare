@@ -227,7 +227,7 @@ Scalar QuadrotorDynamics::generateRandomValue(){
 
 bool QuadrotorDynamics::randomizeMassThrustRatio() {
   mass_thrust_ratio_= mass_thrust_ratio_range_[0] + generateRandomValue() * (mass_thrust_ratio_range_[1] - mass_thrust_ratio_range_[0]);
-  mass_ = mass_thrust_ratio_*(4*thrust_max_);
+  mass_ = mass_thrust_ratio_*(thrust_max_);
   collective_thrust_min_ = 4.0 * thrust_min_ / mass_;
   collective_thrust_max_ = 4.0 * thrust_max_ / mass_;
   return true;
@@ -235,7 +235,7 @@ bool QuadrotorDynamics::randomizeMassThrustRatio() {
 
 bool QuadrotorDynamics::setMassThrustRatio(Scalar mass_thrust_ratio) {
   mass_thrust_ratio_= mass_thrust_ratio;
-  mass_ = mass_thrust_ratio_*(4*thrust_max_);
+  mass_ = mass_thrust_ratio_*(thrust_max_);
   collective_thrust_min_ = 4.0 * thrust_min_ / mass_;
   collective_thrust_max_ = 4.0 * thrust_max_ / mass_;
   return true;
@@ -350,7 +350,7 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   thrust_min_ = 0.0;
   thrust_max_ = motor_omega_max_ * motor_omega_max_ * thrust_map_(0) +
                 motor_omega_max_ * thrust_map_(1) + thrust_map_(2);
-  mass_ = params["quadrotor_dynamics"]["fixed_mass_thrust_ratio"].as<Scalar>()*(4*thrust_max_);
+  mass_ = params["quadrotor_dynamics"]["fixed_mass_thrust_ratio"].as<Scalar>()*(thrust_max_);
 
   //
   collective_thrust_min_ = 4.0 * thrust_min_ / mass_;

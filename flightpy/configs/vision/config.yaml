@@ -96,8 +96,8 @@ simulation:
 quadrotor_dynamics:
   # mass: 0.752
   fix_mass_thrust_ratio: true
-  mass_thrust_ratio_range: [0.2,0.7]
-  fixed_mass_thrust_ratio: 0.8
+  mass_thrust_ratio_range: [0.02,0.2]
+  fixed_mass_thrust_ratio: 0.1
 
   fix_inertia_ratio: true
   inertia_ratio_range: [0.5,2.0]
