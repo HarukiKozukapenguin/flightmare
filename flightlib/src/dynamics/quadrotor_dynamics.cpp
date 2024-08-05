@@ -403,15 +403,15 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   fix_time_constant_ = params["quadrotor_dynamics"]["fix_time_constant"].as<Scalar>();
 
   fix_mass_thrust_ratio_ = params["quadrotor_dynamics"]["fix_mass_thrust_ratio"].as<bool>();
-  mass_thrust_ratio_range_ = Map<Vector<3>>(params["quadrotor_dynamics"]["mass_thrust_ratio_range"].as<std::vector<Scalar>>().data());
+  mass_thrust_ratio_range_ = Map<Vector<2>>(params["quadrotor_dynamics"]["mass_thrust_ratio_range"].as<std::vector<Scalar>>().data());
   fixed_mass_thrust_ratio_ = params["quadrotor_dynamics"]["fixed_mass_thrust_ratio"].as<Scalar>();
 
   fix_inertia_ratio_ = params["quadrotor_dynamics"]["fix_inertia_ratio"].as<bool>();
-  inertia_ratio_range_ = Map<Vector<3>>(params["quadrotor_dynamics"]["inertia_ratio_range"].as<std::vector<Scalar>>().data());
+  inertia_ratio_range_ = Map<Vector<2>>(params["quadrotor_dynamics"]["inertia_ratio_range"].as<std::vector<Scalar>>().data());
   fixed_inertia_ratio_ = params["quadrotor_dynamics"]["fixed_inertia_ratio"].as<Scalar>();
 
   fix_propeller_pos_ratio_ = params["quadrotor_dynamics"]["fix_propeller_pos_ratio"].as<bool>();
-  propeller_pos_ratio_range_ = Map<Vector<3>>(params["quadrotor_dynamics"]["propeller_pos_ratio_range"].as<std::vector<Scalar>>().data());
+  propeller_pos_ratio_range_ = Map<Vector<2>>(params["quadrotor_dynamics"]["propeller_pos_ratio_range"].as<std::vector<Scalar>>().data());
   fixed_propeller_pos_ratio_ = params["quadrotor_dynamics"]["fixed_propeller_pos_ratio"].as<Scalar>();
 
   // load from Control
