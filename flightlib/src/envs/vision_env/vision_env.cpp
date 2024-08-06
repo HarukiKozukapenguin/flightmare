@@ -277,7 +277,7 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
     quad_state_.w[0] + omega_noise_*uniform_dist_(random_gen_), quad_state_.w[1] + omega_noise_*uniform_dist_(random_gen_),
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
     toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta),
-    logsphericalboxel, gain_normalized_act_distance_;
+    logsphericalboxel;
   // std::cout << "obs is called" << std::endl;
   return true;
 }
