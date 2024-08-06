@@ -54,7 +54,6 @@ rewards:
   names:
     [
       "move_reward",
-      "lin_vel_reward",
       "collision_penalty",
       "vel_collision_penalty",
       "when_collision_penlty",
