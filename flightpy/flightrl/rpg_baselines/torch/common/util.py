@@ -8,6 +8,7 @@ import statistics
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import csv
+import matplotlib.colors as colors
 
 columns = [
     "episode_id",
@@ -130,11 +131,11 @@ def test_policy(env, model, render=False):
             y_list = []
             path = (
                 os.environ["FLIGHTMARE_PATH"]
-                + "/flightpy/configs/vision/real_tree_random_8/environment_"
-                + "0"
+                + "/flightpy/configs/vision/real_tree_random_9/environment_"
+                + "140"
                 + "/"
             )
-            figure, axes = plt.subplots()
+            figure, axes = plt.subplots(figsize=(15, 3))
             with open(path + "static_obstacles.csv") as f:
                 reader = csv.reader(f)
                 for row in reader:
@@ -211,9 +212,15 @@ def test_policy(env, model, render=False):
                 ave_vel_list.append(sum(vel_list) / len(vel_list))
                 print("ave vel: {}".format(sum(vel_list) / len(vel_list)))
                 if render:
+
+                    vmin = 0   # Minimum value
+                    vmax = 10  # Maximum value
+                    
+                    # Create a normalized colormap
+                    norm = colors.Normalize(vmin=vmin, vmax=vmax)
                     plt.xlim(right=final_x + 5)
                     plt.scatter(
-                        x_list, y_list, c=vel_list, cmap=cm.jet, marker=".", lw=0
+                        x_list, y_list, c=vel_list, cmap=cm.jet, norm=norm, marker=".", lw=0
                     )
                     ax = plt.colorbar()
                     ax.set_label("vel [m/s]")
