@@ -17,8 +17,10 @@ class LowLevelControllerSimple {
   Vector<4> run(const QuadState& state);
   bool updateQuadDynamics(const QuadrotorDynamics& quad_dynamics);
   bool randomizeKpeuler();
-  bool setTimeConstant(Scalar time_constant);
-  inline Scalar getTime_constant(void) const { return time_constant_;}
+  bool setPolicyTimeConstant(Scalar policy_time_constant);
+  bool setDynamicsTimeConstant(Scalar dynamics_time_constant);
+  inline Scalar getPolicyTimeConstant(void) const { return policy_time_constant_;}
+  inline Scalar getDynamicsTimeconstant(void) const { return dynamics_time_constant_;}
 
  private:
   // Quadrotor properties
@@ -31,7 +33,7 @@ class LowLevelControllerSimple {
   // P gain for euler attitude control,  D gain for body rate
   Matrix<3, 3> Kp_euler_;
   Matrix<3, 3> Kd_rate_;
-  Scalar small_time_constant_, large_time_constant_, init_time_constant_, init_kpeuler_, time_constant_;
+  Scalar small_dynamics_time_constant_, large_dynamics_time_constant_, init_dynamics_time_constant_, init_kpeuler_, dynamics_time_constant_, policy_time_constant_;
   std::uniform_real_distribution<Scalar> uniform_dist_one_direction_{0.0, 1.0};
   std::random_device rd_;
   std::mt19937 random_gen_{rd_()};

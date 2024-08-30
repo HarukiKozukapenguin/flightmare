@@ -74,7 +74,7 @@ class Quadrotor : ObjectBase {
   inline Scalar getMass(void) { return dynamics_.getMass(); };
   inline void setSize(const Ref<Vector<3>> size) { size_ = size; };
   inline void setCollision(const bool collision) { collision_ = collision; };
-  inline Scalar getTime_constant(void) { return ctrl_.getTime_constant(); };
+  inline Scalar getPolicyTimeConstant(void) { return ctrl_.getPolicyTimeConstant(); };
 
   bool resetCollision(QuadState& collide_state);
 

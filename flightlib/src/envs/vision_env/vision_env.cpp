@@ -74,7 +74,11 @@ void VisionEnv::init() {
   // act_std_ << (max_force / quad_ptr_->getMass()) / 2, max_omega.x(),
   //   max_omega.y(), max_omega.z();
   act_mean_ << 0, 0;
-  act_std_ << max_gain_, max_gain_;  // set by my experience (cmd difference)
+  if (act_std_from_max_gain_){
+    act_std_ << max_gain_, max_gain_;
+  } else {
+    act_std_ << act_std_max_gain_, act_std_max_gain_;
+  }
 
   collide_num = 0;
   wall_collide_num = 0;
@@ -131,7 +135,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     is_collision_ = false;
     is_threshold_collision_ = false;
     quad_ptr_->reset(quad_state_);
-    time_constant_ = quad_ptr_->getTime_constant();
+    time_constant_ = quad_ptr_->getPolicyTimeConstant();
     time_constant_ /= vel_compensation_;
 
     init_isCollision();  // change is_collision depending on initial position
@@ -179,7 +183,11 @@ void VisionEnv::randomize_size(){
 void VisionEnv::randomize_gain(){
   // reset acc_max when reset
   max_gain_ = uniform_dist_one_direction_(random_gen_)*(range_max_gain_[1] - range_max_gain_[0]) + range_max_gain_[0];
-  act_std_ << max_gain_, max_gain_;
+  if (act_std_from_max_gain_){
+    act_std_ << max_gain_, max_gain_;
+  } else {
+    act_std_ << act_std_max_gain_, act_std_max_gain_;
+  }
 }
 
 bool VisionEnv::reset(Ref<Vector<>> obs, bool random) { return reset(obs); }
@@ -1001,7 +1009,7 @@ bool VisionEnv::isTerminalState(Scalar &reward) {
     iter += 1;
     // std::cout << iter << std::endl;
     // std::cout << "iter is " << iter << std::endl;
-    if (iter == 80 && fly_result_) {
+    if (iter == 100 && fly_result_) {
       std::cout << "collide_num is " << collide_num << std::endl;
       std::cout << "time_num is " << time_num << std::endl;
       std::cout << "bound_num is " << bound_num << std::endl;
@@ -1124,7 +1132,8 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     sim_dt_ = cfg["simulation"]["sim_dt"].as<Scalar>();
     max_t_ = cfg["simulation"]["max_t"].as<Scalar>();
     num_envs_ = cfg["simulation"]["num_envs"].as<int>();
-    num_each_env_steps_ = (int)(5E7/num_envs_);
+    allow_collision_steps_ = cfg["simulation"]["allow_collision_steps"].as<int>();
+    num_each_env_steps_ = (int)(allow_collision_steps_/num_envs_);
     act_delay_ = cfg["simulation"]["act_delay"].as<Scalar>();
     act_delay_width_ = cfg["simulation"]["act_delay_width"].as<Scalar>();
     obs_delay_ = cfg["simulation"]["obs_delay"].as<Scalar>();
@@ -1145,7 +1154,14 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
       cfg["quadrotor_dynamics"]["max_gain_fix"].as<bool>();
     max_gain_ = cfg["quadrotor_dynamics"]["fix_max_gain"].as<Scalar>();
     vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
-    act_std_ << max_gain_, max_gain_;
+    act_std_from_max_gain_ = cfg["quadrotor_dynamics"]["act_std_from_state_gain"].as<bool>();
+    if (act_std_from_max_gain_){
+      act_std_ << max_gain_, max_gain_;
+    }
+    else{
+      act_std_max_gain_ = cfg["quadrotor_dynamics"]["exec_max_gain"].as<Scalar>();
+      act_std_ << act_std_max_gain_, act_std_max_gain_;
+    }
   }
 
   if (cfg["rewards"]) {

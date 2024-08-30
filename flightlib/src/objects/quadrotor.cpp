@@ -182,7 +182,13 @@ void Quadrotor::init() {
   updateDynamics(dynamics_);
   reset();
   if (dynamics_.time_constant_fix_) {
-    ctrl_.setTimeConstant(dynamics_.fix_time_constant_);
+    ctrl_.setPolicyTimeConstant(dynamics_.policy_time_constant_);
+    if (dynamics_.time_constant_from_state_){
+      ctrl_.setDynamicsTimeConstant(dynamics_.policy_time_constant_);
+    }
+    else{
+      ctrl_.setDynamicsTimeConstant(dynamics_.dynamics_time_constant_);
+    }
     }
 }
 
