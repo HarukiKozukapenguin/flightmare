@@ -517,8 +517,7 @@ Scalar VisionEnv::getClosestDistance(
       }
     }
   }
-
-  return rmin / max_detection_range_;
+  return (rmin + norm_dist_(random_gen_)*0.05)/ max_detection_range_;
 }
 Scalar VisionEnv::calc_dist_from_wall(Scalar sign, const Vector<3>& Cell, const Vector<3> &poll_y) const {
   Scalar y_d= (sign*(wall_pos_- quad_size_) - quad_state_.p[1]);
