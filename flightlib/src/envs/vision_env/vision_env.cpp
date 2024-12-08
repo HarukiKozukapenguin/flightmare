@@ -345,7 +345,6 @@ bool VisionEnv::getObstacleState(
     if (obstacle_2d_dist < obs_radius + quad_size_threshold_) {
       is_threshold_collision_ = true;
     }
-
   }
 
   // std::cout << "get dynamic_objects_" << std::endl;
@@ -358,6 +357,40 @@ bool VisionEnv::getObstacleState(
       is_threshold_collision_ = true;
     }
   // compute relatiev distance to static obstacles
+  for (int i = 0; i < (int)static_rectangle_objects_.size(); i++) {
+    // compute relative position vector
+    Vector<3> delta_pos = static_rectangle_objects_[i]->getPos() - quad_state_.p;
+    relative_pos.push_back(delta_pos);
+
+    // compute relative distance
+    Scalar obstacle_dist = delta_pos.norm();
+    Scalar obstacle_2d_dist = std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));
+    if (obstacle_dist > max_detection_range_) {
+      obstacle_dist = max_detection_range_;
+    }
+    relative_pos_norm_.push_back(obstacle_dist);
+    relative_2d_pos_norm_.push_back(obstacle_2d_dist);
+
+
+    // store the obstacle radius
+    Scalar obs_size_x = static_objects_[i]->getScale()[0];
+    Scalar obs_size_y = static_objects_[i]->getScale()[1];
+
+    obstacle_radius_.push_back(obs_radius);
+
+    if (obstacle_2d_dist < obs_size_x,  + quad_size_) {
+      is_collision_ = true;
+    }
+    if (obstacle_2d_dist < obs_radius + quad_size_threshold_) {
+      is_threshold_collision_ = true;
+    }
+  }]
+
+  // compute relatiev distance to rectangle static obstacles
+  relative_2d_rectangle_pos_.clear();
+  obstacle_rectangle_size_.clear();
+  obstacle_rectengle_size_x_.clear();
+  obstacle_rectengle_size_y_.clear();
   for (int i = 0; i < (int)static_objects_.size(); i++) {
     // compute relative position vector
     Vector<3> delta_pos = static_objects_[i]->getPos() - quad_state_.p;
@@ -375,15 +408,16 @@ bool VisionEnv::getObstacleState(
 
 
     // store the obstacle radius
-    Scalar obs_radius = static_objects_[i]->getScale()[0];
-    // obs_radius = obs_radius / 2;
+    Scalar obs_size_x = static_objects_[i]->getScale()[0];
+    Scalar obs_size_y = static_objects_[i]->getScale()[1];
 
-    obstacle_radius_.push_back(obs_radius);
+    obstacle_rectengle_size_x_.push_back(obs_size_x);
+    obstacle_rectengle_size_y_.push_back(obs_size_y);
 
-    if (obstacle_2d_dist < obs_radius + quad_size_) {
+    if (is_rectangle_collision(delta_pos, obs_size_x, obs_size_y, quad_size_)) {
       is_collision_ = true;
     }
-    if (obstacle_2d_dist < obs_radius + quad_size_threshold_) {
+    if (is_rectangle_collision(delta_pos, obs_size_x, obs_size_y, quad_size_threshold_)) {
       is_threshold_collision_ = true;
     }
   }
