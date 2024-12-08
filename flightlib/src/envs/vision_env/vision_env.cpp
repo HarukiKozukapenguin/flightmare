@@ -304,6 +304,9 @@ bool VisionEnv::getObstacleState(
   relative_pos_norm_.clear();
   relative_2d_pos_norm_.clear();
   obstacle_radius_.clear();
+  is_collision_ = false;
+  is_threshold_collision_ = false;
+  is_wall_collision_ = false;
 
   //
   quad_ptr_->getState(&quad_state_);
@@ -339,13 +342,13 @@ bool VisionEnv::getObstacleState(
     if (obstacle_2d_dist < obs_radius + quad_size_) {
       is_collision_ = true;
     }
+    if (obstacle_2d_dist < obs_radius + quad_size_threshold_) {
+      is_threshold_collision_ = true;
+    }
+
   }
 
   // std::cout << "get dynamic_objects_" << std::endl;
-
-  is_collision_ = false;
-  is_threshold_collision_ = false;
-  is_wall_collision_ = false;
   Scalar y_pos = quad_state_.x(QS::POSY);
   Scalar wall_2d_dist = std::min(wall_pos_ - y_pos, wall_pos_ + y_pos);
   if (wall_2d_dist < quad_size_) {
