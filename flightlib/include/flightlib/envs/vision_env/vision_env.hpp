@@ -128,6 +128,7 @@ class VisionEnv final : public EnvBase {
   bool chooseLevel();
   bool configDynamicObjects(const std::string &yaml_file);
   bool configStaticObjects(const std::string &csv_file);
+  bool configStaticRectangleObjects(const std::string &csv_file);
 
   bool simDynamicObstacles(const Scalar dt);
 
@@ -174,6 +175,7 @@ class VisionEnv final : public EnvBase {
   //
   std::vector<std::shared_ptr<UnityObject>> static_objects_;
   std::vector<std::shared_ptr<UnityObject>> dynamic_objects_;
+  std::vector<std::shared_ptr<UnityObject>> static_rectangle_objects_;
 
   QuadState quad_state_, quad_old_state_;
   // set act_ to member valuable to include act to obs
@@ -260,10 +262,11 @@ class VisionEnv final : public EnvBase {
   Vector<3> unity_render_offset_;
 
   //
-  std::string static_object_csv_;
+  std::string static_object_csv_, static_rectangle_csv_;
   std::string obstacle_cfg_path_;
   int num_dynamic_objects_;
   int num_static_objects_;
+  int num_static_rectangle_objects_;
 
   int collide_num;
   int wall_collide_num;

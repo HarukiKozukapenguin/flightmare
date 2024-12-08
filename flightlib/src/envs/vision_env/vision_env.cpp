@@ -294,7 +294,7 @@ Scalar VisionEnv::toLog(Scalar x, Scalar beta){
 
 bool VisionEnv::getObstacleState(
   Ref<Vector<visionenv::Theta_Cuts>> sphericalboxel,
-  Ref<Vector<visionenv::kNObstaclesState>> obs_state) {
+  Ref<Vector<visionenv::kNObstaclesState>> obs_state){
   // Scalar safty_threshold = 0.2;
   if (static_objects_.size() < 0) {
     logger_.error("No dynamic or static obstacles.");
@@ -1260,6 +1260,15 @@ bool VisionEnv::changeLevel() {
     logger_.error(
       "Cannot config Static Object. Something wrong with the config file");
   }
+
+  // add rectancle objects
+  static_rectangle_csv_ =
+    obstacle_cfg_path_ + std::string("/static_rectangle_obstacles.csv");
+  if (!configStaticRectangleObjects(static_rectangle_csv_)) {
+    logger_.error(
+      "Cannot config Static Rectangle Object. Something wrong with the config file");
+  }
+
   return true;
 }
 
@@ -1367,6 +1376,53 @@ bool VisionEnv::configStaticObjects(const std::string &csv_file) {
     static_objects_.push_back(obj);
   }
   num_static_objects_ = static_objects_.size();
+
+  return true;
+}
+
+bool VisionEnv::configStaticRectangleObjects(const std::string &csv_file) {
+  //
+  if (!(file_exists(csv_file))) {
+    logger_.error("Configuration file %s does not exists.", csv_file);
+    return false;
+  }
+  std::ifstream infile(csv_file);
+  int i = 0;
+  for (auto &row : CSVRange(infile)) {
+    // Read column 0 for time
+    std::string object_id = "StaticObject" + std::to_string(i + 1);
+    // std::cout << object_id << std::endl;
+    std::string prefab_id = (std::string)row[0];
+
+    //
+    std::shared_ptr<UnityObject> obj =
+      std::make_shared<UnityObject>(object_id, prefab_id);
+
+    //
+    Vector<3> pos;
+    pos << std::stod((std::string)row[1]), std::stod((std::string)row[2]),
+      std::stod((std::string)row[3]);
+
+    Quaternion quat;
+    quat.w() = std::stod((std::string)row[4]);
+    quat.x() = std::stod((std::string)row[5]);
+    quat.y() = std::stod((std::string)row[6]);
+    quat.z() = std::stod((std::string)row[7]);
+
+    Vector<3> scale;
+    scale << std::stod((std::string)row[8]), std::stod((std::string)row[9]),
+      std::stod((std::string)row[10]);
+
+    //
+    obj->setPosition(pos);
+    obj->setRotation(quat);
+    // actual size in meters
+    obj->setSize(Vector<3>(1.0, 1.0, 1.0));
+    // scale of the original size
+    obj->setScale(scale);
+    static_rectangle_objects_.push_back(obj);
+  }
+  num_static_rectangle_objects_ = static_rectangle_objects_.size();
 
   return true;
 }
