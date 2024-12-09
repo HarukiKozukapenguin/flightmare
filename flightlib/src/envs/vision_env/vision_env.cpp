@@ -386,26 +386,14 @@ bool VisionEnv::getObstacleState(
   }
 
   // compute relatiev distance to rectangle static obstacles
-  relative_2d_rectangle_pos_.clear();
-  obstacle_rectangle_size_.clear();
+  relative_3d_rectangle_pos_.clear();
   obstacle_rectangle_size_x_.clear();
   obstacle_rectangle_size_y_.clear();
   rectangle_relative_margin_.clear();
   for (int i = 0; i < (int)static_rectangle_objects_.size(); i++) {
     // compute relative position vector
     Vector<3> delta_pos = static_rectangle_objects_[i]->getPos() - quad_state_.p;
-    relative_pos.push_back(delta_pos);
-
-    // compute relative distance
-    Scalar obstacle_dist = delta_pos.norm();
-    Scalar obstacle_2d_dist =
-      std::sqrt(std::pow(delta_pos[0], 2) + std::pow(delta_pos[1], 2));
-    if (obstacle_dist > max_detection_range_) {
-      obstacle_dist = max_detection_range_;
-    }
-    relative_pos_norm_.push_back(obstacle_dist);
-    relative_2d_pos_norm_.push_back(obstacle_2d_dist);
-
+    relative_3d_rectangle_pos_.push_back(delta_pos);
 
     // store the obstacle radius
     Scalar obs_size_x = static_rectangle_objects_[i]->getScale()[0];

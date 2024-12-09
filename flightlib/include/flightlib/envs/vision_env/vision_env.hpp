@@ -214,7 +214,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> relative_pos_norm_;
   std::vector<Scalar> relative_2d_pos_norm_;
   std::vector<Scalar> obstacle_radius_;
-  std::vector<Scalar> relative_2d_rectangle_pos_;
+  std::vector<Vector<3>> relative_3d_rectangle_pos_;
   std::vector<Scalar> obstacle_rectangle_size_;
   std::vector<Scalar> obstacle_rectangle_size_x_;
   std::vector<Scalar> obstacle_rectangle_size_y_;
