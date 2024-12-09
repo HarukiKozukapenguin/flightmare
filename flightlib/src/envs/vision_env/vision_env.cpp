@@ -373,24 +373,23 @@ bool VisionEnv::getObstacleState(
 
 
     // store the obstacle radius
-    Scalar obs_size_x = static_objects_[i]->getScale()[0];
-    Scalar obs_size_y = static_objects_[i]->getScale()[1];
+    Scalar obs_radius = dynamic_objects_[i]->getScale()[0];
 
     obstacle_radius_.push_back(obs_radius);
 
-    if (obstacle_2d_dist < obs_size_x,  + quad_size_) {
+    if (obstacle_2d_dist < obs_radius + quad_size_) {
       is_collision_ = true;
     }
     if (obstacle_2d_dist < obs_radius + quad_size_threshold_) {
       is_threshold_collision_ = true;
     }
-  }]
+  }
 
   // compute relatiev distance to rectangle static obstacles
   relative_2d_rectangle_pos_.clear();
   obstacle_rectangle_size_.clear();
-  obstacle_rectengle_size_x_.clear();
-  obstacle_rectengle_size_y_.clear();
+  obstacle_rectangle_size_x_.clear();
+  obstacle_rectangle_size_y_.clear();
   for (int i = 0; i < (int)static_objects_.size(); i++) {
     // compute relative position vector
     Vector<3> delta_pos = static_objects_[i]->getPos() - quad_state_.p;
@@ -411,8 +410,8 @@ bool VisionEnv::getObstacleState(
     Scalar obs_size_x = static_objects_[i]->getScale()[0];
     Scalar obs_size_y = static_objects_[i]->getScale()[1];
 
-    obstacle_rectengle_size_x_.push_back(obs_size_x);
-    obstacle_rectengle_size_y_.push_back(obs_size_y);
+    obstacle_rectangle_size_x_.push_back(obs_size_x);
+    obstacle_rectangle_size_y_.push_back(obs_size_y);
 
     if (is_rectangle_collision(delta_pos, obs_size_x, obs_size_y, quad_size_)) {
       is_collision_ = true;
@@ -506,6 +505,17 @@ bool VisionEnv::getObstacleState(
   return true;
 }
 
+bool VisionEnv::is_rectangle_collision(Vector<3> delta_pos, Scalar obs_size_x, Scalar obs_size_y, Scalar quad_size){
+    Scalar x_min = delta_pos[0] - obs_size_x;
+    Scalar x_max = delta_pos[0] + obs_size_x;
+    Scalar y_min = delta_pos[1] - obs_size_y;
+    Scalar y_max = delta_pos[1] + obs_size_y;
+    Scalar closest_point_of_center_x = std::max(x_min,std::min(0.0,x_max));
+    Scalar closest_point_of_center_y = std::max(y_min,std::min(0.0,y_max));
+    Scalar closest_distance = std::sqrt(closest_point_of_center_x*closest_point_of_center_x\
+					+closest_point_of_center_y*closest_point_of_center_y);
+    return closest_distance < quad_size;
+  }
 Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
   const std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> &pos_b_list,
   const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
