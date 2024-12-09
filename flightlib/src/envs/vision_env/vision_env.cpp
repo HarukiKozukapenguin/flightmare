@@ -390,6 +390,7 @@ bool VisionEnv::getObstacleState(
   obstacle_rectangle_size_.clear();
   obstacle_rectangle_size_x_.clear();
   obstacle_rectangle_size_y_.clear();
+  rectangle_relative_margin_.clear();
   for (int i = 0; i < (int)static_rectangle_objects_.size(); i++) {
     // compute relative position vector
     Vector<3> delta_pos = static_rectangle_objects_[i]->getPos() - quad_state_.p;
@@ -514,6 +515,7 @@ bool VisionEnv::is_rectangle_collision(Vector<3> delta_pos, Scalar obs_size_x, S
     Scalar closest_point_of_center_y = std::max(y_min,std::min(0.0,y_max));
     Scalar closest_distance = std::sqrt(closest_point_of_center_x*closest_point_of_center_x\
 					+closest_point_of_center_y*closest_point_of_center_y);
+    rectangle_relative_margin_.push_back(closest_distance - quad_size);
     return closest_distance < quad_size;
   }
 Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(
@@ -863,6 +865,17 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
     if (wall_dist <= dist_margin_){
       collision_penalty += collision_coeff_ * std::exp(-collision_exp_coeff_ * wall_dist);
     }
+  }
+  idx = 0;
+  for (size_t sort_idx : sort_indexes(rectangle_relative_margin_)) {
+    if (idx >= visionenv::kNObstacles) break;
+
+    if (rectangle_relative_margin_[sort_idx] <= dist_margin_) {
+      // compute distance penalty
+      collision_penalty +=
+        collision_coeff_ * std::exp(-collision_exp_coeff_ * rectangle_relative_margin_[sort_idx]);
+    }
+    idx += 1;
   }
 
   Scalar when_collision_penlty = 0;

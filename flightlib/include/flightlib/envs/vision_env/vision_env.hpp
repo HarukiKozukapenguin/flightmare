@@ -218,7 +218,7 @@ class VisionEnv final : public EnvBase {
   std::vector<Scalar> obstacle_rectangle_size_;
   std::vector<Scalar> obstacle_rectangle_size_x_;
   std::vector<Scalar> obstacle_rectangle_size_y_;
-
+  std::vector<Scalar> rectangle_relative_margin_;
   // Scalar tree_size_;
   std::vector<Scalar> dist_theta_list_, acc_theta_list_;
   // std::vector<Scalar> phi_list_;
