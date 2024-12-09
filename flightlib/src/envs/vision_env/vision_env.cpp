@@ -414,10 +414,10 @@ bool VisionEnv::getObstacleState(
     obstacle_rectangle_size_x_.push_back(obs_size_x);
     obstacle_rectangle_size_y_.push_back(obs_size_y);
 
-    if (is_rectangle_collision(delta_pos, obs_size_x, obs_size_y, quad_size_)) {
+    if (is_rectangle_collision(delta_pos, obs_size_x, obs_size_y, quad_size_, true)) {
       is_collision_ = true;
     }
-    if (is_rectangle_collision(delta_pos, obs_size_x, obs_size_y, quad_size_threshold_)) {
+    if (is_rectangle_collision(delta_pos, obs_size_x, obs_size_y, quad_size_threshold_, false)) {
       is_threshold_collision_ = true;
     }
   }
@@ -506,7 +506,7 @@ bool VisionEnv::getObstacleState(
   return true;
 }
 
-bool VisionEnv::is_rectangle_collision(Vector<3> delta_pos, Scalar obs_size_x, Scalar obs_size_y, Scalar quad_size){
+  bool VisionEnv::is_rectangle_collision(Vector<3> delta_pos, Scalar obs_size_x, Scalar obs_size_y, Scalar quad_size, bool is_add_margin){
     Scalar x_min = delta_pos[0] - obs_size_x;
     Scalar x_max = delta_pos[0] + obs_size_x;
     Scalar y_min = delta_pos[1] - obs_size_y;
@@ -515,7 +515,7 @@ bool VisionEnv::is_rectangle_collision(Vector<3> delta_pos, Scalar obs_size_x, S
     Scalar closest_point_of_center_y = std::max(y_min,std::min(0.0,y_max));
     Scalar closest_distance = std::sqrt(closest_point_of_center_x*closest_point_of_center_x\
 					+closest_point_of_center_y*closest_point_of_center_y);
-    rectangle_relative_margin_.push_back(closest_distance - quad_size);
+    if (is_add_margin) rectangle_relative_margin_.push_back(closest_distance - quad_size);
     return closest_distance < quad_size;
   }
 Vector<visionenv::Theta_Cuts> VisionEnv::getsphericalboxel(

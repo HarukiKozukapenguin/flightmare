@@ -168,7 +168,7 @@ class VisionEnv final : public EnvBase {
   void effect_obs_delay(Ref<Vector<>> obs);
   void reset_delay_buffer();
   bool set_current_max_collide_vel();
-  bool is_rectangle_collision(Vector<3> delta_pos, Scalar obs_size_x, Scalar obs_size_y, Scalar quad_size);
+  bool is_rectangle_collision(Vector<3> delta_pos, Scalar obs_size_x, Scalar obs_size_y, Scalar quad_size, bool is_add_margin);
 
   int env_id_;
   // quadrotor
