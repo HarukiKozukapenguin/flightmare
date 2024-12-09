@@ -390,9 +390,9 @@ bool VisionEnv::getObstacleState(
   obstacle_rectangle_size_.clear();
   obstacle_rectangle_size_x_.clear();
   obstacle_rectangle_size_y_.clear();
-  for (int i = 0; i < (int)static_objects_.size(); i++) {
+  for (int i = 0; i < (int)static_rectangle_objects_.size(); i++) {
     // compute relative position vector
-    Vector<3> delta_pos = static_objects_[i]->getPos() - quad_state_.p;
+    Vector<3> delta_pos = static_rectangle_objects_[i]->getPos() - quad_state_.p;
     relative_pos.push_back(delta_pos);
 
     // compute relative distance
@@ -407,8 +407,8 @@ bool VisionEnv::getObstacleState(
 
 
     // store the obstacle radius
-    Scalar obs_size_x = static_objects_[i]->getScale()[0];
-    Scalar obs_size_y = static_objects_[i]->getScale()[1];
+    Scalar obs_size_x = static_rectangle_objects_[i]->getScale()[0];
+    Scalar obs_size_y = static_rectangle_objects_[i]->getScale()[1];
 
     obstacle_rectangle_size_x_.push_back(obs_size_x);
     obstacle_rectangle_size_y_.push_back(obs_size_y);
