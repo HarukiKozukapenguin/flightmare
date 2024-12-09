@@ -536,6 +536,8 @@ Scalar VisionEnv::getClosestDistance(
   Scalar y_p = calc_dist_from_wall(1, Cell, poll_y);
   Scalar y_n = calc_dist_from_wall(-1, Cell, poll_y);
   Scalar rmin = std::min(std::min(y_p, y_n), max_detection_range_);
+  Scalar box_min = calc_dist_from_box(tcell);
+  rmin = std::min(rmin, box_min);
   for (size_t i = 0; i < obstacle_num_; ++i) {
     Vector<3> pos = pos_b_list[i];
     // make large radius depending on quad size for avoidance direction
@@ -556,6 +558,63 @@ Scalar VisionEnv::getClosestDistance(
   }
 
   return rmin / max_detection_range_;
+}
+  // small distance from box
+Scalar VisionEnv::calc_dist_from_box(Scalar tcell)const{
+  // calc intersection with each side
+  Scalar rmin = max_detection_range_;
+  for (size_t i = 0; i < obstacle_num_; ++i) {
+    Vector<3> pos = relative_3d_rectangle_pos_[i];
+    Scalar x_0 = pos[0];
+    Scalar y_0 = pos[1];
+    Scalar l = obstacle_rectangle_size_x_[i];
+    Scalar h = obstacle_rectangle_size_y_[i];
+    Scalar x_l = (y_0 - h - quad_size_)/std::tan(tcell);
+    Scalar x_h = (y_0 + h + quad_size_)/std::tan(tcell);
+    Scalar y_l = (x_0 - l - quad_size_)*std::tan(tcell);
+    Scalar y_h = (x_0 + l + quad_size_)*std::tan(tcell);
+    if (x_0 - l <= x_l && \
+	x_l <= x_0 + l && \
+	0 < x_l/std::cos(tcell)) rmin = std::min(rmin,x_l/std::cos(tcell));
+    if (x_0 - l <= x_h && \
+	x_h <= x_0 + l && \
+	0 < x_h/std::cos(tcell)) rmin = std::min(rmin,x_h/std::cos(tcell));
+    if (y_0 - h <= y_l && \
+	y_l <= y_0 + l && \
+	0 < y_l/std::sin(tcell)) rmin = std::min(rmin,y_l/std::sin(tcell));
+    if (y_0 - h <= y_h && \
+	y_h <= y_0 + l && \
+	0 < y_h/std::cos(tcell)) rmin = std::min(rmin,y_h/std::sin(tcell));
+  
+  // set circle in edge of rectangle
+  std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> pos_b_list;
+
+  Vector<3> pos_b;
+  pos_b << x_0 - l, y_0 - h, 0.0;
+  pos_b_list.push_back(pos_b);
+  pos_b << x_0 + l, y_0 - h, 0.0;
+  pos_b_list.push_back(pos_b);
+  pos_b << x_0 - l, y_0 + h, 0.0;
+  pos_b_list.push_back(pos_b);
+  pos_b << x_0 + l, y_0 + h, 0.0;
+  pos_b_list.push_back(pos_b);
+  for (size_t i = 0; i < pos_b_list.size(); ++i) {
+    Vector<3> pos = pos_b_list[i];
+    // make large radius depending on quad size for avoidance direction
+    Scalar radius = 0.0 + quad_size_;
+    Scalar a = 1.0;
+    Scalar b = pos[0]*std::cos(tcell) + pos[1]*std::sin(tcell);
+    Scalar c = std::pow(pos[0],2) + std::pow(pos[1],2) - std::pow(radius,2);
+    Scalar D = std::pow(b, 2) - a * c;
+    if (0 <= D) {
+      Scalar dist = (b - std::sqrt(D)) / a;
+      if (dist >= 0) {
+        rmin = std::min(dist, rmin);
+      }
+    }
+  }
+  }
+  return rmin;
 }
 Scalar VisionEnv::calc_dist_from_wall(Scalar sign, const Vector<3>& Cell, const Vector<3> &poll_y) const {
   Scalar y_d= (sign*(wall_pos_- quad_size_) - quad_state_.p[1]);

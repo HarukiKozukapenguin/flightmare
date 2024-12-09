@@ -108,6 +108,7 @@ class VisionEnv final : public EnvBase {
     const std::vector<Scalar> &obs_radius_list, const Vector<3> &poll_y, const Vector<3> &poll_z,
     const Matrix<3, 3> &R_T) const;
   Scalar calc_dist_from_wall(Scalar sign, const Vector<3>& Cell, const Vector<3> &poll_y) const;
+  Scalar calc_dist_from_box(Scalar tcell) const;
 
   // get quadrotor states
   bool getQuadAct(Ref<Vector<>> act) const;
