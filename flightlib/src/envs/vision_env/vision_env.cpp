@@ -584,7 +584,7 @@ Scalar VisionEnv::calc_dist_from_box(Scalar tcell)const{
 	0 < y_l/std::sin(tcell)) rmin = std::min(rmin,y_l/std::sin(tcell));
     if (y_0 - h <= y_h && \
 	y_h <= y_0 + l && \
-	0 < y_h/std::cos(tcell)) rmin = std::min(rmin,y_h/std::sin(tcell));
+	0 < y_h/std::sin(tcell)) rmin = std::min(rmin,y_h/std::sin(tcell));
   
   // set circle in edge of rectangle
   std::vector<Vector<3>, Eigen::aligned_allocator<Vector<3>>> pos_b_list;
