@@ -335,7 +335,7 @@ bool VisionEnv::getObstacleState(
     Scalar obs_radius = dynamic_objects_[i]->getScale()[0];
     // due to think quadsize, change obs_radius to more smaller to
     // move forword
-    obs_radius = obs_radius / 4;
+    obs_radius = obs_radius;
     obstacle_radius_.push_back(obs_radius);
 
     //
