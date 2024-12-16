@@ -357,9 +357,9 @@ bool VisionEnv::getObstacleState(
       is_threshold_collision_ = true;
     }
   // compute relatiev distance to static obstacles
-  for (int i = 0; i < (int)static_rectangle_objects_.size(); i++) {
+  for (int i = 0; i < (int)static_objects_.size(); i++) {
     // compute relative position vector
-    Vector<3> delta_pos = static_rectangle_objects_[i]->getPos() - quad_state_.p;
+    Vector<3> delta_pos = static_objects_[i]->getPos() - quad_state_.p;
     relative_pos.push_back(delta_pos);
 
     // compute relative distance
@@ -373,7 +373,7 @@ bool VisionEnv::getObstacleState(
 
 
     // store the obstacle radius
-    Scalar obs_radius = dynamic_objects_[i]->getScale()[0];
+    Scalar obs_radius = static_objects_[i]->getScale()[0];
 
     obstacle_radius_.push_back(obs_radius);
 
