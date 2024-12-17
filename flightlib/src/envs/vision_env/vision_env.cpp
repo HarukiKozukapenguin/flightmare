@@ -986,7 +986,7 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 
   // survive reward by reciprocal of velocity
   Vector<3> compensate_vel = {quad_state_.v[0]*vel_compensation_, quad_state_.v[1], 0.0};
-  const Scalar survive_reward = survive_rew_/(compensate_vel.norm()+0.1);
+  const Scalar survive_reward = survive_rew_/(compensate_vel.norm()+0.01);
 
   // - world box penalty
 
