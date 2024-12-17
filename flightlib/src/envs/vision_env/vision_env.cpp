@@ -984,6 +984,10 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   // - angular velocity penalty, to avoid oscillations
   const Scalar ang_vel_penalty = angular_vel_coeff_ * quad_state_.w.norm();
 
+  // survive reward by reciprocal of velocity
+  Vector<3> compensate_vel = {quad_state_.v[0]*vel_compensation_, quad_state_.v[1], 0.0};
+  const Scalar survive_reward = survive_rew_/(compensate_vel.norm()+0.1);
+
   // - world box penalty
 
   Scalar world_box_penalty =
@@ -1015,13 +1019,13 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
   //  change progress reward as survive reward
   const Scalar total_reward =
     move_reward + lin_vel_reward + collision_penalty + vel_collision_penalty + when_collision_penlty +
-    ang_vel_penalty + survive_rew_ + world_box_penalty + attitude_penalty +
+    ang_vel_penalty + survive_reward + world_box_penalty + attitude_penalty +
     command_penalty + attitude_vel_penalty;
 
   // return all reward components for debug purposes
   // only the total reward is used by the RL algorithm
   reward << move_reward, lin_vel_reward, collision_penalty,
-    vel_collision_penalty, when_collision_penlty, ang_vel_penalty, survive_rew_, world_box_penalty,
+    vel_collision_penalty, when_collision_penlty, ang_vel_penalty, survive_reward, world_box_penalty,
     attitude_penalty, command_penalty, attitude_vel_penalty, total_reward;
   return true;
 }
