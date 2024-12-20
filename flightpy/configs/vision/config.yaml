@@ -45,7 +45,7 @@ rewards:
   survive_rew: 0.03
   world_box_coeff: [0, 0] # y,z
   attitude_coeff: 0
-  command_coeff: [-0.000000005, -0.000000025]
+  command_coeff: [-0.00000000, -0.0000000]
   attitude_vel_coeff: -5.0
   when_collision_coeff: -2.0
   when_wall_collision_coeff: -3.0
