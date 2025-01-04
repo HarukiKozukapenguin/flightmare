@@ -72,6 +72,7 @@ class Quadrotor : ObjectBase {
 
   //
   inline Scalar getMass(void) { return dynamics_.getMass(); };
+  inline Scalar getKdacc(void) { return dynamics_.getKdacc(); };
   inline void setSize(const Ref<Vector<3>> size) { size_ = size; };
   inline void setCollision(const bool collision) { collision_ = collision; };
   inline Scalar getTime_constant(void) { return ctrl_.getTime_constant(); };

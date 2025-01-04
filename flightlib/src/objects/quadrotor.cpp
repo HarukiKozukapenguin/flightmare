@@ -191,6 +191,7 @@ bool Quadrotor::reset() {
   motor_omega_.setZero();
   motor_thrusts_.setZero();
   if (!dynamics_.time_constant_fix_) ctrl_.randomizeKpeuler();
+  if (!dynamics_.fix_vel_gain_) dynamics_.randomizeKdacc();
   return true;
 }
 
@@ -201,6 +202,7 @@ bool Quadrotor::reset(const QuadState &state) {
   motor_omega_.setZero();
   motor_thrusts_.setZero();
   if (!dynamics_.time_constant_fix_) ctrl_.randomizeKpeuler();
+  if (!dynamics_.fix_vel_gain_) dynamics_.randomizeKdacc();
   // std::cout << "reset in Quadrotor is finished" << std::endl;
   return true;
 }

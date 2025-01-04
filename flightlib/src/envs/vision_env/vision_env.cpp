@@ -116,7 +116,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
   if (!max_gain_fix_){
     randomize_gain();
   }
-  vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
+  vel_compensation_ = learn_max_gain_/max_gain_;
   while (true) {
     quad_state_.x(QS::POSX) = uniform_dist_(random_gen_) * 10 + 10;
     quad_state_.x(QS::POSY) = uniform_dist_(random_gen_) * world_box_[2] * 0.2;
@@ -132,7 +132,7 @@ bool VisionEnv::reset(Ref<Vector<>> obs) {
     is_threshold_collision_ = false;
     quad_ptr_->reset(quad_state_);
     time_constant_ = quad_ptr_->getTime_constant();
-    time_constant_ /= vel_compensation_;
+    // time_constant_ /= vel_compensation_;
 
     init_isCollision();  // change is_collision depending on initial position
 
@@ -270,13 +270,14 @@ bool VisionEnv::getObs(Ref<Vector<>> obs) {
                       (world_box_[i * 2 + 1] - world_box_[i * 2]);
   }
   // Observations
+  Scalar kdacc = quad_ptr_->getKdacc();
 
-  obs << quad_size_, time_constant_, max_gain_, act_, quad_state_.p[0], quad_state_.p[1],
+  obs << quad_size_, time_constant_, max_gain_, kdacc, act_, quad_state_.p[0], quad_state_.p[1],
     quad_state_.v[0]*vel_compensation_ ,quad_state_.v[1], body_tilt,
     quad_state_.w[0] + omega_noise_*uniform_dist_(random_gen_), quad_state_.w[1] + omega_noise_*uniform_dist_(random_gen_),
     toLog((wall_pos_ - quad_size_) - quad_state_.x(QS::POSY), beta),
     toLog((wall_pos_ - quad_size_) + quad_state_.x(QS::POSY), beta),
-    logsphericalboxel, gain_normalized_act_distance_;
+    logsphericalboxel;
   // std::cout << "obs is called" << std::endl;
   return true;
 }
@@ -792,6 +793,18 @@ bool VisionEnv::step(Ref<Vector<>> act, Ref<Vector<>> obs,
     cmd_.a[2] = 0.0;
     cmd_.yaw = 0.0;
   }
+  else if (vel_control_){
+    cmd_.p[0] = quad_state_.p[0];
+    cmd_.p[1] = quad_state_.p[1];
+    cmd_.p[2] = 1.0;
+    cmd_.v[0] = pi_act_(0);
+    cmd_.v[1] = pi_act_(1);
+    cmd_.v[2] = 0.0;
+    cmd_.a[0] = 0.0;
+    cmd_.a[1] = 0.0;
+    cmd_.a[2] = 0.0;
+    cmd_.yaw = 0.0;
+    }
   else if (control_feedthrough_) {
     cmd_.p[0] = pi_act_(0);
     cmd_.p[1] = pi_act_(1);
@@ -1014,13 +1027,13 @@ bool VisionEnv::computeReward(Ref<Vector<>> reward) {
 
   //  change progress reward as survive reward
   const Scalar total_reward =
-    move_reward + lin_vel_reward + collision_penalty + vel_collision_penalty + when_collision_penlty +
+    move_reward + collision_penalty + vel_collision_penalty + when_collision_penlty +
     ang_vel_penalty + survive_rew_ + world_box_penalty + attitude_penalty +
     command_penalty + attitude_vel_penalty;
 
   // return all reward components for debug purposes
   // only the total reward is used by the RL algorithm
-  reward << move_reward, lin_vel_reward, collision_penalty,
+  reward << move_reward, collision_penalty,
     vel_collision_penalty, when_collision_penlty, ang_vel_penalty, survive_rew_, world_box_penalty,
     attitude_penalty, command_penalty, attitude_vel_penalty, total_reward;
   return true;
@@ -1215,6 +1228,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     momentum_bool_ = cfg["environment"]["momentum_bool"].as<bool>();
     momentum_ = cfg["environment"]["momentum"].as<Scalar>();
     acc_control_ = cfg["environment"]["acc_control"].as<bool>();
+    vel_control_ = cfg["environment"]["vel_control"].as<bool>();
     dist_theta_list_ = cfg["environment"]["dist_theta"].as<std::vector<Scalar>>();
     acc_theta_list_ = cfg["environment"]["acc_theta"].as<std::vector<Scalar>>();
     init_max_collide_vel_ = cfg["environment"]["max_collide_vel"].as<Scalar>();
@@ -1251,7 +1265,7 @@ bool VisionEnv::loadParam(const YAML::Node &cfg) {
     max_gain_fix_ =
       cfg["quadrotor_dynamics"]["max_gain_fix"].as<bool>();
     max_gain_ = cfg["quadrotor_dynamics"]["fix_max_gain"].as<Scalar>();
-    vel_compensation_ = std::sqrt(learn_max_gain_/max_gain_);
+    vel_compensation_ = learn_max_gain_/max_gain_;
     act_std_ << max_gain_, max_gain_;
   }
 

@@ -9,6 +9,7 @@
 #include "flightlib/common/math.hpp"
 #include "flightlib/common/quad_state.hpp"
 #include "flightlib/dynamics/dynamics_base.hpp"
+#include <random>
 
 namespace flightlib {
 
@@ -62,9 +63,13 @@ class QuadrotorDynamics : DynamicsBase {
   };
   inline Scalar getSingleThrustMax(void) const { return thrust_max_; };
   inline Scalar getForceMax(void) const { return force_torque_max_(0); };
+  inline Scalar getKdacc(void) const { return xy_kdacc_; };
 
   bool setMass(const Scalar mass);
   bool setMotortauInv(const Scalar tau_inv);
+
+  Scalar generateRandomValue();
+  bool randomizeKdacc();
 
   friend std::ostream& operator<<(std::ostream& os,
                                   const QuadrotorDynamics& quad_dymaics);
@@ -73,6 +78,7 @@ class QuadrotorDynamics : DynamicsBase {
   bool drag_compensation_;
   Vector<3> kpacc_;
   Vector<3> kdacc_;
+  Scalar xy_kdacc_;
   Scalar kpatt_z_;
   Scalar kpatt_xy_;
   Vector<3> kpeuler_;
@@ -86,6 +92,7 @@ class QuadrotorDynamics : DynamicsBase {
   Vector<2> range_time_constant_;
   Scalar init_time_constant_;
   Scalar fix_time_constant_;
+  bool fix_vel_gain_;
 
  private:
   bool updateInertiaMarix();
@@ -118,6 +125,9 @@ class QuadrotorDynamics : DynamicsBase {
 
   // Quadrotor limits
   Vector<3> omega_max_;
+
+  Vector<2> range_vel_gain_;
+  Scalar fixed_vel_gain_;
 
 };
 
