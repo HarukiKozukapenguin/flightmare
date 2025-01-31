@@ -125,9 +125,11 @@ Control:
   cmd_mode:                     2 # please check flightmare/flightlib/include/flightlib/common/command.hpp#9-13
   position_control:             true # whether need position control
   drag_compensation:            true
-  fix_mass: true
-  fix_inertia: true
-  fix_gain: true
+  fix_mass:                     false
+  fix_inertia:                  false
+  fix_gain:                     false
+  fix_vel_gain:                 true
+  range_vel_gain:               [2.0,10.0]
   mass:                         [0.1,4.0] #[kg]
   inertia:                      [0.5,16.0] #[ratio]
 

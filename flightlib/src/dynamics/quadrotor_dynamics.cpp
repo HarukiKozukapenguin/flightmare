@@ -348,7 +348,6 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   range_vel_gain_ = Map<Vector<2>>(params["Control"]["range_vel_gain"].as<std::vector<Scalar>>().data());
   range_mass_ = Map<Vector<2>>(params["Control"]["mass"].as<std::vector<Scalar>>().data());
   range_inertia_ = Map<Vector<2>>(params["Control"]["inertia"].as<std::vector<Scalar>>().data());
-  fixed_vel_gain_ = params["Control"]["fixed_vel_gain"].as<Scalar>();
 
   // allocation matrix
   // compute column-wise cross product
