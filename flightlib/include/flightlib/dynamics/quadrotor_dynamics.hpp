@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <memory>
+#include <random>
 
 #include "flightlib/common/logger.hpp"
 #include "flightlib/common/math.hpp"
@@ -66,6 +67,12 @@ class QuadrotorDynamics : DynamicsBase {
   bool setMass(const Scalar mass);
   bool setMotortauInv(const Scalar tau_inv);
 
+  Scalar generateRandomValue();
+  bool randomizeKdacc();
+  bool randomizeMass();
+  bool randomizeInertia();
+  bool randomizeGain();
+
   friend std::ostream& operator<<(std::ostream& os,
                                   const QuadrotorDynamics& quad_dymaics);
 
@@ -86,6 +93,8 @@ class QuadrotorDynamics : DynamicsBase {
   Vector<2> range_time_constant_;
   Scalar init_time_constant_;
   Scalar fix_time_constant_;
+  bool fix_vel_gain_;
+  bool fix_mass_, fix_inertia_, fix_gain_;
 
  private:
   bool updateInertiaMarix();
@@ -119,6 +128,19 @@ class QuadrotorDynamics : DynamicsBase {
   // Quadrotor limits
   Vector<3> omega_max_;
 
+  Vector<2> range_vel_gain_;
+  Scalar fixed_vel_gain_;
+
+  Vector<2> range_mass_;
+  Vector<2> range_inertia_;
+  std::vector<Scalar> param_inertia_vec_;
+  Vector<3> param_kpacc_;
+  Vector<3> param_kdacc_;
+  Scalar param_kpatt_z_;
+  Scalar param_kpatt_xy_;
+  Vector<3> param_kprate_;
+  Vector<3> param_kdrate_;
+  Vector<3> param_kpeuler_;
 };
 
 }  // namespace flightlib

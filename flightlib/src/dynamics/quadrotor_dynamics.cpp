@@ -218,6 +218,40 @@ bool QuadrotorDynamics::setMotortauInv(const Scalar tau_inv) {
   return true;
 }
 
+Scalar QuadrotorDynamics::generateRandomValue(){
+  std::random_device rd;
+  std::mt19937 gen(rd());  // Mersenne Twister engine
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+  return dis(gen);
+  }
+
+
+bool QuadrotorDynamics::randomizeMass() {
+  mass_ = range_mass_[0] + generateRandomValue() * (range_mass_[1] - range_mass_[0]);
+  return true;
+}
+bool QuadrotorDynamics::randomizeInertia() {
+  std::vector<Scalar> inertia_vec(param_inertia_vec_.size());
+  Scalar inertia_ratio = range_inertia_[0] + generateRandomValue() * (range_inertia_[1] - range_inertia_[0]);
+  for (size_t i = 0; i < param_inertia_vec_.size(); i++)
+    {
+      inertia_vec[i] = param_inertia_vec_[i] * inertia_ratio;
+    }
+  J_ = Map<Vector<3>>(inertia_vec.data()).asDiagonal();
+  J_inv_ = J_.inverse();
+  return true;
+}
+
+bool QuadrotorDynamics::randomizeGain(){
+  kpacc_ = param_kpacc_*generateRandomValue();
+  kdacc_ = param_kdacc_*generateRandomValue();
+  kpatt_z_ = param_kpatt_z_*generateRandomValue();
+  kpatt_xy_ = param_kpatt_xy_*generateRandomValue();
+  kprate_ = param_kprate_*generateRandomValue();
+  kdrate_ = param_kdrate_*generateRandomValue();
+  kpeuler_ = param_kpeuler_*generateRandomValue();
+  return true;
+}
 
 bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
   // if (params["quadrotor_dynamics"]) {
@@ -255,10 +289,9 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
 
 
   // inertia matrix
-  std::vector<Scalar> inertia_vec;
-  inertia_vec =
+  param_inertia_vec_ =
     params["quadrotor_dynamics"]["inertia"].as<std::vector<Scalar>>();
-  J_ = Map<Vector<3>>(inertia_vec.data()).asDiagonal();
+  J_ = Map<Vector<3>>(param_inertia_vec_.data()).asDiagonal();
   J_inv_ = J_.inverse();
 
 
@@ -295,19 +328,27 @@ bool QuadrotorDynamics::updateParams(const YAML::Node& params) {
 
   // load from Control
   drag_compensation_ = params["Control"]["drag_compensation"].as<bool>();
-  kpacc_ = Map<Vector<3>>(params["Control"]["kpacc"].as<std::vector<Scalar>>().data());
-  kdacc_ = Map<Vector<3>>(params["Control"]["kdacc"].as<std::vector<Scalar>>().data());
-  kpatt_z_ = params["Control"]["kpatt_z"].as<Scalar>();
-  kpatt_xy_ = params["Control"]["kpatt_xy"].as<Scalar>();
-  kprate_ = Map<Vector<3>>(params["Control"]["kprate"].as<std::vector<Scalar>>().data());
-  kdrate_ = Map<Vector<3>>(params["Control"]["kdrate"].as<std::vector<Scalar>>().data());
-  kpeuler_ = Map<Vector<3>>(params["Control"]["kpeuler"].as<std::vector<Scalar>>().data());
+  param_kpacc_ = Map<Vector<3>>(params["Control"]["kpacc"].as<std::vector<Scalar>>().data());
+  param_kdacc_ = Map<Vector<3>>(params["Control"]["kdacc"].as<std::vector<Scalar>>().data());
+  param_kpatt_z_ = params["Control"]["kpatt_z"].as<Scalar>();
+  param_kpatt_xy_ = params["Control"]["kpatt_xy"].as<Scalar>();
+  param_kprate_ = Map<Vector<3>>(params["Control"]["kprate"].as<std::vector<Scalar>>().data());
+  param_kdrate_ = Map<Vector<3>>(params["Control"]["kdrate"].as<std::vector<Scalar>>().data());
+  param_kpeuler_ = Map<Vector<3>>(params["Control"]["kpeuler"].as<std::vector<Scalar>>().data());
   p_err_max_ = Map<Vector<3>>(params["Control"]["p_err_max"].as<std::vector<Scalar>>().data());
   v_err_max_ = Map<Vector<3>>(params["Control"]["v_err_max"].as<std::vector<Scalar>>().data());
   filter_sampling_frequency_ = 
     params["Control"]["filter_sampling_frequency"].as<Scalar>();
   filter_cutoff_frequency_ = 
     params["Control"]["filter_cutoff_frequency"].as<Scalar>();
+  fix_mass_ = params["Control"]["fix_mass"].as<bool>();
+  fix_inertia_ = params["Control"]["fix_inertia"].as<bool>();
+  fix_gain_ = params["Control"]["fix_gain"].as<bool>();  
+  fix_vel_gain_ = params["Control"]["fix_vel_gain"].as<bool>();
+  range_vel_gain_ = Map<Vector<2>>(params["Control"]["range_vel_gain"].as<std::vector<Scalar>>().data());
+  range_mass_ = Map<Vector<2>>(params["Control"]["mass"].as<std::vector<Scalar>>().data());
+  range_inertia_ = Map<Vector<2>>(params["Control"]["inertia"].as<std::vector<Scalar>>().data());
+  fixed_vel_gain_ = params["Control"]["fixed_vel_gain"].as<Scalar>();
 
   // allocation matrix
   // compute column-wise cross product
